@@ -1,0 +1,35 @@
+.chkacptterms {
+    width: 1.34rem;
+    height: 1.34rem;
+    border-radius: 1.34rem;
+    padding: 0;
+    -webkit-appearance: none;
+    -ms-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+
+    &:checked {
+        display: block;
+        background: #0d6efd url('/assets/icons/check.svg') center center no-repeat;
+    }
+}
+
+.colfauthpass1 {
+    background-color: white; 
+    color: black;
+    padding: 15px;
+}
+
+.colfauthpass2 {
+    background: linear-gradient(#FB00FF 0%, #048EFF 50%, #000000 100%), url('/assets/images/bkgMain.svg') no-repeat center center fixed;
+    background-blend-mode: multiply;
+    height: 100vh;
+}
+
+@media all and (max-width: 768px) {
+    .colfauthpass1 {
+        min-height: 100vh;
+    }
+    .colfauthpass2 { display: none; }
+}

@@ -1,0 +1,12 @@
+.theme-earth {
+    $bkgcolorprimary: green;
+    $colorprimary: white;
+    $colorsecondary: black;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

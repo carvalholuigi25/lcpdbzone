@@ -1,0 +1,154 @@
+@let displayData = displayedData$ | async;
+
+<div class="data-table-wrapper">
+  <!-- Title -->
+  @if (title) {
+    <div class="data-table-header mb-3">
+      <h3>{{ title }}</h3>
+    </div>
+  }
+
+  <!-- Controls -->
+  @if (!loading && displayData?.length! > 0) {
+    <div class="data-table-controls mb-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <input
+            class="form-control"
+            placeholder="Search..."
+            (input)="onSearch($any($event.target).value)"
+            [value]="search$.value"
+          />
+        </div>
+        @if (hasSortableColumns) {
+          <div class="col-md-2">
+            <div class="input-group">
+              <label class="input-group-text">Sort</label>
+              <select class="form-select" (change)="setSort($any($event.target).value)" [value]="sortField$.value">
+                @for (col of columns; track col.key) {
+                  @if (col.sortable !== false) {
+                    <option [value]="col.key">{{ col.label }}</option>
+                  }
+                }
+              </select>
+            </div>
+          </div>
+        }
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()" title="Clear all filters and reset sort">
+            <i class="bi bi-arrow-counterclockwise"></i> Clear
+          </button>
+        </div>
+        <div class="col-md-2">
+          <div class="input-group">
+            <label class="input-group-text">Per</label>
+            <select class="form-select" (change)="setPageSize($any($event.target).value)" [value]="pageSize$.value">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-2 text-end">
+          <p class="mb-0">Total: {{ totalItems }}</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading && (displayData?.length ?? 0) === 0 && totalItems === 0) {
+    <app-alert [data]="dataAlert" />
+    <div class="mx-auto mt-3 text-center">
+        <button type="button" class="btn btn-primary btnreldata" (click)="onSearch('')">Reload</button>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!loading && (displayData?.length ?? 0) > 0) {
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle text-center">
+        <thead class="table-light">
+          <tr>
+            @for (col of columns; track col.key) {
+              <th
+                scope="col"
+                (click)="col.sortable !== false && setSort(col.key)"
+                [class.cursor-pointer]="col.sortable !== false"
+                [class.table-active]="isSortActive(col.key)"
+              >
+                {{ col.label }}
+                @if (col.sortable !== false) {
+                  {{ getSortIndicator(col.key) }}
+                }
+              </th>
+            }
+            @if (actions && actions.length > 0) {
+              <th scope="col">Actions</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of displayData!; track row.id) {
+            <tr>
+              @for (col of columns; track col.key) {
+                <td [ngClass]="col.cellClass">
+                  {{ formatValue(row[col.key], col) }}
+                </td>
+              }
+              @if (actions && actions.length > 0) {
+                <td>
+                  <div class="d-flex justify-content-center align-items-center gap-1">
+                    @for (action of actions; track action.label) {
+                      <button
+                        [class]="'btn btn-sm ' + (action.class || 'btn-outline-primary')"
+                        [title]="action.title"
+                        (click)="action.action(row)"
+                      >
+                        <i [class]="action.icon"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (showPagination && totalPages > 1) {
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="btn-group" role="group" aria-label="pagination">
+          <button class="btn btn-sm btn-outline-secondary" (click)="prevPage()" [disabled]="page === 1">Prev</button>
+          @for (p of pages; track p) {
+            <button
+              class="btn btn-sm"
+              [class.active]="p === page"
+              [class.btn-outline-primary]="p === page"
+              [class.btn-outline-secondary]="p !== page"
+              (click)="gotoPage(p)"
+            >
+              {{ p }}
+            </button>
+          }
+          <button class="btn btn-sm btn-outline-secondary" (click)="nextPage()" [disabled]="page === totalPages">Next</button>
+        </div>
+        <div>
+          <small>Page {{ page }} of {{ totalPages }}</small>
+        </div>
+      </div>
+    }
+  }
+</div>

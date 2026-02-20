@@ -1,0 +1,14 @@
+.blkdatanotfound {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    width: auto;
+    max-width: 100%;
+    border-radius: calc(16px + 8px);
+
+    .icowarn {
+        font-size: 2rem;
+    }
+}

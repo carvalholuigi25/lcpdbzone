@@ -1,0 +1,12 @@
+.theme-moon {
+    $bkgcolorprimary: #F6F1D5;
+    $colorprimary: white;
+    $colorsecondary: black;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

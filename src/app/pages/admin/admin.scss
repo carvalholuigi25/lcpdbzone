@@ -1,0 +1,31 @@
+.admin {
+    &.sidebarhidden {
+        padding: 6rem 0rem !important;
+    }
+
+    .card {
+        &.carddata {
+            background: linear-gradient(#FF00FF 100%);
+            box-shadow: 1px 3px 5px black;
+            border-radius: 15px;
+            text-align: center;
+
+            i {
+                font-size: 2rem;
+            }
+            
+            .card-body {
+                display: flex;
+                flex-direction: column !important;
+            }
+        }
+    }
+
+    .lnk {
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

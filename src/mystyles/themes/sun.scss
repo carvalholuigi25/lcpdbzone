@@ -1,0 +1,12 @@
+.theme-sun {
+    $bkgcolorprimary: #ef8e38;
+    $colorprimary: white;
+    $colorsecondary: black;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

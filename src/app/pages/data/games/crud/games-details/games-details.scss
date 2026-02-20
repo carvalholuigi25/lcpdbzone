@@ -1,0 +1,130 @@
+.cardgamesdet {
+    position: relative;
+
+    .cardtvseasonsinfo {
+        position: relative;
+
+        &.blkcardembed {
+            padding: 0;
+
+            .imgcovertop {
+                max-height: 30vh;
+            }
+
+            .card-body {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                color: white;
+                z-index: 1000;
+                padding: 15px;
+                overflow: auto;
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+    }
+
+    .cardtvepisodesinfo {
+        position: relative;
+        
+        &.blkcardembed {
+            padding: 0;
+
+            .imgcovertop {
+                max-height: 30vh;
+            }
+
+            .card-body {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                color: white;
+                z-index: 1000;
+                padding: 15px;
+                overflow: auto;
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+    }
+
+    .mblkcoverspart {
+        min-height: 64vh;
+    }
+
+    .mybkgcont {
+        background-blend-mode: multiply;
+        background: linear-gradient(360deg, black, transparent);
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        z-index: 1000;
+        border-radius: inherit;
+    }
+
+    .blkcoverspart {
+        position: relative;
+
+        .containercovers {
+            position: absolute;
+            top: 85%;
+            bottom: -50%;
+            left: 50%;
+            right: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            border-radius: 24px;
+            width: calc(360px / 2);
+            height: calc(360px / 2);
+            max-width: 100%;
+            max-height: 100%;
+            padding: 0;
+        }
+    }
+
+    .mblkinfospart {
+        display: block;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+
+        * {
+            text-align: inherit;
+            margin-left: inherit;
+            margin-right: inherit;
+        }
+    }
+
+    .imgcovertop {
+        position: relative;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: calc(16px + 8px);
+    }
+
+    .imgcovermain {
+        position: relative;
+        max-height: 600px;
+        object-fit: cover;
+        border-radius: calc(16px + 8px);
+    }
+}
+
+.icowarn {
+    font-size: clamp(2rem, 3vw, 4rem);
+}
+
+@media all and (max-width: 768px) {
+    .blkcoverspart {
+        .containercovers {
+            padding: 15px;
+        }
+    }
+}

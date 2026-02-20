@@ -1,0 +1,9 @@
+<div class="auth">
+  @if (currentUrl.includes('/auth/login')) {
+    <app-login></app-login>
+  } @else if (currentUrl.includes('/auth/register')) {
+    <app-register></app-register>
+  } @else {
+    <app-forgotpass></app-forgotpass>
+  }
+</div>

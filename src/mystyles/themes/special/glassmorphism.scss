@@ -1,0 +1,37 @@
+// glass variables
+$glass-bg: rgba(255, 255, 255, 0.15);
+$glass-border: rgba(255, 255, 255, 0.25);
+$glass-blur: 20px;
+$glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+
+@mixin glassmorphism(
+  $bg: $glass-bg,
+  $blur: $glass-blur,
+  $border: $glass-border,
+  $radius: 16px
+) {
+  background: $bg;
+  backdrop-filter: blur($blur) saturate(180%);
+  -webkit-backdrop-filter: blur($blur) saturate(180%);
+  border-radius: $radius;
+  border: 1px solid $border;
+  box-shadow: $glass-shadow;
+}
+
+@mixin glassmorphismalt() {
+  background: rgba(255, 0, 251, 0.5) !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 0, 255, 0.3) !important;
+}
+
+
+.glassmorphismui {
+  & {
+    .header, .footer {
+      @include glassmorphismalt();
+    }
+  }
+}

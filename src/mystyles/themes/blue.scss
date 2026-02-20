@@ -1,0 +1,12 @@
+.theme-blue {
+    $bkgcolorprimary: #0000ffaf;
+    $colorprimary: black;
+    $colorsecondary: white;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

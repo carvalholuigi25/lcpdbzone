@@ -1,0 +1,94 @@
+<div class="container-fluid w-100">
+  <div class="row">
+    <div class="col-12 col-md-6 colfauthreg1">
+      @if (isLoggedIn && userDetails) {
+        <div class="form d-flex justify-content-center align-items-center h-100">
+          <div class="form-group mx-auto text-center">
+            <h2>Welcome, {{ userDetails!.username }}</h2>
+            <p>You already logged in!</p>
+            <a href="/" class="btn btn-primary btngohome btnrounded">Go home</a>
+          </div>
+        </div>
+      }
+
+      @if (!isLoggedIn) {
+        <div class="form d-flex justify-content-center align-items-center h-100">
+          <form
+            [formGroup]="formRegister"
+            (ngSubmit)="onSubmit()"
+            action=""
+            class="frmregister d-block text-center"
+          >
+            <div class="form-group">
+              <label for="username" class="lblusername text-center">
+                <i class="bi bi-alphabet"></i>
+                Username
+              </label>
+              <input
+                type="text"
+                name="username"
+                id="username"
+                class="username form-control mt-3"
+                formControlName="username"
+                placeholder="Please write your username here..."
+              />
+            </div>
+            <div class="form-group mt-3">
+              <label for="email" class="lblemail text-center">
+                <i class="bi bi-envelope"></i>
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="email form-control mt-3"
+                formControlName="email"
+                placeholder="Please write your email here..."
+              />
+            </div>
+            <div class="form-group mt-3">
+              <label for="password" class="lblpass text-center">
+                <i class="bi bi-pass"></i>
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                class="password form-control mt-3"
+                formControlName="password"
+                placeholder="Please write your password here..."
+              />
+            </div>
+            <div class="form-group mt-3">
+              <div class="d-flex justify-content-center align-items-center">
+                <input
+                  type="checkbox"
+                  name="chkacptterms"
+                  id="chkacptterms"
+                  class="chkacptterms form-control"
+                  formControlName="chkacptterms"
+                  placeholder="Please accept the terms and conditions"
+                />
+                <label for="chkacptterms" class="lblacptterms ms-2"
+                  >Accept terms and conditions</label
+                >
+              </div>
+            </div>
+            <div class="form-group mt-3">
+              <div class="d-flex justify-content-center align-items-center">
+                <input type="reset" value="Reset" class="btn btn-secondary btnreset btnrounded" />
+                <input type="submit" value="Submit" class="btn btn-primary btnsubmit btnrounded ms-2" />
+              </div>
+            </div>
+            <div class="form-group mt-3 mx-auto text-center">
+              <a href="/auth/login" class="btn btn-primary btngoreg btnrounded">Back to login</a>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+    <div class="col-12 col-md-6 colfauthreg2"></div>
+  </div>
+</div>

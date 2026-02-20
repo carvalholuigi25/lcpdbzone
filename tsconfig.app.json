@@ -5,12 +5,13 @@
   "compilerOptions": {
     "outDir": "./out-tsc/app",
     "types": [
-      "node"
+      "node",
+      "@angular/localize"
     ]
   },
   "include": [
     "src/**/*.ts"
-  ],
+, "src/app/modules/routes/data/datalazyroutes.module copy.ts.bkp"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

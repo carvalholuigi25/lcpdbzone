@@ -1,0 +1,12 @@
+.theme-green {
+    $bkgcolorprimary: #008000ab;
+    $colorprimary: black;
+    $colorsecondary: white;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

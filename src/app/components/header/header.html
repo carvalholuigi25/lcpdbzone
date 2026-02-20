@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary header">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">LCPDatabaseZone</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-list"></i>
+      <!-- <span class="navbar-toggler-icon"></span> -->
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav me-auto ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        </li>
+        
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/data/home/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Data</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav me-0">
+        <li class="nav-item navitemsettings">
+          @if(userDetails) {
+            <div class="d-inline-flex justify-content-between align-items-center w-100">
+              <a class="nav-link ms-2" [routerLink]="userDetails.role === 'admin' ? ('/admin/'+userDetails.id) : ('/user/'+userDetails.id)" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                <span class="displayname">{{userDetails.displayName ?? userDetails.username}}</span>
+              </a>
+              <button class="btn btn-primary btnlogout ms-2" (click)="doLogout()">
+                <i class="bi bi-door-closed-fill"></i>
+              </button>
+            </div>
+          } @else {
+            <a class="nav-link" routerLink="/auth/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+              <i class="bi bi-gear-fill"></i>
+            </a>
+          }
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

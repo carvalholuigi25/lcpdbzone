@@ -1,0 +1,37 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Footer } from './footer';
+import { describe, it, expect, beforeEach } from 'vitest';
+
+describe('Footer', () => {
+  let component: Footer;
+  let fixture: ComponentFixture<Footer>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Footer]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(Footer);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should set current year', () => {
+    const currentYear = new Date().getFullYear();
+    expect(component.year).toBe(currentYear);
+  });
+
+  it('should have correct email', () => {
+    expect(component.mail).toBe('luiscarvalho239@gmail.com');
+  });
+
+  it('should display year in template', () => {
+    const compiled = fixture.nativeElement;
+    // Year should be displayed in the footer
+    expect(component.year).toBe(new Date().getFullYear());
+  });
+});

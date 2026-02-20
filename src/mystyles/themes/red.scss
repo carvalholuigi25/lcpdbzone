@@ -1,0 +1,12 @@
+.theme-red {
+    $bkgcolorprimary: #ff0000b4;
+    $colorprimary: black;
+    $colorsecondary: white;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

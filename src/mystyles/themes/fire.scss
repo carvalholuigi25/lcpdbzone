@@ -1,0 +1,12 @@
+.theme-fire {
+    $bkgcolorprimary: rgb(255, 30, 0);
+    $colorprimary: white;
+    $colorsecondary: black;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

@@ -1,0 +1,40 @@
+<div [class]="'admin' + (hideSidebar ? ' sidebarhidden' : '')">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <h2>
+          <i class="bi bi-speedometer ico"></i>
+          <span class="titlep ms-2">Dashboard</span>
+        </h2>
+      </div>
+
+      <div class="col-12">
+        <div class="container">
+          <div class="row align-items-center justify-content-center g-3 my-3">
+            @if (aryPages && aryPages.length > 0) {
+              @for (ary of aryPages; track ary.id) {
+                <div class="col-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                  <a class="lnk" [routerLink]="ary.link">
+                    <div class="card carddata">
+                      <div class="card-body">
+                        <i [classList]="'bi ' + ary.icon"></i>
+                        {{ ary.title }}
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              }
+            } @else {
+              <div class="col-12">
+                <div class="blkwarn">
+                  <i class="bi bi-exclamation-warning warnico"></i>
+                  <p class="warntitle">No categories!</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

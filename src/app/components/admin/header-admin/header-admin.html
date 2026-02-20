@@ -1,0 +1,69 @@
+<app-modal [modalId]="'mymodalnotifications'" [modalTitle]="'Notifications'" [modalContent]="'Coming soon...'" />
+
+<nav [class]="'navbar navbar-expand-lg bg-body-tertiary headeradmin ' + (!hideNavbar ? 'headeradminactive': '')">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">LCPDatabaseZone</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="bi bi-list"></i>
+      <!-- <span class="navbar-toggler-icon"></span> -->
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav me-auto ms-0 mb-2 mb-lg-0">
+        <li class="nav-item me-0">
+          <div class="d-flex w-100 mw-100">
+            <form [class]="'frmsearch' + (isSearchOpen ? ' active' : '')" role="search">
+              <div class="form-group-inline">
+                <input class="form-control me-2 inpsearch" type="search" placeholder="Search" aria-label="Search"/>
+                <button class="btn btn-outline-success btnsearch" type="submit">
+                  <i class="bi bi-search"></i>
+                </button>
+
+                @if(isSearchOpen) {
+                  <button class="btn btn-outline-secondary btnclose-search" type="button" (click)="closeSearch()">
+                    <i class="bi bi-x"></i>
+                  </button>
+                }
+              </div>
+            </form>
+
+            @if(!isSearchOpen) {
+              <button class="btn btn-outline-secondary btntoggle-search" type="button" (click)="toggleSearch()">
+                <i class="bi bi-search"></i>
+              </button>
+            }
+          </div>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav me-0">
+        @if(userDetails) {
+          <li class="nav-item navitemnotifications">
+            <div class="d-inline-flex justify-content-between align-items-center w-100">
+              <a type="button" class="btn btn-primary btnnotifications btnt ms-2" data-bs-toggle="modal" [attr.data-bs-target]="'#mymodalnotifications'" (click)="toggleNotifications()">
+                <i class="bi bi-bell-fill"></i>
+              </a>
+            </div>
+          </li>
+          <li class="nav-item navitemsettings">
+            <div class="d-inline-flex justify-content-between align-items-center w-100">
+              <a class="nav-link ms-2" [routerLink]="userDetails.role === 'admin' ? ('/admin/'+userDetails.id) : ('/user/'+userDetails.id)" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                <span class="displayname">{{userDetails.displayName ?? userDetails.username}}</span>
+              </a>
+              <button class="btn btn-primary btnlogout ms-2" (click)="doLogout()">
+                <i class="bi bi-door-closed-fill"></i>
+              </button>
+            </div>
+          </li>
+        } @else {
+          <li class="nav-item navitemsettings">
+            <div class="d-inline-flex justify-content-between align-items-center w-100">
+              <a class="nav-link" routerLink="/auth/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                <i class="bi bi-gear-fill"></i>
+              </a>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>

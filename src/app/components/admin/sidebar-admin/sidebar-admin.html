@@ -1,0 +1,23 @@
+<ul [class]="'nav flex-column sidebaradmin ' + (hideSidebar ? 'hidden' : '')">
+  <li class="nav-item">
+    <a class="navbar-brand" routerLink="/">LCPDatabaseZone</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" aria-current="page" routerLink="/admin/1/" routerLinkActive="active">
+      <i class="bi bi-speedometer"></i>
+      <span class="ms-2">Dashboard</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" routerLink="/admin/data" routerLinkActive="active">
+      <i class="bi bi-database"></i>
+      <span class="ms-2">Data</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" routerLink="/admin/settings" routerLinkActive="active">
+      <i class="bi bi-gear-fill"></i>
+      <span class="ms-2">Settings</span>
+    </a>
+  </li>
+</ul>

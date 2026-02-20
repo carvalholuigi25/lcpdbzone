@@ -1,0 +1,30 @@
+.colfcmovies1 {
+    padding-bottom: 10rem;
+}
+
+.frmcreatemovies {
+    width: 100%;
+    max-width: 100%;
+
+    .form-group {
+        margin-top: 1.5rem;
+    }
+
+    .isFeatured {
+        width: 1.34rem;
+        height: 1.34rem;
+        border-radius: 1.34rem;
+        padding: 0;
+        margin: auto auto;
+        -webkit-appearance: none;
+        -ms-appearance: none;
+        -moz-appearance: none;
+        -o-appearance: none;
+        appearance: none;
+
+        &:checked {
+            display: block;
+            background: #0d6efd url('/assets/icons/check.svg') center center no-repeat;
+        }
+    }
+}

@@ -1,0 +1,36 @@
+.header {
+    position: relative;
+    background: linear-gradient(#FF00FF 100%);
+    box-shadow: 1px 3px 5px #000000;
+    color: white;
+    padding: 15px;
+    margin: 15px;
+    border-radius: 15px;
+
+    .navitemsettings {
+        .bi {
+            background: linear-gradient(to bottom, #FF00FF 50%, #048EFF 100%);
+            border-radius: 50%;
+            padding: 15px;
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    .btnlogout {
+        background: transparent;
+        border: 0;
+        padding: inherit;
+    }
+}
+
+@media all and (max-width: 992px) {
+    .navitemsettings {
+        display: flex;
+        justify-content: space-between;
+    }
+}

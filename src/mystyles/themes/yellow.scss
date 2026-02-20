@@ -1,0 +1,12 @@
+.theme-yellow {
+    $bkgcolorprimary: #ffff009d;
+    $colorprimary: black;
+    $colorsecondary: white;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

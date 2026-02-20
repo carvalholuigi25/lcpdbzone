@@ -1,0 +1,113 @@
+import { Component, DOCUMENT, Inject } from '@angular/core';
+import { AdminRoutesModule } from "@/app/modules/routes/auth/adminroutes.module";
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AllDataBooks, AuthResponse, BooksModel } from '@/app/models';
+import { AuthService } from '@/app/services/auth.service';
+import { BooksDataService } from '@/app/services';
+import { ActivatedRoute } from '@angular/router';
+import { DatepickerComponent } from '@/app/components';
+
+@Component({
+  selector: 'app-update-books',
+  imports: [AdminRoutesModule, ReactiveFormsModule, DatepickerComponent],
+  providers: [BooksDataService],
+  templateUrl: './update-books.html',
+  styleUrl: './update-books.scss',
+})
+export class UpdateBooks {
+  bookId: number = 1;
+
+  formUpdateBooks = new FormGroup({
+    bookId: new FormControl(this.bookId, []),
+    title: new FormControl('', [Validators.required]),
+    description: new FormControl('', [Validators.required]),
+    studio: new FormControl('', [Validators.required]),
+    image: new FormControl('', [Validators.required]),
+    artwork: new FormControl('', []),
+    isFeatured: new FormControl(false, []),
+    releaseDate: new FormControl(null, []),
+    genre: new FormControl([''], []),
+    format: new FormControl([''], []),
+    scoreRating: new FormControl(0, []),
+  });
+
+  isLoggedIn: boolean = false;
+  userDetails?: AuthResponse;
+
+  constructor(@Inject(DOCUMENT) private document: Document, private route: ActivatedRoute, private authService: AuthService, private booksDataService: BooksDataService) {
+    const localStorage = this.document.defaultView?.localStorage;
+
+    if(localStorage && localStorage.getItem("login")) {
+      this.isLoggedIn = true;
+
+      this.userDetails = {
+        displayName: JSON.parse(localStorage.getItem("login")!).displayName,
+        username: JSON.parse(localStorage.getItem("login")!).username
+      }
+    }
+  }
+
+  ngOnInit() {
+    // this.id = parseInt(this.route.snapshot.paramMap.get("id")?.toString()!) || 1;
+    this.route.paramMap.subscribe(params => {
+      this.bookId = parseInt(params.get('id')!) || 1;
+      this.loadNewData(this.bookId);
+    });
+  }
+
+  loadNewData(bookId: number = 1) {
+    this.booksDataService.getBooks(bookId).subscribe((r) => {
+      if(r) {
+        console.log(r)
+        const datares: any = r;
+        this.formUpdateBooks.setValue({
+          bookId: bookId,
+          title: datares.title,
+          description: ""+datares.description,
+          studio: ""+datares.studio,
+          image: ""+datares.image,
+          artwork: ""+datares.artwork,
+          isFeatured: Boolean(datares.isFeatured),
+          releaseDate: (datares.releaseDate ? new Date(datares.releaseDate.toString()) : null) as any,
+          genre: datares.genre?.toString().split(","),
+          format: datares.format?.toString().split(","),
+          scoreRating: parseInt(datares.scoreRating!.toString()),
+        })
+      }
+    });
+  }
+
+  onSubmit() {
+    let promptupd = confirm(`Do you want to update this data (id: ${this.bookId})?`);
+
+    if(promptupd !== null && promptupd == true) {
+      try {
+        const {title, description, studio, image, artwork, isFeatured, releaseDate, scoreRating, genre, format} = this.formUpdateBooks.value;
+        this.booksDataService.updateBooks(this.bookId, {
+          bookId: this.bookId,
+          title: ""+title,
+          description: ""+description,
+          studio: ""+studio,
+          image: ""+image,
+          artwork: ""+artwork,
+          isFeatured: Boolean(isFeatured),
+          releaseDate: new Date(""+releaseDate).toISOString(),
+          scoreRating: parseInt(""+scoreRating),
+          genre: genre?.toString().split(","),
+          format: format?.toString().split(","),
+        }).subscribe((r) => {
+          alert(`Updated info for books (id: ${this.bookId})!`);
+
+          setTimeout(() => {
+            window.location.href = "/";
+            // this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+            //   this.router.navigate([this.router.url]);
+            // });
+          }, 100 * 5);
+        });
+      } catch (error) {
+        alert(error);
+      }
+    }
+  }
+}

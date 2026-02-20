@@ -1,0 +1,37 @@
+.sidebaradmin {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 100%;
+    max-height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    background: linear-gradient(#FF00FF 100%);
+    box-shadow: 1px 3px 5px #000000;
+    color: white;
+    padding: 2rem;
+    margin: 0;
+    border-radius: 15px;
+    overflow: auto;
+
+    .nav-item {
+        $padding: .5rem;
+        padding-top: $padding;
+        padding-bottom: $padding;
+    }
+
+    &.hidden {
+        display: none;
+    }
+}
+
+@media all and (max-width: 768px) {
+    .sidebaradmin {
+        &.hidden {
+            left: 0;
+        }
+    }
+}

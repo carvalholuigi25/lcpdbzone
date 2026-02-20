@@ -1,0 +1,12 @@
+.theme-light {
+    $bkgcolorprimary: #ffffff80;
+    $colorprimary: black;
+    $colorsecondary: white;
+
+    background-color: $bkgcolorprimary;
+    color: $colorprimary;
+
+    .section {
+        color: $colorsecondary !important;
+    }
+}

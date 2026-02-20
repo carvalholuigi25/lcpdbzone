@@ -1,0 +1,225 @@
+<div [class]="'admin' + (hideSidebar ? ' sidebarhidden' : '')">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <h2>
+                    <i class="bi bi-gear-fill ico"></i>
+                    <span class="titlep ms-2">Settings</span>
+                </h2>
+            </div>
+        </div>
+
+        <!-- Success Alert -->
+        @if(saved) {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <strong>Success!</strong> Your settings have been saved.
+                <button type="button" class="btn-close" (click)="saved = false"></button>
+            </div>
+        }
+        
+
+        <!-- Settings Form -->
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Application Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+                            <!-- Theme Setting -->
+                            <div class="mb-4">
+                                <label for="themeSelect" class="form-label">
+                                    <i class="bi bi-palette me-2"></i>Theme
+                                </label>
+                                <select 
+                                    id="themeSelect"
+                                    class="form-select form-select-lg"
+                                    formControlName="theme">
+                                    <option *ngFor="let option of themeOptions" [value]="option.value">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Choose your preferred color theme (Light, Dark, or Auto)
+                                </small>
+                            </div>
+
+                            <!-- Real-time Data Section -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-lightning-charge me-2"></i>Real-time Data
+                                </h6>
+                                
+                                <!-- Real-time Data Enabled -->
+                                <div class="form-check form-switch mb-3">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        id="realTimeDataToggle"
+                                        formControlName="realTimeDataEnabled">
+                                    <label class="form-check-label" for="realTimeDataToggle">
+                                        Enable Real-time Data Updates
+                                    </label>
+                                </div>
+
+                                <!-- Auto Refresh Interval -->
+                                <div class="mb-3">
+                                    <label for="refreshInterval" class="form-label">
+                                        Auto Refresh Interval (seconds)
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        id="refreshInterval"
+                                        class="form-control"
+                                        formControlName="autoRefreshInterval"
+                                        min="5"
+                                        max="300"
+                                        [disabled]="!settingsForm.get('realTimeDataEnabled')?.value">
+                                    <small class="form-text text-muted">
+                                        Set how often data should refresh (5-300 seconds)
+                                    </small>
+
+                                    @if(settingsForm.get('autoRefreshInterval')?.invalid && settingsForm.get('autoRefreshInterval')?.touched) {
+                                        <div class="text-danger small mt-1">
+                                            @if(settingsForm.get('autoRefreshInterval')?.errors?.['min']) {
+                                                <span>Minimum value is 5</span>
+                                            }
+
+                                            @if(settingsForm.get('autoRefreshInterval')?.errors?.['max']) {
+                                                <span>Maximum value is 300</span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Notifications Section -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-bell me-2"></i>Notifications
+                                </h6>
+                                <div class="form-check form-switch">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        id="notificationsToggle"
+                                        formControlName="notificationsEnabled">
+                                    <label class="form-check-label" for="notificationsToggle">
+                                        Enable Notifications
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Logging Section -->
+                            <div class="mb-4">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-file-earmark-text me-2"></i>Logging
+                                </h6>
+                                <div class="form-check form-switch">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        id="loggingToggle"
+                                        formControlName="enableLogging">
+                                    <label class="form-check-label" for="loggingToggle">
+                                        Enable Application Logging
+                                    </label>
+                                </div>
+                                <small class="form-text text-muted d-block mt-2">
+                                    Enable detailed logging for debugging purposes
+                                </small>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex gap-2 mt-5">
+                                <button 
+                                    type="submit" 
+                                    class="btn btn-primary btn-lg"
+                                    [disabled]="loading || settingsForm.invalid">
+
+                                    @if(!loading) {
+                                        <span>
+                                            <i class="bi bi-cloud-check me-2"></i>
+                                            Save to Server
+                                        </span>
+                                    }
+
+                                    @if(loading) {
+                                        <span>
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            Saving...
+                                        </span>
+                                    }
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-secondary btn-lg"
+                                    (click)="saveLocally()"
+                                    [disabled]="loading || settingsForm.invalid">
+                                    <i class="bi bi-floppy me-2"></i>
+                                    Save Locally
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-outline-danger btn-lg"
+                                    (click)="resetToDefaults()"
+                                    [disabled]="loading">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i>
+                                    Reset to Defaults
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Info Sidebar -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Settings Info</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>
+                                <i class="bi bi-palette text-warning"></i> Theme
+                            </h6>
+                            <p class="mb-0 text-muted small">
+                                Choose your preferred color scheme. Auto will follow your system preferences.
+                            </p>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <h6>
+                                <i class="bi bi-lightning-charge text-success"></i> Real-time Data
+                            </h6>
+                            <p class="mb-0 text-muted small">
+                                Enable automatic data updates and set the refresh interval for live data synchronization.
+                            </p>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <h6>
+                                <i class="bi bi-bell text-info"></i> Notifications
+                            </h6>
+                            <p class="mb-0 text-muted small">
+                                Receive alerts and updates about important events and changes.
+                            </p>
+                        </div>
+                        <hr>
+                        <div>
+                            <h6>
+                                <i class="bi bi-file-earmark-text text-secondary"></i> Logging
+                            </h6>
+                            <p class="mb-0 text-muted small">
+                                Enable detailed application logging for troubleshooting and debugging.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

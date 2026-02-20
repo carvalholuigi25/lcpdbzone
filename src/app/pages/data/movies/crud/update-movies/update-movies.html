@@ -1,0 +1,228 @@
+<div class="container w-100">
+  <div class="row">
+    <div class="col-12 col-md-12 colfumovies1">
+      <div class="d-block text-center mx-auto">
+        <h2>
+          <i class="bi bi-film"></i>
+          Update Movies Info
+        </h2>
+      </div>
+
+      <div class="form d-flex justify-content-center align-items-center w-100 h-100">
+        <form
+          [formGroup]="formUpdateMovies"
+          (ngSubmit)="onSubmit()"
+          action=""
+          class="frmupdatemovies d-block text-center"
+        >
+          <div class="form-group hidden">
+            <label for="movieId" class="lblmovieid text-center">
+              <i class="bi bi-alphabet"></i>
+              ID
+            </label>
+            <input
+              type="number"
+              name="movieId"
+              id="movieId"
+              class="movieId form-control disabled mt-3"
+              formControlName="movieId"
+              placeholder="Please write your tvserie id here..."
+              [readOnly]="true"
+              [disabled]="true"
+            />
+          </div>
+          <div class="form-group">
+            <label for="title" class="lbltitle text-center">
+              <i class="bi bi-alphabet"></i>
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              id="title"
+              class="title form-control mt-3"
+              formControlName="title"
+              placeholder="Please write your title here..."
+            />
+          </div>
+          <div class="form-group mt-3">
+            <label for="description" class="lbldescription text-center">
+              <i class="bi bi-alphabet"></i>
+              Description
+            </label>
+            <textarea
+              name="description"
+              id="description"
+              class="description form-control mt-3"
+              formControlName="description"
+              placeholder="Please write your description here..."
+              cols="1"
+              rows="10"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="studio" class="lblstudio text-center">
+              <i class="bi bi-alphabet"></i>
+              Studio
+            </label>
+            <input
+              type="text"
+              name="studio"
+              id="studio"
+              class="studio form-control mt-3"
+              formControlName="studio"
+              placeholder="Please write your studio here..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="image" class="lblimage text-center">
+              <i class="bi bi-alphabet"></i>
+              Image
+            </label>
+            <input
+              type="text"
+              name="image"
+              id="image"
+              class="image form-control mt-3"
+              formControlName="image"
+              placeholder="Please write your image here..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="artwork" class="lblartwork text-center">
+              <i class="bi bi-alphabet"></i>
+              Artwork
+            </label>
+            <input
+              type="text"
+              name="artwork"
+              id="artwork"
+              class="artwork form-control mt-3"
+              formControlName="artwork"
+              placeholder="Please write your artwork url here..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="isfeatured" class="lblisfeatured text-center">
+              <i class="bi bi-alphabet"></i>
+              IsFeatured
+            </label>
+            <input
+              type="checkbox"
+              name="isFeatured"
+              id="isFeatured"
+              class="isFeatured form-control mt-3"
+              formControlName="isFeatured"
+              placeholder="Please check your isFeatured here..."
+            />
+          </div>
+          <div class="form-group mt-3">
+            <app-datepicker
+              label="Release Date"
+              iconClass="bi bi-calendar-event"
+              hint="Select the release date for this movie"
+              formControlName="releaseDate"
+              inputId="releaseDate">
+            </app-datepicker>
+          </div>
+          <div class="form-group">
+            <label for="genre" class="lblgenre text-center">
+              <i class="bi bi-alphabet"></i>
+              Genre
+            </label>
+            <input
+              type="text"
+              name="genre"
+              id="genre"
+              class="genre form-control mt-3"
+              formControlName="genre"
+              placeholder="Please write your genre here..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="format" class="lblformat text-center">
+              <i class="bi bi-alphabet"></i>
+              Format
+            </label>
+            <input
+              type="text"
+              name="format"
+              id="format"
+              class="format form-control mt-3"
+              formControlName="format"
+              placeholder="Please write your format here..."
+            />
+          </div>
+          <div class="form-group">
+            <label for="scorerating" class="lblscorerating text-center">
+              <i class="bi bi-alphabet"></i>
+              Score Rating
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="10"
+              name="scoreRating"
+              id="scoreRating"
+              class="scoreRating form-control mt-3"
+              formControlName="scoreRating"
+              placeholder="Please write your score rating here..."
+            />
+          </div>
+          <div class="row mt-3">
+            <div class="col-6">
+              <div class="form-group">
+                <label for="numseasons" class="lblnumseasons text-center">
+                  <i class="bi bi-alphabet"></i>
+                  Num of Seasons
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  name="numSeasons"
+                  id="numSeasons"
+                  class="numSeasons form-control mt-3"
+                  formControlName="numSeasons"
+                  placeholder="Please write your num of seasons here..."
+                />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="form-group">
+                <label for="numepisodes" class="lblnumepisodes text-center">
+                  <i class="bi bi-alphabet"></i>
+                  Num of Episodes
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  name="numEpisodes"
+                  id="numEpisodes"
+                  class="numEpisodes form-control mt-3"
+                  formControlName="numEpisodes"
+                  placeholder="Please write your num of episodes here..."
+                />
+              </div>
+            </div>
+            <div class="clearfix"></div>
+          </div>
+          <div class="form-group mt-3">
+            <div class="d-flex justify-content-center align-items-center">
+              <input type="reset" value="Reset" class="btn btn-secondary btnreset btnrounded" />
+              <input
+                type="submit"
+                value="Submit"
+                class="btn btn-primary btnsubmit btnrounded ms-2"
+              />
+            </div>
+          </div>
+          <div class="form-group mt-3 mx-auto text-center">
+            <a routerLink="/data/movies" class="btn btn-primary btnback btnrounded">Back</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

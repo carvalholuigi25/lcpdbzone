@@ -1,1 +1,204 @@
 /* You can add global styles to this file, and also import other style files */
+@use 'bootstrap/scss/bootstrap';
+@use 'bootstrap-icons/font/bootstrap-icons.css';
+@use 'mystyles/all.scss';
+
+@font-face {
+  font-family: myFirstFont;
+  src: url('fonts/orbitron/static/Orbitron-Bold.ttf');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    line-height: 1.6;
+    padding: 0;
+    background: linear-gradient(#FB00FF 0%, #048EFF 50%, #000000 100%), url('/assets/images/bkgMain.svg') no-repeat center center fixed;
+    background-blend-mode: multiply;
+    background-attachment: fixed;
+    padding-bottom: 10rem;
+}
+
+.active {
+    color: yellow;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.header, .footer {
+    font-family: myFirstFont;
+}
+
+.container {
+    padding-bottom: 7rem;
+}
+
+.section {
+    display: block;
+    width: auto;
+    max-width: 100%;
+
+    &.sectionhome {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100vh;
+        margin: 20px;
+
+        .title {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            text-align: center;
+        }
+
+        .desc {
+            font-size: clamp(1rem, 2vw, 1rem);
+            text-align: justify;
+            margin-top: 5px;
+            line-height: 1.5rem;
+        }
+
+        .btnreadmore {
+            padding: 15px;
+            border-radius: 15px;
+            background: linear-gradient(#FF00FF 50%,#048EFF 100%);
+        }
+    }
+}
+
+.card {
+    border-radius: calc(16px + 8px);
+
+    .img-fluid {
+        border-radius: inherit;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .card-title {
+        font-weight: bold;
+        font-size: clamp(1.5rem, 2vw, 2rem);
+    }
+
+    .card-text {
+        text-align: justify;
+        line-height: 2rem;
+    }
+}
+
+.btn {
+    &.btnrounded {
+        border-radius: calc(16px + 4px);
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+.disabled {
+    cursor: not-allowed !important;
+    background-color: silver !important;
+}
+
+.textlong {
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+    -webkit-animation-duration: var(--animate-duration);
+    animation-duration: var(--animate-duration);
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+
+    text-overflow: ellipsis;
+    width: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    word-break: break-all;
+
+    &:hover {
+        text-overflow: clip;
+        white-space: normal;
+        -webkit-animation-name: myfadeIn;
+        animation-name: myfadeIn;
+    }
+
+    // &:not(:hover) {
+    //     -webkit-animation-name: myfadeOut;
+    //     animation-name: myfadeOut;
+    // }
+}
+
+.btnshoworhideside {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+
+.admin {
+    display: block;
+    background-color: white;
+    color: black;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+
+    &.sidebarhidden {
+        padding: 6rem 0rem !important;
+    }
+}
+
+.btn {
+    &.btnt {
+        background: transparent !important;
+        border-color: transparent !important;
+        padding: inherit !important;
+    }
+}
+
+.modal {
+    .modal-body {
+        text-align: justify;
+        line-height: 2rem;
+    }
+}
+
+.toast, #liveToast {
+    display: inherit;
+}
+
+
+.form-group {
+    label:not(.lblrememberme):not(.lblacptterms) {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+}
+
+.bkgcurtain {
+    position: fixed;
+    z-index: 1;
+    background-color: rgb(0, 0, 0, .5);
+    width: 100%;
+    height: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+@media all and (min-width: 1200px) {
+    .admin { 
+        padding: 6rem calc(12rem + 1rem);
+    }
+}
