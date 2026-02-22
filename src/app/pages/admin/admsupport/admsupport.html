@@ -1,0 +1,41 @@
+<div [class]="'admin' + (hideSidebar ? ' sidebarhidden' : '')">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <h2>
+          <i class="bi bi-chat-fill ico"></i>
+          <span class="titlep ms-2">Support</span>
+        </h2>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-primary btntogsuport" (click)="toggleSupport()">Toggle support</button>
+
+    @if(isSuportEnabled) {
+      <div class="chat-container mt-3">
+        <div class="messages">
+          @for(msg of messages; track msg.id) {
+            <div class="message" [ngClass]="msg.role">
+              {{ msg.content }}
+            </div>
+          }
+
+          @if(loading) {
+            <div class="message assistant">Digitando...</div>
+          }
+        </div>
+
+        <div class="input-container">
+          <input
+            [(ngModel)]="userInput"
+            (keyup.enter)="sendMessageStream()"
+            placeholder="Digite sua mensagem..."
+          />
+          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()">Limpar</button>
+          <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()">Enviar</button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

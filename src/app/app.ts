@@ -4,10 +4,11 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
 import { SharedModule } from './modules';
+import { Admsupport } from "./pages/admin/admsupport/admsupport";
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, RouterModule, SharedModule],
+  imports: [CommonModule, RouterOutlet, RouterModule, SharedModule, Admsupport],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -4,7 +4,7 @@ import { SharedComponentsModule } from '@/app/modules/sharedcomps.module';
 import { myFunctionsService, TVSeriesDataService, AnimesDataService, BooksDataService, MoviesDataService, GamesDataService } from '@/app/services';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, DOCUMENT, Inject, Input } from '@angular/core';
+import { Component, DOCUMENT, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { map, Observable, startWith } from 'rxjs';
 
@@ -15,7 +15,7 @@ import { map, Observable, startWith } from 'rxjs';
   templateUrl: './admdata.html',
   styleUrl: './admdata.scss',
 })
-export class Admdata {
+export class Admdata implements OnInit, OnDestroy {
   @Input() hideSidebar: boolean = false;
 
   // Data

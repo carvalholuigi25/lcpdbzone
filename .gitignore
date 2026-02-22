@@ -47,3 +47,5 @@ notes/
 public/assets/images/tvseries
 covinfo
 package-lock.json
+.env
+.env.*

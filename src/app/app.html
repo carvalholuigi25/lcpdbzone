@@ -23,6 +23,8 @@
       <app-admsettings [hideSidebar]="hideSidebar" />
     } @else if (currentUrl.includes("/admin/data")) {
       <app-admdata [hideSidebar]="hideSidebar" />
+     } @else if (currentUrl.includes("/admin/support")) {
+      <app-admsupport [hideSidebar]="hideSidebar" />
     } @else {
       <app-admin [hideSidebar]="hideSidebar" />
     }

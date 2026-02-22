@@ -102,8 +102,13 @@
           @for (row of displayData!; track row.id) {
             <tr>
               @for (col of columns; track col.key) {
-                <td [ngClass]="col.cellClass">
-                  {{ formatValue(row[col.key], col) }}
+                <td [ngClass]="col.cellClass" [id]="'cl'+col.key">
+                  @if(col.key == "image") {
+                    <!-- <img [appLazyLoadImage]='""+row[col.key]' [alt]="row[col.key]" class="img-fluid mb-2" width="50" height="50" /> -->
+                    <img [src]='"assets\\images\\"+row[col.key]' [alt]="row[col.key]" class="img-fluid mb-2" width="50" height="50" loading="lazy" />                    
+                  } @else {
+                    {{ formatValue(row[col.key], col) }}
+                  }
                 </td>
               }
               @if (actions && actions.length > 0) {

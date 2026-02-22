@@ -6,7 +6,7 @@ import { Directive, ElementRef, Input, OnDestroy, OnInit, Renderer2 } from '@ang
   selector: '[appLazyLoadImage]'
 })
 export class LazyLoadImageDirective implements OnInit, OnDestroy {
-  @Input('appLazyLoadImage') src!: string; // Actual image URL
+  @Input('appLazyLoadImage') src: string = ""; // Actual image URL
   @Input() placeholder: string = 'assets\\images\\tvseries\\default.svg';       // Optional placeholder image
 
   private observer?: IntersectionObserver;
@@ -16,6 +16,8 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const imgElement = this.el.nativeElement;
+    this.src = this.src.includes("assets\\images\\") ? this.src : `assets\\images\\${this.src}`;
+    this.renderer.setAttribute(imgElement, 'loading', 'lazy');
 
     // Set placeholder if provided
     if (this.placeholder) {
@@ -35,6 +37,7 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
           if (entry.isIntersecting) {
             this.loadImage();
             this.observer?.disconnect();
+            this.observer?.unobserve(imgElement);
           }
         });
       }, { rootMargin: '100px' }); // Preload before fully in view
@@ -47,6 +50,9 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
     if (this.src) {
       const imgEl = this.el.nativeElement;
 
+      // Set the actual image source
+      this.renderer.setAttribute(imgEl, 'src', this.src);
+
       // Set up error handling
       imgEl.onerror = () => {
         if (this.placeholder) {
@@ -56,13 +62,15 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
         }
       };
 
-      // Set the actual image source
-      this.renderer.setAttribute(imgEl, 'src', this.src);
       // this.renderer.setAttribute(this.el.nativeElement, 'src', this.src);
     }
   }
 
   ngOnDestroy(): void {
+    if(this.el.nativeElement) {
+      this.observer?.unobserve(this.el.nativeElement);
+    }
+
     this.observer?.disconnect();
   }
 }

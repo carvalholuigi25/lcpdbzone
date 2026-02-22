@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { myFunctionsService } from '@/app/services';
-import { Alert, AlertModel } from '../alert/alert';
+import { Alert, AlertModel } from '@/app/components';
+import { AdminRoutesModule } from "@/app/modules/routes/auth/adminroutes.module";
 
 export interface DataTableColumn {
   key: string;
@@ -24,7 +25,7 @@ export interface DataTableAction {
 @Component({
   selector: 'app-data-table',
   standalone: true,
-  imports: [CommonModule, Alert],
+  imports: [CommonModule, Alert, AdminRoutesModule],
   providers: [myFunctionsService],
   templateUrl: './data-table.html',
   styleUrl: './data-table.scss',
