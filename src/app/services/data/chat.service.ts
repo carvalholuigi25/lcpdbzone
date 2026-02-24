@@ -26,30 +26,30 @@ export class ChatService {
   //     return data.choices[0].message.content;
   //   }
 
-  async sendMessage(prompt: string): Promise<string> {
-    const response = await fetch('http://localhost:3000/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env['OPENAI_API_KEY']}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-nano',
-        messages: [{ role: 'assistant', content: prompt }],
-      }),
-    });
+  // async sendMessage(prompt: string): Promise<string> {
+  //   const response = await fetch('http://localhost:3000/chat', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization: `Bearer ${process.env['OPENAI_API_KEY']}`,
+  //     },
+  //     body: JSON.stringify({
+  //       model: 'gpt-5-nano',
+  //       messages: [{ role: 'assistant', content: prompt }],
+  //     }),
+  //   });
 
-    const data = await response.json();
-    return data.content ?? data.choices[0].message.content;
-  }
+  //   const data = await response.json();
+  //   return data.content ?? data.choices[0].message.content;
+  // }
 
-  async streamMessage(
+  async sendMessage(
     messages: any[],
     onChunk: (chunk: string) => void,
-  signal?: AbortSignal
+    signal?: AbortSignal
   ): Promise<void> {
 
-    const response = await fetch('http://localhost:3000/achat', {
+    const response = await fetch('http://localhost:3000/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -6,7 +6,7 @@
     "start": "ng serve -c=production",
     "startdev": "ng serve -c=development",
     "startapi": "json-server --watch src/assets/api/lcpdbzone-api.json --port 3000",
-    "startmyapi2": "node server.js",
+    "startmyapi2": "node --watch server.js",
     "startmyapi": "C:\\Users\\luisc\\Documents\\projects\\lcpapi\\lcpapi.library\\Scripts\\batch\\startapi.bat",
     "startall": "concurrently 'npm:startmyapi' 'npm:startmyapi2' 'npm:start'",
     "startalld": "concurrently 'npm:startmyapi' 'npm:startmyapi2' 'npm:startdev'",

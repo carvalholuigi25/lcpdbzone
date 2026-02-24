@@ -46,29 +46,29 @@ export class Admsupport implements OnInit {
     this.loading = false;
   }
 
-  async sendMessage() {
-    if (!this.userInput.trim()) return;
+  // async sendMessage() {
+  //   if (!this.userInput.trim()) return;
 
-    const userMessage: Message = {
-      id: this.id,
-      role: 'user',
-      content: this.userInput
-    };
+  //   const userMessage: Message = {
+  //     id: this.id,
+  //     role: 'user',
+  //     content: this.userInput
+  //   };
 
-    this.messages.push(userMessage);
-    const prompt = this.userInput;
-    this.userInput = '';
-    this.loading = true;
+  //   this.messages.push(userMessage);
+  //   const prompt = this.userInput;
+  //   this.userInput = '';
+  //   this.loading = true;
 
-    const response = await this.chatService.sendMessage(prompt);
+  //   const response = await this.chatService.sendMessage(prompt);
 
-    this.messages.push({
-      role: 'assistant',
-      content: response
-    });
+  //   this.messages.push({
+  //     role: 'assistant',
+  //     content: response
+  //   });
 
-    this.loading = false;
-  }
+  //   this.loading = false;
+  // }
 
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
@@ -91,11 +91,10 @@ export class Admsupport implements OnInit {
 
     this.userInput = '';
     this.loading = true;
-
-    this.abortController = new AbortController();
-
+    
     try {
-      await this.chatService.streamMessage(
+      this.abortController = new AbortController();
+      await this.chatService.sendMessage(
         conversation,
         (chunk) => {
           assistantMessage.content += chunk;

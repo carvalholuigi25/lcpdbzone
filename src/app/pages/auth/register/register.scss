@@ -16,7 +16,8 @@
 }
 
 .colfauthreg1 {
-    background-color: white; 
+    backdrop-filter: blur(10px);
+    background: rgb(255, 255, 255, .5);
     color: black;
     padding: 15px;
 }
