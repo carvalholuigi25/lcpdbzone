@@ -25,12 +25,16 @@ export class Admsupport implements OnInit {
   messages: Message[] = [];
   userInput = '';
   loading = false;
-  private abortController?: AbortController;
+  private abortController: AbortController | null = null;
 
   constructor(private chatService: ChatService) {}
 
   ngOnInit(): void {
-    
+    if (this.loading && this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+      this.loading = false;
+    }
   }
 
   toggleSupport() {
@@ -40,10 +44,16 @@ export class Admsupport implements OnInit {
   clearMessage() {
     if (this.loading && this.abortController) {
       this.abortController.abort();
+      this.abortController = null;
     }
 
     this.messages = [];
+    this.userInput = "";
     this.loading = false;
+  }
+
+  async refreshMessageStream() {
+    this.sendMessageStream();
   }
 
   // async sendMessage() {
@@ -74,39 +84,52 @@ export class Admsupport implements OnInit {
     if (!this.userInput.trim() || this.loading) return;
 
     const userMessage: Message = {
+      id: this.id,
       role: 'user',
       content: this.userInput
     };
 
-    this.messages.push(userMessage);
-
     const assistantMessage: Message = {
+      id: this.id,
       role: 'assistant',
       content: ''
     };
 
-    this.messages.push(assistantMessage);
+    let conversation = [];
 
-    const conversation = [...this.messages];
+    this.messages.push(userMessage);
+    this.messages.push(assistantMessage);
 
     this.userInput = '';
     this.loading = true;
+
+    conversation = [...this.messages];
     
     try {
+      this.abortController = null;
       this.abortController = new AbortController();
+
       await this.chatService.sendMessage(
         conversation,
         (chunk) => {
           assistantMessage.content += chunk;
         },
         this.abortController.signal
-      );
+      ).then(() => {
+        this.loading = false;
+      }).finally(() => {
+        this.loading = false;
+      }).catch((err) => {
+        console.log(err);
+        this.loading = true;
+      });
+
     } catch (err) {
       if ((err as any).name !== 'AbortError') {
         console.error(err);
       }
-    }
 
-    this.loading = false;
+      this.loading = false;
+    }
   }
 }

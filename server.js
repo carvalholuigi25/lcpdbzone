@@ -100,6 +100,8 @@ app.post('/chat', async (req, res) => {
 
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Accept', 'application/json; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
       for await (const msgo of objresp.messages) {
         res.write(msgo.content || "");

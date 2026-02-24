@@ -9,6 +9,9 @@
 }
 
 .messages {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
   flex: 1;
   overflow-y: auto;
   padding: 20px;
@@ -24,11 +27,15 @@
 .user {
   background: #19c37d;
   align-self: flex-end;
+  white-space: pre-line;
+  word-break: break-all;
 }
 
 .assistant {
   background: #444654;
   align-self: flex-start;
+  white-space: pre-line;
+  word-break: break-all;
 }
 
 .input-container {
