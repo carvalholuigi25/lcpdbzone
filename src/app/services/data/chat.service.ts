@@ -7,72 +7,52 @@ import process from 'process';
 export class ChatService {
   constructor() {}
 
-  //   async sendMessage(prompt: string): Promise<string> {
-  //     const response = await fetch('https://api.openai.com/v1/chat/completions', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Authorization': 'Bearer SUA_API_KEY'
-  //       },
-  //       body: JSON.stringify({
-  //         model: 'gpt-4o-mini',
-  //         messages: [
-  //           { role: 'user', content: prompt }
-  //         ]
-  //       })
-  //     });
-
-  //     const data = await response.json();
-  //     return data.choices[0].message.content;
-  //   }
-
-  // async sendMessage(prompt: string): Promise<string> {
-  //   const response = await fetch('http://localhost:3000/chat', {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${process.env['OPENAI_API_KEY']}`,
-  //     },
-  //     body: JSON.stringify({
-  //       model: 'gpt-5-nano',
-  //       messages: [{ role: 'assistant', content: prompt }],
-  //     }),
-  //   });
-
-  //   const data = await response.json();
-  //   return data.content ?? data.choices[0].message.content;
-  // }
-
   async sendMessage(
     messages: any[],
     onChunk: (chunk: string) => void,
     signal?: AbortSignal
   ): Promise<void> {
-
     const response = await fetch('http://localhost:3000/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env['OPENAI_API_KEY']}`,
+        Authorization: `Bearer ${process.env?.['OPENAI_API_KEY']}`,
       },
-      body: JSON.stringify({ 
-         model: 'gpt-5-nano',
-         messages: messages,
+      body: JSON.stringify({
+        model: 'gpt-5-nano',
+        messages: messages,
       }),
-      signal
+      signal,
     });
 
-    const reader = response.body?.getReader();
+    // If there's no streaming body, fall back to text response
+    if (!response.body) {
+      const text = await response.text();
+      if (text) onChunk(text);
+      return;
+    }
+
+    const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
-    if (!reader) return;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-      onChunk(chunk);
+        // decode streaming bytes safely
+        const chunk = decoder.decode(value, { stream: true });
+        if (chunk) onChunk(chunk);
+      }
+    } catch (err: any) {
+      // Propagate AbortError so caller can detect aborts
+      if (err.name === 'AbortError') throw err;
+      console.error('Error reading chat stream:', err);
+      throw err;
+    } finally {
+      try {
+        reader.releaseLock();
+      } catch (e) {}
     }
   }
 }

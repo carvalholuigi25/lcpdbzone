@@ -1,6 +1,6 @@
 import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface Message {
@@ -16,7 +16,7 @@ interface Message {
   templateUrl: './admsupport.html',
   styleUrl: './admsupport.scss',
 })
-export class Admsupport implements OnInit {
+export class Admsupport implements OnInit, OnDestroy {
   @Input() hideSidebar: boolean = false;
 
   isSuportEnabled: boolean = false;
@@ -27,13 +27,18 @@ export class Admsupport implements OnInit {
   loading = false;
   private abortController: AbortController | null = null;
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit(): void {
-    if (this.loading && this.abortController) {
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
-      this.loading = false;
     }
   }
 
@@ -53,83 +58,64 @@ export class Admsupport implements OnInit {
   }
 
   async refreshMessageStream() {
-    this.sendMessageStream();
+    // resend last user message if present
+    const lastUser = [...this.messages].reverse().find(m => m.role === 'user');
+    if (lastUser?.content) {
+      this.userInput = lastUser.content;
+      await this.sendMessageStream();
+    }
   }
-
-  // async sendMessage() {
-  //   if (!this.userInput.trim()) return;
-
-  //   const userMessage: Message = {
-  //     id: this.id,
-  //     role: 'user',
-  //     content: this.userInput
-  //   };
-
-  //   this.messages.push(userMessage);
-  //   const prompt = this.userInput;
-  //   this.userInput = '';
-  //   this.loading = true;
-
-  //   const response = await this.chatService.sendMessage(prompt);
-
-  //   this.messages.push({
-  //     role: 'assistant',
-  //     content: response
-  //   });
-
-  //   this.loading = false;
-  // }
-
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 
+    const userId = this.id++;
     const userMessage: Message = {
-      id: this.id,
+      id: userId,
       role: 'user',
-      content: this.userInput
+      content: this.userInput,
     };
 
     const assistantMessage: Message = {
-      id: this.id,
+      id: userId,
       role: 'assistant',
-      content: ''
+      content: '',
     };
 
-    let conversation = [];
-
-    this.messages.push(userMessage);
-    this.messages.push(assistantMessage);
-
+    this.messages.push(userMessage, assistantMessage);
     this.userInput = '';
     this.loading = true;
 
-    conversation = [...this.messages];
-    
-    try {
-      this.abortController = null;
-      this.abortController = new AbortController();
+    const conversation = [...this.messages];
 
+    // abort any previous
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+
+    try {
       await this.chatService.sendMessage(
         conversation,
         (chunk) => {
-          assistantMessage.content += chunk;
+          // ensure UI updates run inside Angular zone
+          this.ngZone.run(() => {
+            assistantMessage.content += chunk;
+            this.cdr.markForCheck();
+          });
         },
         this.abortController.signal
-      ).then(() => {
-        this.loading = false;
-      }).finally(() => {
-        this.loading = false;
-      }).catch((err) => {
-        console.log(err);
-        this.loading = true;
-      });
-
-    } catch (err) {
-      if ((err as any).name !== 'AbortError') {
+      );
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
         console.error(err);
+        this.ngZone.run(() => {
+          assistantMessage.content += '\n\n[Error receiving response]';
+          this.cdr.markForCheck();
+        });
       }
-
+    } finally {
       this.loading = false;
+      this.abortController = null;
     }
   }
 }

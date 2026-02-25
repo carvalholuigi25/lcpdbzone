@@ -13,30 +13,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// app.post("/chat", async (req, res) => {
-//   try {
-//     const { model, messages } = req.body;
-
-//     const completion = await openai.chat.completions.create({
-//       model: model ?? "gpt-5-nano",
-//       messages,
-//     });
-
-//     res.json(completion.choices[0].message);
-//   } catch (error) {
-//     res.status(500).json({ error: "Erro ao gerar resposta " + error });
-//   }
-// });
-
-// app.post('/schat', (req, res) => {
-//   try {
-//     const {message} = req.body;
-//     res.json({ reply: getBotResponse(message) });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
-
 function setHouseNumZero(num = 1) {
   return num < 10 ? '0' + parseInt(num) : parseInt(num);
 }
