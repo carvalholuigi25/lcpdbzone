@@ -58,7 +58,7 @@
     {
       "id": 12,
       "cmd": "weather",
-      "description": "Provides a weather update. (Note: This command is currently not functional.)"
+      "description": "Provides a weather update."
     }
   ]
 }

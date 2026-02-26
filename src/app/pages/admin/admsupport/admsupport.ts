@@ -25,6 +25,8 @@ export class Admsupport implements OnInit, OnDestroy {
   messages: Message[] = [];
   userInput = '';
   loading = false;
+  dt = new Date();
+
   private abortController: AbortController | null = null;
 
   constructor(
@@ -46,6 +48,7 @@ export class Admsupport implements OnInit, OnDestroy {
 
   toggleSupport() {
     this.isSuportEnabled = !this.isSuportEnabled;
+    this.clearMessage();
   }
 
   loadInitialChatbot() {

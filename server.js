@@ -59,6 +59,47 @@ function generateQuote() {
   return quotes[Math.floor(Math.random() * quotes.length)];
 }
 
+// Function to get user's location
+function detectLocation() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                return {latitude: position.coords.latitude, longitude: position.coords.longitude, error: null};
+            },
+            (error) => {
+                return {latitude: null, longitude: null, error: error.message};
+            }
+        );
+    } else {
+      return {latitude: null, longitude: null, error: "Geolocation not supported by your browser."};
+    }
+}
+
+async function getWeather(method = "city", city = "") {
+  try {
+    const location = method == "geolocation" ? detectLocation() : null;
+    const qparams = `${location ? `?lat=${location.latitude}&lon=${location.longitude}` : `?q=${encodeURIComponent(city)}`}`;
+    const appidparams = `&appid=${process.env.API_OPENWEATHER_KEY}&units=metric`;
+    // const qparams = `?q=${encodeURIComponent(city)}&appid=${process.env.API_OPENWEATHER_KEY}&units=metric`;
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/weather${qparams}${appidparams}`);
+    const data = await response.json();
+
+    if (data.cod !== 200) {
+      return `Could not retrieve weather data for ${data.name || "unknown location"}.`;
+    }
+
+    const { name, main, weather, wind } = data;
+
+    return `The current weather in ${name} is:\n
+            Temperature: ${main.temp}°C\n
+            Condition: ${weather[0].description}\n
+            Humidity: ${main.humidity}%\n
+            Wind Speed: ${wind.speed} m/s`;
+  } catch (error) {
+    return "Error fetching weather data: " + error.message;
+  }
+}
+
 app.post('/chat', async (req, res) => {
   try {
     const prefix = "!", prefixalt = "$";
@@ -120,7 +161,7 @@ app.post('/chat', async (req, res) => {
       } else if (msg == prefix+"mail" || msg == prefixalt+"mail") {
         objresp.messages = [{role: "assistant", content: "You can contact us at: " + process.env.CONTACT_EMAIL}];
       } else if (msg == prefix+"weather" || msg == prefixalt+"weather") {
-        objresp.messages = [{role: "assistant", content: "Sorry, I can't provide weather updates at the moment."}];
+        objresp.messages = [{role: "assistant", content: await getWeather("city", process.env.DEFAULT_CITY || "New York")}];
       } else if (msg == prefix+"bye" || msg == prefixalt+"bye") {
          objresp.messages = [{role: "assistant", content: "Goodbye! Have a great day!"}];
       } else {

@@ -9,7 +9,9 @@
       </div>
     </div>
 
-    <button type="button" class="btn btn-primary btntogsuport" (click)="toggleSupport()">Toggle support</button>
+    <button type="button" class="btn btn-primary btntogsupport" (click)="toggleSupport()">
+      {{isSuportEnabled ? 'Disable' : 'Enable'}} support
+    </button>
 
     @if(isSuportEnabled) {
       <div class="chat-container mt-3">
@@ -17,13 +19,30 @@
           @if(messages) {
             @for(msg of messages; track msg.id) {
               <div class="message" [ngClass]="msg.role">
-                {{ msg.content }}
+                @if(messages.length > 1) {
+                  @if(msg.role == 'user') {
+                    <i class="bi bi-person-fill" alt="User"></i>
+                    <span class="ms-1">You: </span>
+                  } @else if(msg.role == 'assistant') {
+                    <i class="bi bi-robot" alt="Support"></i>
+                    <span class="ms-1">Support: </span>
+                  } @else {
+                    <i class="bi bi-question-circle" alt="System"></i>
+                    <span class="ms-1">System: </span>
+                  }
+                }
+
+                <p class="mt-3">{{ msg.content }}</p>
+                <p class="mt-3"><i class="bi bi-clock"></i> {{dt | date:'fullDate'}} {{dt | date:'shortTime'}}</p>
               </div>
             }
           }
 
           @if(loading) {
-            <div class="message assistant">Digitando...</div>
+            <div class="message assistant">
+              <i class="bi bi-chat-dots-fill" alt="Digitando..." title="Digitando..."></i>
+              Digitando...
+            </div>
           }
         </div>
 
@@ -36,7 +55,7 @@
           <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()">
             <i class="bi bi-arrow-clockwise" alt="Refresh"></i>
           </button>
-          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!userInput && messages.length >= 1">
+          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!messages.length">
             <i class="bi bi-x-lg" alt="Clear"></i>
           </button>
           <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput">
