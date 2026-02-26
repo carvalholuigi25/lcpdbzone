@@ -1,0 +1,44 @@
+{
+  "cmds": [
+    {
+      "id": 1,
+      "cmd": "hello",
+      "description": "Returns a friendly greeting message."
+    },
+    {
+      "id": 2,
+      "cmd": "welcome",
+      "description": "Provides a welcome message to the user."
+    },
+    {
+      "id": 3,
+      "cmd": "time",
+      "description": "Returns the current date and time."
+    },
+    {
+      "id": 4,
+      "cmd": "help",
+      "description": "Provides a list of available commands and their descriptions."
+    },
+    {
+      "id": 5,
+      "cmd": "bye",
+      "description": "Returns a goodbye message to the user."
+    },
+    {
+      "id": 6,
+      "cmd": "ai",
+      "description": "Engages the AI chatbot for a conversation. (must include the prefix '!' or '$' before the command and the model is optional, example: !ai gpt-5-nano or $ai gpt-5-nano 'text')"
+    },
+    {
+      "id": 7,
+      "cmd": "timezone",
+      "description": "Returns the current timezone of the server."
+    },
+    {
+      "id": 8,
+      "cmd": "date",
+      "description": "Returns the current date."
+    }
+  ]
+}

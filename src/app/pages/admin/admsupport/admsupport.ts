@@ -69,6 +69,7 @@ export class Admsupport implements OnInit, OnDestroy {
     if (!this.userInput.trim() || this.loading) return;
 
     const userId = this.id++;
+    
     const userMessage: Message = {
       id: userId,
       role: 'user',

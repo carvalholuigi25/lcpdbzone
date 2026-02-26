@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -23,7 +24,17 @@ function getTimeNow() {
     datev: dt.getFullYear() + "-" + setHouseNumZero(dt.getUTCMonth()+1) + "-" + setHouseNumZero(dt.getUTCDate()),
     timev: setHouseNumZero(dt.getUTCHours()) + ":" + setHouseNumZero(dt.getUTCMinutes()) + ":" + setHouseNumZero(dt.getUTCSeconds())
   }
-  return dtobj.datev + " " + dtobj.timev;
+  return dtobj.timev;
+}
+
+function getDateNow() {
+  const dt = new Date();
+  return dt.getFullYear() + "-" + setHouseNumZero(dt.getUTCMonth()+1) + "-" + setHouseNumZero(dt.getUTCDate());
+}
+
+function getHelpCmds() {
+  const {cmds} = JSON.parse(fs.readFileSync('./list_help_cmds.json', 'utf-8'));
+  return cmds || [];
 }
 
 app.post('/chat', async (req, res) => {
@@ -46,7 +57,11 @@ app.post('/chat', async (req, res) => {
       objresp.messages = [{role: "assistant", content: "I didn't understand that. Please send a valid message."}];
     }
 
-    if (msg.includes(prefix+"ai") || msg.includes(prefixalt+"ai")) {
+    if (msg == "" || msg == " " || msg == null || msg == undefined) {
+      objresp.messages = [{role: "assistant", content: "Please start your message with a command prefix (e.g., '!' or '$')."}];
+    }
+
+    if (msg == prefix+"ai" || msg == prefixalt+"ai") {
       const completion = await openai.chat.completions.create({
         model: objresp.model ?? 'gpt-5-nano',
         messages: messages,
@@ -62,16 +77,28 @@ app.post('/chat', async (req, res) => {
         res.write(content);
       }
     } else {
-      if (msg.includes('hello') || msg.includes('hi')) {
+      const listhelpcmds = getHelpCmds();
+
+      if (msg == prefix+"hello" || msg == prefixalt+"hello") {
         objresp.messages = [{role: "assistant", content: "Hello world!"}];
-      } else if (msg.includes('time')) {
+      } else if (msg == prefix+"welcome" || msg == prefixalt+"welcome") {
+        objresp.messages = [{role: "assistant", content: "Welcome to our chatbot! How can I assist you today?"}];
+      } else if (msg == prefix+"time" || msg == prefixalt+"time") {
         objresp.messages = [{role: "assistant", content: "The time is: " + getTimeNow()}];
-      } else if (msg.includes('help')) {
-        objresp.messages = [{role: "assistant", content: "HELP: Theres list of commands: \r\n!ai || $ai -> for ai chat, \r\nhello -> hello message, \r\ntime -> outputs for time information, \r\nhelp -> help list commands, \r\nbye -> bye message"}];
-      } else if (msg.includes('bye')) {
+      } else if (msg == prefix+"date" || msg == prefixalt+"date") {
+        objresp.messages = [{role: "assistant", content: "Today's date is: " + getDateNow()}];
+      } else if (msg == prefix+"timezone" || msg == prefixalt+"timezone") {
+        objresp.messages = [{role: "assistant", content: "The current timezone is: " + Intl.DateTimeFormat().resolvedOptions().timeZone}];
+      } else if (msg == prefix+"help" || msg == prefixalt+"help") {
+        objresp.messages = [{role: "assistant", content: "HELP: Theres list of commands: \r\n" + listhelpcmds.map(x => `${x.cmd} - ${x.description}`).join("\r\n")}];
+      } else if (msg == prefix+"bye" || msg == prefixalt+"bye") {
          objresp.messages = [{role: "assistant", content: "Goodbye! Have a great day!"}];
       } else {
-         objresp.messages = [{role: "assistant", content: "I'm not sure how to respond to that. Can you rephrase?"}];
+        if(!msg.startsWith(prefix) && !msg.startsWith(prefixalt)) {
+          objresp.messages = [{role: "assistant", content: "Please start your message with a command prefix (e.g., '!' or '$')."}];
+        } else {
+           objresp.messages = [{role: "assistant", content: "I'm not sure how to respond to that. Can you rephrase?"}];
+        }
       }
 
       res.setHeader('Content-Type', 'application/json; charset=utf-8');

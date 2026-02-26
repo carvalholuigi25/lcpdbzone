@@ -33,9 +33,15 @@
             (keyup.enter)="sendMessageStream()"
             placeholder="Digite sua mensagem..."
           />
-          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()">Limpar</button>
-          <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()">Refresh</button>
-          <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput">Enviar</button>
+          <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()">
+            <i class="bi bi-arrow-clockwise" alt="Refresh"></i>
+          </button>
+          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!userInput && messages.length >= 1">
+            <i class="bi bi-x-lg" alt="Clear"></i>
+          </button>
+          <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput">
+            <i class="bi bi-send" alt="Send"></i>
+          </button>
         </div>
       </div>
     }
