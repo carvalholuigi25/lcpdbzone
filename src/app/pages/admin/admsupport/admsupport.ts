@@ -33,7 +33,9 @@ export class Admsupport implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadInitialChatbot();
+  }
 
   ngOnDestroy(): void {
     if (this.abortController) {
@@ -46,6 +48,13 @@ export class Admsupport implements OnInit, OnDestroy {
     this.isSuportEnabled = !this.isSuportEnabled;
   }
 
+  loadInitialChatbot() {
+    if(this.messages.length === 0 && this.userInput.trim() === '') {
+      this.userInput = '$welcome';
+      this.sendMessageStream();
+    }
+  }
+
   clearMessage() {
     if (this.loading && this.abortController) {
       this.abortController.abort();
@@ -55,6 +64,7 @@ export class Admsupport implements OnInit, OnDestroy {
     this.messages = [];
     this.userInput = "";
     this.loading = false;
+    this.loadInitialChatbot();
   }
 
   async refreshMessageStream() {

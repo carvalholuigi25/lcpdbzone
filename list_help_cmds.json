@@ -39,6 +39,26 @@
       "id": 8,
       "cmd": "date",
       "description": "Returns the current date."
+    },
+    {
+      "id": 9,
+      "cmd": "joke",
+      "description": "Tells a random joke."
+    },
+    {
+      "id": 10,
+      "cmd": "quote",
+      "description": "Provides an inspirational quote."
+    },
+    {
+      "id": 11,
+      "cmd": "mail",
+      "description": "Provides contact information for support."
+    },
+    {
+      "id": 12,
+      "cmd": "weather",
+      "description": "Provides a weather update. (Note: This command is currently not functional.)"
     }
   ]
 }

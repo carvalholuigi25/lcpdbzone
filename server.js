@@ -37,6 +37,28 @@ function getHelpCmds() {
   return cmds || [];
 }
 
+function generateJoke() {
+  const jokes = [
+    "Why don't scientists trust atoms? Because they make up everything!",
+    "Why did the scarecrow win an award? Because he was outstanding in his field!",
+    "Why don't skeletons fight each other? They don't have the guts!",
+    "Why did the bicycle fall over? Because it was two-tired!",
+    "Why did the math book look sad? Because it had too many problems!"
+  ];
+  return jokes[Math.floor(Math.random() * jokes.length)];
+}
+
+function generateQuote() {
+  const quotes = [
+    "The only way to do great work is to love what you do. - Steve Jobs",
+    "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
+    "Believe you can and you're halfway there. - Theodore Roosevelt",
+    "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+    "Don't watch the clock; do what it does. Keep going. - Sam Levenson"
+  ];
+  return quotes[Math.floor(Math.random() * quotes.length)];
+}
+
 app.post('/chat', async (req, res) => {
   try {
     const prefix = "!", prefixalt = "$";
@@ -90,7 +112,15 @@ app.post('/chat', async (req, res) => {
       } else if (msg == prefix+"timezone" || msg == prefixalt+"timezone") {
         objresp.messages = [{role: "assistant", content: "The current timezone is: " + Intl.DateTimeFormat().resolvedOptions().timeZone}];
       } else if (msg == prefix+"help" || msg == prefixalt+"help") {
-        objresp.messages = [{role: "assistant", content: "HELP: Theres list of commands: \r\n" + listhelpcmds.map(x => `${x.cmd} - ${x.description}`).join("\r\n")}];
+        objresp.messages = [{role: "assistant", content: "HELP: With prefix (! or $), use this avaliable list of commands: \r\n" + listhelpcmds.map(x => `${x.cmd} - ${x.description}`).join("\r\n")}];
+      } else if (msg == prefix+"joke" || msg == prefixalt+"joke") {
+        objresp.messages = [{role: "assistant", content: generateJoke()}];
+      } else if (msg == prefix+"quote" || msg == prefixalt+"quote") {
+        objresp.messages = [{role: "assistant", content: generateQuote()}];
+      } else if (msg == prefix+"mail" || msg == prefixalt+"mail") {
+        objresp.messages = [{role: "assistant", content: "You can contact us at: " + process.env.CONTACT_EMAIL}];
+      } else if (msg == prefix+"weather" || msg == prefixalt+"weather") {
+        objresp.messages = [{role: "assistant", content: "Sorry, I can't provide weather updates at the moment."}];
       } else if (msg == prefix+"bye" || msg == prefixalt+"bye") {
          objresp.messages = [{role: "assistant", content: "Goodbye! Have a great day!"}];
       } else {
