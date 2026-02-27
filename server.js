@@ -100,6 +100,61 @@ async function getWeather(method = "city", city = "") {
   }
 }
 
+async function getListGames() {
+  try {
+    const response = await fetch('https://api.rawg.io/api/games?key=' + process.env.API_RAWG_KEY);
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) {
+      return "No games found.";
+    }
+    const gamesList = data.results.slice(0, 10).map(game => game.name).join('\n');
+    return `Here are some popular games:\n${gamesList}`;
+  } catch (error) {
+    return "Error fetching games data: " + error.message;
+  }
+}
+
+async function getListMovies() {
+  try {
+    const response = await fetch('https://api.themoviedb.org/3/movie/popular?api_key=' + process.env.API_TMDB_KEY);
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) {
+      return "No movies found.";
+    }
+    const moviesList = data.results.slice(0, 10).map(movie => movie.title).join('\n');
+    return `Here are some popular movies:\n${moviesList}`;
+  } catch (error) {
+    return "Error fetching movies data: " + error.message;
+  }
+}
+
+async function getListAnimes() {
+  try {
+    const response = await fetch('https://api.jikan.moe/v4/top/anime');
+    const data = await response.json();
+    if (!data.data || data.data.length === 0) {
+      return "No animes found.";
+    }
+    const animesList = data.data.slice(0, 10).map(anime => anime.title).join('\n');
+    return `Here are some popular animes:\n${animesList}`;
+  } catch (error) {
+    return "Error fetching animes data: " + error.message;
+  }
+}
+
+function getListModels() {
+  // This is a static list of models for demonstration purposes. In a real application, you might want to fetch this from an API or database.
+  // Src: https://developers.openai.com/api/docs/models
+  const models = [
+    { name: "gpt-5-nano", description: "A compact and efficient model for basic tasks." },
+    { name: "gpt-5-mini", description: "A small model for quick responses and simple interactions." },
+    { name: "gpt-5-medium", description: "A balanced model for general use with improved performance." },
+    { name: "gpt-5-large", description: "A powerful model for complex tasks and detailed responses." },
+    { name: "gpt-5-xlarge", description: "An advanced model for high-quality outputs and nuanced understanding." }
+  ];
+  return models.map(m => `${m.name} - ${m.description}`).join('\n');
+}
+
 app.post('/chat', async (req, res) => {
   try {
     const prefix = "!", prefixalt = "$";
@@ -140,8 +195,6 @@ app.post('/chat', async (req, res) => {
         res.write(content);
       }
     } else {
-      const listhelpcmds = getHelpCmds();
-
       if (msg == prefix+"hello" || msg == prefixalt+"hello") {
         objresp.messages = [{role: "assistant", content: "Hello world!"}];
       } else if (msg == prefix+"welcome" || msg == prefixalt+"welcome") {
@@ -153,22 +206,32 @@ app.post('/chat', async (req, res) => {
       } else if (msg == prefix+"timezone" || msg == prefixalt+"timezone") {
         objresp.messages = [{role: "assistant", content: "The current timezone is: " + Intl.DateTimeFormat().resolvedOptions().timeZone}];
       } else if (msg == prefix+"help" || msg == prefixalt+"help") {
-        objresp.messages = [{role: "assistant", content: "HELP: With prefix (! or $), use this avaliable list of commands: \r\n" + listhelpcmds.map(x => `${x.cmd} - ${x.description}`).join("\r\n")}];
+        objresp.messages = [{role: "assistant", content: "HELP: With prefix (! or $), use this avaliable list of commands: \r\n" + getHelpCmds().map(x => `${x.cmd} - ${x.description}`).join("\r\n")}];
+      } else if (msg == prefix+"listaimodels" || msg == prefixalt+"listaimodels") {
+        objresp.messages = [{role: "assistant", content: "Here are the available models:\n" + getListModels()}];
       } else if (msg == prefix+"joke" || msg == prefixalt+"joke") {
         objresp.messages = [{role: "assistant", content: generateJoke()}];
       } else if (msg == prefix+"quote" || msg == prefixalt+"quote") {
         objresp.messages = [{role: "assistant", content: generateQuote()}];
       } else if (msg == prefix+"mail" || msg == prefixalt+"mail") {
         objresp.messages = [{role: "assistant", content: "You can contact us at: " + process.env.CONTACT_EMAIL}];
-      } else if (msg == prefix+"weather" || msg == prefixalt+"weather") {
-        objresp.messages = [{role: "assistant", content: await getWeather("city", process.env.DEFAULT_CITY || "New York")}];
+      } else if (msg == prefix+"weather" || msg == prefixalt+"weather" || msg.startsWith(prefix+"weather city:") || msg.startsWith(prefixalt+"weather city:")) {
+        const msgv = msg.indexOf("weather city:") > -1 ? msg.split("weather city:")[1].trim() : null;
+        console.log(msgv)
+        objresp.messages = [{role: "assistant", content: await getWeather("city", msgv || process.env.DEFAULT_CITY || "New York")}];
+      } else if (msg == prefix+"listgames" || msg == prefixalt+"listgames") {
+        objresp.messages = [{role: "assistant", content: await getListGames()}];
+      } else if (msg == prefix+"listmovies" || msg == prefixalt+"listmovies") {
+        objresp.messages = [{role: "assistant", content: await getListMovies()}];
+      } else if (msg == prefix+"listanimes" || msg == prefixalt+"listanimes") {
+        objresp.messages = [{role: "assistant", content: await getListAnimes()}];
       } else if (msg == prefix+"bye" || msg == prefixalt+"bye") {
-         objresp.messages = [{role: "assistant", content: "Goodbye! Have a great day!"}];
+        objresp.messages = [{role: "assistant", content: "Goodbye! Have a great day!"}];
       } else {
         if(!msg.startsWith(prefix) && !msg.startsWith(prefixalt)) {
           objresp.messages = [{role: "assistant", content: "Please start your message with a command prefix (e.g., '!' or '$')."}];
         } else {
-           objresp.messages = [{role: "assistant", content: "I'm not sure how to respond to that. Can you rephrase?"}];
+          objresp.messages = [{role: "assistant", content: "I'm not sure how to respond to that. Can you rephrase?"}];
         }
       }
 

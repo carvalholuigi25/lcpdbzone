@@ -18,9 +18,11 @@
 }
 
 .message {
+  position: relative;
   max-width: 70%;
   padding: 12px;
   border-radius: 12px;
+  margin-top: 10px;
   margin-bottom: 10px;
 }
 
@@ -60,4 +62,32 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+}
+
+.mavatar {
+  position: relative
+}
+
+.avatar {
+  $size: .8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -$size;
+  right: -$size;
+  width: $size;
+  height: $size;
+  border-radius: calc(16px + 8px);
+  background: inherit;
+  padding: $size;
+  line-height: 0;
+
+  .avatar-user {
+    background: #19c37d;
+  }
+
+  .avatar-assistant {
+    background: #444654;
+  }
 }

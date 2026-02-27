@@ -1,6 +1,6 @@
 import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface Message {
@@ -19,7 +19,7 @@ interface Message {
 export class Admsupport implements OnInit, OnDestroy {
   @Input() hideSidebar: boolean = false;
 
-  isSuportEnabled: boolean = false;
+  isSupportChatEnabled: boolean = false;
 
   id: number = 1;
   messages: Message[] = [];
@@ -32,8 +32,17 @@ export class Admsupport implements OnInit, OnDestroy {
   constructor(
     private chatService: ChatService,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    @Inject(DOCUMENT) private document: Document
+  ) {
+    const localStorage = this.document.defaultView?.localStorage;
+
+    this.isSupportChatEnabled = localStorage?.getItem("supportChatEnabled") === "true";
+
+    if(localStorage) {
+      localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+    }
+  }
 
   ngOnInit(): void {
     this.loadInitialChatbot();
@@ -47,8 +56,12 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   toggleSupport() {
-    this.isSuportEnabled = !this.isSuportEnabled;
+    this.isSupportChatEnabled = !this.isSupportChatEnabled;
     this.clearMessage();
+
+    if(this.document.defaultView?.localStorage) {
+      this.document.defaultView?.localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+    }
   }
 
   loadInitialChatbot() {
@@ -78,6 +91,7 @@ export class Admsupport implements OnInit, OnDestroy {
       await this.sendMessageStream();
     }
   }
+
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 

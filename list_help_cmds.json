@@ -59,6 +59,26 @@
       "id": 12,
       "cmd": "weather",
       "description": "Provides a weather update."
+    },
+    {
+      "id": 13,
+      "cmd": "listgames",
+      "description": "Provides a list of popular games."
+    },
+    {
+      "id": 14,
+      "cmd": "listmovies",
+      "description": "Provides a list of popular movies."
+    },
+    {
+      "id": 15,
+      "cmd": "listanimes",
+      "description": "Provides a list of popular animes."
+    },
+    {
+      "id": 16,
+      "cmd": "listaimodels",
+      "description": "Provides a list of available AI models for the !ai command."
     }
   ]
 }
