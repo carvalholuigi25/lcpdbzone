@@ -1,3 +1,4 @@
+import { SafeHtmlPipe } from '@/app/pipes';
 import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
@@ -7,11 +8,12 @@ interface Message {
   id?: string | number;
   role: string | 'user' | 'assistant';
   content: string;
+  timestamp?: Date | string;
 }
 
 @Component({
   selector: 'app-admsupport',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SafeHtmlPipe],
   standalone: true,
   templateUrl: './admsupport.html',
   styleUrl: './admsupport.scss',
@@ -25,7 +27,6 @@ export class Admsupport implements OnInit, OnDestroy {
   messages: Message[] = [];
   userInput = '';
   loading = false;
-  dt = new Date();
 
   private abortController: AbortController | null = null;
 
@@ -101,12 +102,14 @@ export class Admsupport implements OnInit, OnDestroy {
       id: userId,
       role: 'user',
       content: this.userInput,
+      timestamp: new Date().toISOString()
     };
 
     const assistantMessage: Message = {
       id: userId,
       role: 'assistant',
       content: '',
+      timestamp: new Date().toISOString()
     };
 
     this.messages.push(userMessage, assistantMessage);

@@ -12,73 +12,93 @@
     },
     {
       "id": 3,
-      "cmd": "time",
-      "description": "Returns the current date and time."
-    },
-    {
-      "id": 4,
       "cmd": "help",
       "description": "Provides a list of available commands and their descriptions."
     },
     {
-      "id": 5,
+      "id": 4,
       "cmd": "bye",
       "description": "Returns a goodbye message to the user."
     },
     {
-      "id": 6,
+      "id": 5,
       "cmd": "ai",
       "description": "Engages the AI chatbot for a conversation. (must include the prefix '!' or '$' before the command and the model is optional, example: !ai gpt-5-nano or $ai gpt-5-nano 'text')"
     },
     {
-      "id": 7,
+      "id": 6,
       "cmd": "timezone",
       "description": "Returns the current timezone of the server."
     },
     {
-      "id": 8,
+      "id": 7,
       "cmd": "date",
-      "description": "Returns the current date."
+      "description": "Returns the current date. (You can also specify a timezone, example: !date zone:America/New_York or $date zone:America/New_York)"
+    },
+    {
+      "id": 8,
+      "cmd": "datetime",
+      "description": "Returns the current date and time. (You can also specify a timezone, example: !datetime zone:America/New_York or $datetime zone:America/New_York)"
     },
     {
       "id": 9,
+      "cmd": "time",
+      "description": "Returns the current time. (You can also specify a timezone, example: !time zone:America/New_York or $time zone:America/New_York)"
+    },
+    {
+      "id": 10,
       "cmd": "joke",
       "description": "Tells a random joke."
     },
     {
-      "id": 10,
+      "id": 11,
       "cmd": "quote",
       "description": "Provides an inspirational quote."
     },
     {
-      "id": 11,
+      "id": 12,
       "cmd": "mail",
       "description": "Provides contact information for support."
     },
     {
-      "id": 12,
+      "id": 13,
       "cmd": "weather",
-      "description": "Provides a weather update."
+      "description": "Provides a weather update. (You can specify a location, example: !weather zone:New York or $weather zone:New York)"
     },
     {
-      "id": 13,
+      "id": 14,
       "cmd": "listgames",
       "description": "Provides a list of popular games."
     },
     {
-      "id": 14,
+      "id": 15,
       "cmd": "listmovies",
       "description": "Provides a list of popular movies."
     },
     {
-      "id": 15,
+      "id": 16,
       "cmd": "listanimes",
       "description": "Provides a list of popular animes."
     },
     {
-      "id": 16,
+      "id": 17,
+      "cmd": "listpodcasts",
+      "description": "Provides a list of popular podcasts."
+    },
+    {
+      "id": 18,
       "cmd": "listaimodels",
       "description": "Provides a list of available AI models for the !ai command."
+    },
+    {
+      "id": 19,
+      "cmd": "calc",
+      "description": "Evaluates a mathematical expression. (example: !calc 2+2 or $calc 2+2)"
+    },
+    {
+      "id": 20,
+      "cmd": "calcage",
+      "description": "Calculates age based on birth year. (example: !calcage 1990 or $calcage 1990)"
     }
   ]
 }
