@@ -261,4 +261,252 @@ function getCalcAgeResult(birthYear) {
   }
 }
 
-export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult };
+function getCountdownResult(targetDate) {
+  try {
+    const now = new Date();
+    const target = new Date(targetDate);
+    if (isNaN(target.getTime())) {
+      throw new Error("Invalid target date.");
+    }
+    const diff = target - now;
+    if (diff < 0) {
+      return "The target date has already passed.";
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    return `Time until ${targetDate}: ${days} days, ${hours} hours, ${minutes} minutes, and ${seconds} seconds.`;
+  }
+  catch (error) {
+    return "Error calculating countdown: " + error.message;
+  }
+}
+
+function getCountupResult(startDate) {
+  try {
+    const now = new Date();
+    const start = new Date(startDate);
+    if (isNaN(start.getTime())) {
+      throw new Error("Invalid start date.");
+    }
+    const diff = now - start;
+    if (diff < 0) {
+      return "The start date is in the future.";
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    return `Time since ${startDate}: ${days} days, ${hours} hours, ${minutes} minutes, and ${seconds} seconds.`;
+  }
+  catch (error) {
+    return "Error calculating countup: " + error.message;
+  }
+}
+
+function getDataSizeConversion(size, fromUnit, toUnit) {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const fromIndex = units.indexOf(fromUnit.toString().toUpperCase());
+  const toIndex = units.indexOf(toUnit.toString().toUpperCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use B, KB, MB, GB, or TB.";
+  }
+  const convertedSize = size * Math.pow(1024, fromIndex - toIndex);
+  return `${size} ${fromUnit.toString().toUpperCase()} is equal to ${convertedSize} ${toUnit.toString().toUpperCase()}.`;
+}
+
+function getTemperatureConversion(value, fromUnit, toUnit) {
+  const from = fromUnit.toString().toUpperCase();
+  const to = toUnit.toString().toUpperCase();
+  let convertedValue;
+  if (from === 'C' && to === 'F') {
+    convertedValue = (value * 9/5) + 32;
+  } else if (from === 'F' && to === 'C') {
+    convertedValue = (value - 32) * 5/9;
+  } else if (from === 'C' && to === 'K') {
+    convertedValue = value + 273.15;
+  } else if (from === 'K' && to === 'C') {
+    convertedValue = value - 273.15;
+  } else if (from === 'F' && to === 'K') {
+    convertedValue = (value - 32) * 5/9 + 273.15;
+  } else if (from === 'K' && to === 'F') {
+    convertedValue = (value - 273.15) * 9/5 + 32;
+  } else {
+    return "Invalid units. Please use C, F, or K.";
+  }
+  return `${value}°${from} is equal to ${convertedValue}°${to}.`;
+}
+
+function getLengthConversion(value, fromUnit, toUnit) {
+  const units = ['m', 'km', 'mi', 'ft'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use m, km, mi, or ft.";
+  }
+  const conversionFactors = {
+    'm': [1, 0.001, 0.000621371, 3.28084],
+    'km': [1000, 1, 0.621371, 3280.84],
+    'mi': [1609.34, 1.60934, 1, 5280],
+    'ft': [0.3048, 0.0003048, 0.000189394, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+}
+
+function getWeightConversion(value, fromUnit, toUnit) {
+  const units = ['g', 'kg', 'lb', 'oz'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use g, kg, lb, or oz.";
+  }
+  const conversionFactors = {
+    'g': [1, 0.001, 0.00220462, 0.035274],
+    'kg': [1000, 1, 2.20462, 35.274],
+    'lb': [453.592, 0.453592, 1, 16],
+    'oz': [28.3495, 0.0283495, 0.0625, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+}
+
+function getSpeedConversion(value, fromUnit, toUnit) {
+  const units = ['m/s', 'km/h', 'mph'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use m/s, km/h, or mph.";
+  }
+  const conversionFactors = {
+    'm/s': [1, 3.6, 2.23694],
+    'km/h': [0.277778, 1, 0.621371],
+    'mph': [0.44704, 1.60934, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+}
+
+function getPressureConversion(value, fromUnit, toUnit) {
+  const units = ['pa', 'kpa', 'bar', 'psi'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use Pa, kPa, bar, or psi.";
+  }
+  const conversionFactors = {
+    'pa': [1, 0.001, 0.00001, 0.000145038],
+    'kpa': [1000, 1, 0.01, 0.145038],
+    'bar': [100000, 100, 1, 14.5038],
+    'psi': [6894.76, 6.89476, 0.0689476, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+}
+
+function getVolumeConversion(value, fromUnit, toUnit) {
+  const units = ['l', 'ml', 'gal', 'cup'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use L, mL, gal, or cup.";
+  }
+  const conversionFactors = {
+    'l': [1, 1000, 0.264172, 4.22675],
+    'ml': [0.001, 1, 0.000264172, 0.00422675],
+    'gal': [3.78541, 3785.41, 1, 16],
+    'cup': [0.236588, 236.588, 0.0625, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+}
+
+function getEnergyConversion(value, fromUnit, toUnit) { 
+  const units = ['j', 'kj', 'cal', 'kcal'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use J, kJ, cal, or kcal.";
+  }
+  const conversionFactors = {
+    'j': [1, 0.001, 0.239006, 0.000239006],
+    'kj': [1000, 1, 239.006, 0.239006],
+    'cal': [4.184, 0.004184, 1, 0.001],
+    'kcal': [4184, 4.184, 1000, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+}
+
+async function getCurrencyConversion(value = 1, fromCurrency = "EUR", toCurrency = "USD") {
+  const apiKey = process.env.API_EXCHANGE_RATE_KEY;
+  const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency.toString().toUpperCase()}`;
+  return fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data.result !== "success") {
+        throw new Error("Error fetching exchange rates: " + data['error-type']);
+      } else {
+        const rate = data.conversion_rates[toCurrency.toString().toUpperCase()];
+        if (!rate) {
+          throw new Error("Invalid target currency.");
+        }
+        const convertedValue = value * rate;
+        return `${value} ${fromCurrency.toString().toUpperCase()} is equal to ${convertedValue} ${toCurrency.toString().toUpperCase()}.`;
+      }
+    })
+    .catch(error => {
+      return "Error converting currency: " + error.message;
+    });
+}
+
+async function getRadioStationsByCountry(country = "Portugal") {
+  try {
+    const response = await fetch(`https://de1.api.radio-browser.info/json/stations/bycountry/${encodeURIComponent(country)}`);
+    const data = await response.json();
+    if (!data || data.length === 0) {
+      return `No radio stations found for ${country}.`;
+    }
+    const stationsList = data.slice(0, 10).map(station => station.name).join('\n');
+    return `Here are some radio stations in ${country}:\n${stationsList}`;
+  } catch (error) {
+    return "Error fetching radio stations: " + error.message;
+  }
+}
+
+async function getYouTubePlaylist(channelId) {
+  try {
+    const apiKey = process.env.API_YOUTUBE_KEY;
+    const url = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${channelId}&key=${apiKey}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!data.items || data.items.length === 0) {
+      return `No playlists found for channel ID ${channelId}.`;
+    }
+    const playlistsList = data.items.map(playlist => playlist.snippet.title).join('\n');
+    return `Here are some playlists from the channel:\n${playlistsList}`;
+  } catch (error) {
+    return "Error fetching YouTube playlists: " + error.message;
+  }
+}
+
+function getInspiredBy() {
+  const inspirations = [
+    "The chatbot is inspired by the idea of creating a versatile and interactive assistant that can provide information, answer questions, and engage in conversations on a wide range of topics.",
+    "It draws inspiration from the concept of a digital companion that can assist users in their daily lives, offering support, entertainment, and knowledge at their fingertips.",
+    "The chatbot is also influenced by the advancements in natural language processing and artificial intelligence, aiming to leverage these technologies to create a more human-like and responsive experience for users."
+  ];
+  return inspirations[Math.floor(Math.random() * inspirations.length)];
+}
+
+function getMotivation() {
+  const motivations = [
+    "The motivation behind this chatbot is to provide users with a convenient and accessible way to obtain information, seek assistance, and engage in meaningful conversations without the need for human intervention.",
+    "The chatbot aims to enhance user experience by offering quick and accurate responses, making it easier for individuals to find answers to their questions and access resources on various topics.",
+    "The development of this chatbot is driven by the desire to create a tool that can help users save time, increase productivity, and provide a source of entertainment and companionship in the digital age."
+  ];
+  return motivations[Math.floor(Math.random() * motivations.length)];
+}
+
+export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYouTubePlaylist };

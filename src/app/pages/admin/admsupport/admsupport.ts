@@ -84,6 +84,14 @@ export class Admsupport implements OnInit, OnDestroy {
     this.loadInitialChatbot();
   }
 
+  endInteraction() {
+    if (this.loading && this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+    this.loading = false;
+  }
+
   async refreshMessageStream() {
     // resend last user message if present
     const lastUser = [...this.messages].reverse().find(m => m.role === 'user');
@@ -95,6 +103,11 @@ export class Admsupport implements OnInit, OnDestroy {
 
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
+
+    // if(this.userInput.trim() === '$bye') {
+    //   this.clearMessage();
+    //   return;
+    // }
 
     const userId = this.id++;
     
@@ -147,6 +160,10 @@ export class Admsupport implements OnInit, OnDestroy {
     } finally {
       this.loading = false;
       this.abortController = null;
+
+      if(this.userInput.trim() === '$bye' || this.userInput.trim() === '!bye') {
+        this.endInteraction();
+      }
     }
   }
 }

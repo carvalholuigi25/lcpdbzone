@@ -99,6 +99,91 @@
       "id": 20,
       "cmd": "calcage",
       "description": "Calculates age based on birth year. (example: !calcage 1990 or $calcage 1990)"
+    },
+    {
+      "id": 21,
+      "cmd": "countdown",
+      "description": "Counts down to a specific date. (example: !countdown 2024-12-31 or $countdown 2024-12-31)"
+    },
+    {
+      "id": 22,
+      "cmd": "countup",
+      "description": "Counts up from a specific date. (example: !countup 2020-01-01 or $countup 2020-01-01)"
+    },
+    {
+      "id": 23,
+      "cmd": "convert",
+      "description": "Converts units of measurement. (example: !convert 100 cm to inches or $convert 100 cm to inches)"
+    },
+    {
+      "id": 24,
+      "cmd": "inspiredby",
+      "description": "Provides a random source of inspiration."
+    },
+    {
+      "id": 25,
+      "cmd": "motivation",
+      "description": "Provides a random motivational message."
+    },
+    {
+      "id": 26,
+      "cmd": "radiostations",
+      "description": "Provides a list of radio stations by country. (example: !radiostations zone:USA or $radiostations zone:USA)"
+    },
+    {
+      "id": 27,
+      "cmd": "youtubeplaylist",
+      "description": "Provides a YouTube playlist based on a topic. (example: !youtubeplaylist topic:lofi or $youtubeplaylist topic:lofi)"
+    },
+    {
+      "id": 28,
+      "cmd": "convertpressure",
+      "description": "Converts pressure units. (example: !convertpressure 1000 hPa to psi or $convertpressure 1000 hPa to psi)"
+    },
+    {
+      "id": 29,
+      "cmd": "convertspeed",
+      "description": "Converts speed units. (example: !convertspeed 100 km/h to mph or $convertspeed 100 km/h to mph)"
+    },
+    {
+      "id": 30,
+      "cmd": "convertenergy",
+      "description": "Converts energy units. (example: !convertenergy 1000 J to kcal or $convertenergy 1000 J to kcal)"
+    },
+    {
+      "id": 31,
+      "cmd": "convertvolume",
+      "description": "Converts volume units. (example: !convertvolume 1 liter to gallons or $convertvolume 1 liter to gallons)"
+    },
+    {
+      "id": 32,
+      "cmd": "convertlength",
+      "description": "Converts length units. (example: !convertlength 100 meters to feet or $convertlength 100 meters to feet)"
+    },
+    {
+      "id": 33,
+      "cmd": "convertweight",
+      "description": "Converts weight units. (example: !convertweight 70 kg to pounds or $convertweight 70 kg to pounds)"
+    },
+    {
+      "id": 34,
+      "cmd": "convertdatasize",
+      "description": "Converts data size units. (example: !convertdatasize 1024 MB to GB or $convertdatasize 1024 MB to GB)"
+    },
+    {
+      "id": 35,
+      "cmd": "converttemperature",
+      "description": "Converts temperature units. (example: !converttemperature 100 C to F or $converttemperature 100 C to F)"
+    },
+    {
+      "id": 36,
+      "cmd": "converttime",
+      "description": "Converts time units. (example: !converttime 3600 seconds to hours or $converttime 3600 seconds to hours)"
+    },
+    {
+      "id": 37,
+      "cmd": "convertcurrency",
+      "description": "Converts currency units. (example: !convertcurrency 100 USD to EUR or $convertcurrency 100 USD to EUR)"
     }
   ]
 }

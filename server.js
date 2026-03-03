@@ -72,7 +72,7 @@ app.post('/chat', async (req, res) => {
       } else if (msg == prefix+"timezone" || msg == prefixalt+"timezone") {
         objresp.messages = [{role: "assistant", content: "The current timezone is: " + f.getTimezone(), timestamp: dt}];
       } else if (msg == prefix+"help" || msg == prefixalt+"help") {
-        objresp.messages = [{role: "assistant", content: "HELP: With prefix (! or $), use this avaliable list of commands: \r\n\n" + f.getHelpCmds().map(x => `<b>${x.cmd}</b> - ${x.description}`).join("\r\n"), timestamp: dt}];
+        objresp.messages = [{role: "assistant", content: "HELP: With prefix (! or $), use this avaliable list of commands: \r\n\n" + f.getHelpCmds().map(x => `${x.id}. <b>${x.cmd}</b> - ${x.description}`).join("\r\n"), timestamp: dt}];
       } else if (msg == prefix+"listaimodels" || msg == prefixalt+"listaimodels") {
         objresp.messages = [{role: "assistant", content: "Here are the available models:\n" + f.getListModels(), timestamp: dt}];
       } else if (msg == prefix+"joke" || msg == prefixalt+"joke") {
@@ -99,6 +99,51 @@ app.post('/chat', async (req, res) => {
         const birthYearStr = msg.replace(prefix+"calcage ", "").replace(prefixalt+"calcage ", "").trim();
         const birthYear = parseInt(birthYearStr, 10);
         objresp.messages = [{role: "assistant", content: f.getCalcAgeResult(birthYear), timestamp: dt}];
+      } else if (msg == prefix+"countdown" || msg == prefixalt+"countdown" || msg.startsWith(prefix+"countdown to:") || msg.startsWith(prefixalt+"countdown to:")) {
+        const targetDateStr = msg.indexOf("countdown to:") > -1 ? msg.split("countdown to:")[1].trim() : null;
+        objresp.messages = [{role: "assistant", content: f.getCountdown(targetDateStr), timestamp: dt}];
+      } else if (msg == prefix+"countup" || msg == prefixalt+"countup" || msg.startsWith(prefix+"countup from:") || msg.startsWith(prefixalt+"countup from:")) {
+        const startDateStr = msg.indexOf("countup from:") > -1 ? msg.split("countup from:")[1].trim() : null;
+        objresp.messages = [{role: "assistant", content: f.getCountup(startDateStr), timestamp: dt}];
+      } else if (msg == prefix+"convertdatasize" || msg == prefixalt+"convertdatasize" || msg.startsWith(prefix+"convertdatasize ") || msg.startsWith(prefixalt+"convertdatasize ")) {
+        const conversionQuery = msg.replace(prefix+"convertdatasize ", "").replace(prefixalt+"convertdatasize ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getDataSizeConversion(conversionQuery), timestamp: dt}];
+      } else if (msg == prefix+"converttemp" || msg == prefixalt+"converttemp" || msg.startsWith(prefix+"converttemp ") || msg.startsWith(prefixalt+"converttemp ")) {
+        const tempQuery = msg.replace(prefix+"converttemp ", "").replace(prefixalt+"converttemp ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getTemperatureConversion(tempQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertlength" || msg == prefixalt+"convertlength" || msg.startsWith(prefix+"convertlength ") || msg.startsWith(prefixalt+"convertlength ")) {
+        const lengthQuery = msg.replace(prefix+"convertlength ", "").replace(prefixalt+"convertlength ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getLengthConversion(lengthQuery), timestamp: dt}];
+      } else if (msg == prefix+"converttime" || msg == prefixalt+"converttime" || msg.startsWith(prefix+"converttime ") || msg.startsWith(prefixalt+"converttime ")) {
+        const timeQuery = msg.replace(prefix+"converttime ", "").replace(prefixalt+"converttime ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getTimeConversion(timeQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertweight" || msg == prefixalt+"convertweight" || msg.startsWith(prefix+"convertweight ") || msg.startsWith(prefixalt+"convertweight ")) {
+        const weightQuery = msg.replace(prefix+"convertweight ", "").replace(prefixalt+"convertweight ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getWeightConversion(weightQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertcurrency" || msg == prefixalt+"convertcurrency" || msg.startsWith(prefix+"convertcurrency ") || msg.startsWith(prefixalt+"convertcurrency ")) {
+        const currencyQuery = msg.replace(prefix+"convertcurrency ", "").replace(prefixalt+"convertcurrency ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getCurrencyConversion(currencyQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertvolume" || msg == prefixalt+"convertvolume" || msg.startsWith(prefix+"convertvolume ") || msg.startsWith(prefixalt+"convertvolume ")) {
+        const volumeQuery = msg.replace(prefix+"convertvolume ", "").replace(prefixalt+"convertvolume ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getVolumeConversion(volumeQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertpressure" || msg == prefixalt+"convertpressure" || msg.startsWith(prefix+"convertpressure ") || msg.startsWith(prefixalt+"convertpressure ")) {
+        const pressureQuery = msg.replace(prefix+"convertpressure ", "").replace(prefixalt+"convertpressure ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getPressureConversion(pressureQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertspeed" || msg == prefixalt+"convertspeed" || msg.startsWith(prefix+"convertspeed ") || msg.startsWith(prefixalt+"convertspeed ")) {
+        const speedQuery = msg.replace(prefix+"convertspeed ", "").replace(prefixalt+"convertspeed ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getSpeedConversion(speedQuery), timestamp: dt}];
+      } else if (msg == prefix+"convertenergy" || msg == prefixalt+"convertenergy" || msg.startsWith(prefix+"convertenergy ") || msg.startsWith(prefixalt+"convertenergy ")) {
+        const energyQuery = msg.replace(prefix+"convertenergy ", "").replace(prefixalt+"convertenergy ", "").trim();
+        objresp.messages = [{role: "assistant", content: f.getEnergyConversion(energyQuery), timestamp: dt}];
+      } else if (msg == prefix+"radio" || msg == prefixalt+"radio") {
+        objresp.messages = [{role: "assistant", content: await f.getRadioStationsByCountry(), timestamp: dt}];
+      } else if (msg == prefix+"youtube" || msg == prefixalt+"youtube" || msg.startsWith(prefix+"youtube playlist:") || msg.startsWith(prefixalt+"youtube playlist:")) {
+        const playlistQuery = msg.replace(prefix+"youtube playlist:", "").replace(prefixalt+"youtube playlist:", "").trim();
+        objresp.messages = [{role: "assistant", content: await f.getYouTubePlaylist(playlistQuery), timestamp: dt}];
+      } else if (msg == prefix+"inspiredby" || msg == prefixalt+"inspiredby") {
+        objresp.messages = [{role: "assistant", content: f.getInspiredBy(), timestamp: dt}];
+      } else if (msg == prefix+"motivation" || msg == prefixalt+"motivation") {
+        objresp.messages = [{role: "assistant", content: f.getMotivation(), timestamp: dt}];
       } else if (msg == prefix+"bye" || msg == prefixalt+"bye") {
         objresp.messages = [{role: "assistant", content: "Goodbye! Have a great day!", timestamp: dt}];
       } else {
