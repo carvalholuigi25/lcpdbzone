@@ -261,6 +261,15 @@ function getCalcAgeResult(birthYear) {
   }
 }
 
+function roundNum(num, dec = 2) {
+  let formatted = new Intl.NumberFormat('pt-PT', {
+      minimumFractionDigits: dec,
+      maximumFractionDigits: dec
+  }).format(num);
+  return parseFloat(formatted);
+  // return +(Math.round(num + ('e+' + dec)) + ('e-' + dec));
+}
+
 function getCountdownResult(targetDate) {
   try {
     const now = new Date();
@@ -313,7 +322,28 @@ function getDataSizeConversion(size, fromUnit, toUnit) {
     return "Invalid units. Please use B, KB, MB, GB, or TB.";
   }
   const convertedSize = size * Math.pow(1024, fromIndex - toIndex);
-  return `${size} ${fromUnit.toString().toUpperCase()} is equal to ${convertedSize} ${toUnit.toString().toUpperCase()}.`;
+  return `${size} ${fromUnit.toString().toUpperCase()} is equal to ${convertedSize} (approx: ${roundNum(convertedSize, 2)}) ${toUnit.toString().toUpperCase()}.`;
+}
+
+function getTimeConversion(value, fromUnit, toUnit) {
+  const units = ['milisec', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
+  const fromIndex = units.indexOf(fromUnit.toString().toLowerCase());
+  const toIndex = units.indexOf(toUnit.toString().toLowerCase());
+  if (fromIndex === -1 || toIndex === -1) {
+    return "Invalid units. Please use milisec, sec, min, hour, day, week, month, or year.";
+  }
+  const conversionFactors = {
+    'milisec': [1, 0.001, 0.0000166667, 0.000000277778, 0.0000000115741, 0.00000000165344, 0.000000000380517, 0.0000000000317098],
+    'sec': [1000, 1, 0.0166667, 0.000277778, 0.0000115741, 0.00000165344, 0.000000380517, 0.0000000317098],
+    'min': [60000, 60, 1, 0.0166667, 0.000694444, 0.000115741, 0.0000267379, 0.00000222817],
+    'hour': [3600000, 3600, 60, 1, 0.0416667, 0.00694444, 0.00173611, 0.00014493],
+    'day': [86400000, 86400, 1440, 24, 1, 0.166667, 0.0416667, 0.00396825],
+    'week': [604800000, 604800, 10080, 168, 7, 1, 0.25, 0.0191781],
+    'month': [2628000000, 2628000, 43800, 730, 30.4167, 4, 1, 0.0808081],
+    'year': [31536000000, 31536000, 525600, 8760, 365.25, 52, 12, 1]
+  };
+  const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
+  return `${value} ${fromUnit.toString().toLowerCase()} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit.toString().toLowerCase()}.`;
 }
 
 function getTemperatureConversion(value, fromUnit, toUnit) {
@@ -335,7 +365,7 @@ function getTemperatureConversion(value, fromUnit, toUnit) {
   } else {
     return "Invalid units. Please use C, F, or K.";
   }
-  return `${value}°${from} is equal to ${convertedValue}°${to}.`;
+  return `${value}°${from} is equal to ${convertedValue}°${to} (approx: ${roundNum(convertedValue, 2)}).`;
 }
 
 function getLengthConversion(value, fromUnit, toUnit) {
@@ -352,7 +382,7 @@ function getLengthConversion(value, fromUnit, toUnit) {
     'ft': [0.3048, 0.0003048, 0.000189394, 1]
   };
   const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
-  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+  return `${value} ${fromUnit} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit}.`;
 }
 
 function getWeightConversion(value, fromUnit, toUnit) {
@@ -369,7 +399,7 @@ function getWeightConversion(value, fromUnit, toUnit) {
     'oz': [28.3495, 0.0283495, 0.0625, 1]
   };
   const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
-  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+  return `${value} ${fromUnit} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit}.`;
 }
 
 function getSpeedConversion(value, fromUnit, toUnit) {
@@ -385,7 +415,7 @@ function getSpeedConversion(value, fromUnit, toUnit) {
     'mph': [0.44704, 1.60934, 1]
   };
   const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
-  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+  return `${value} ${fromUnit} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit}.`;
 }
 
 function getPressureConversion(value, fromUnit, toUnit) {
@@ -402,7 +432,7 @@ function getPressureConversion(value, fromUnit, toUnit) {
     'psi': [6894.76, 6.89476, 0.0689476, 1]
   };
   const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
-  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+  return `${value} ${fromUnit} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit}.`;
 }
 
 function getVolumeConversion(value, fromUnit, toUnit) {
@@ -419,7 +449,7 @@ function getVolumeConversion(value, fromUnit, toUnit) {
     'cup': [0.236588, 236.588, 0.0625, 1]
   };
   const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
-  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+  return `${value} ${fromUnit} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit}.`;
 }
 
 function getEnergyConversion(value, fromUnit, toUnit) { 
@@ -436,7 +466,7 @@ function getEnergyConversion(value, fromUnit, toUnit) {
     'kcal': [4184, 4.184, 1000, 1]
   };
   const convertedValue = value * conversionFactors[fromUnit.toString().toLowerCase()][toIndex];
-  return `${value} ${fromUnit} is equal to ${convertedValue} ${toUnit}.`;
+  return `${value} ${fromUnit} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toUnit}.`;
 }
 
 async function getCurrencyConversion(value = 1, fromCurrency = "EUR", toCurrency = "USD") {
@@ -453,7 +483,7 @@ async function getCurrencyConversion(value = 1, fromCurrency = "EUR", toCurrency
           throw new Error("Invalid target currency.");
         }
         const convertedValue = value * rate;
-        return `${value} ${fromCurrency.toString().toUpperCase()} is equal to ${convertedValue} ${toCurrency.toString().toUpperCase()}.`;
+        return `${value} ${fromCurrency.toString().toUpperCase()} is equal to ${convertedValue} (approx: ${roundNum(convertedValue, 2)}) ${toCurrency.toString().toUpperCase()}.`;
       }
     })
     .catch(error => {
@@ -509,4 +539,4 @@ function getMotivation() {
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
 
-export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYouTubePlaylist };
+export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYouTubePlaylist };

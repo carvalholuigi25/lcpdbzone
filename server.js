@@ -87,112 +87,102 @@ app.post('/chat', async (req, res) => {
       calc: a => f.getCalculatorResult(a),
       calcage: a => f.getCalcAgeResult(parseInt(a, 10)),
       countdown: a => {
-        const match = a.match(/^to:(.*)/);
-        const date = match ? match[1].trim() : null;
+        const matchto = a.match(/^to:(.*)/);
+        const date = matchto ? matchto[1].trim() : 1;
         return f.getCountdownResult(date);
       },
       countup: a => {
-        const match = a.match(/^from:(.*)/);
-        const date = match ? match[1].trim() : null;
+        const matchfrom = a.match(/^from:(.*)/);
+        const date = matchfrom ? matchfrom[1].trim() : 1;
         return f.getCountupResult(date);
       },
       convertdatasize: a => {
-        const matchsize = a.match(/^size:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const size = matchsize ? matchsize[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "MB";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "GB";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const size = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "MB";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "GB";
+
         console.log("Converting data size:", { a, unit, tounit });
         return f.getDataSizeConversion(size, unit, tounit);
       },
       converttemp: a => {
-        const matchtemp = a.match(/^temp:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const temp = matchtemp ? matchtemp[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "C";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "F";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const temp = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "C";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "F";
+
         console.log("Converting temperature:", { a, unit, tounit });
         return f.getTemperatureConversion(temp, unit, tounit);
       },
       convertlength: a => {
-        const matchlen = a.match(/^length:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const length = matchlen ? matchlen[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "m";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "ft";
+       const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const length = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "m";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "ft";
+
         console.log("Converting length:", { a, unit, tounit });
         return f.getLengthConversion(length, unit, tounit);
       },
       converttime: a => {
-        const matchtime = a.match(/^time:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const time = matchtime ? matchtime[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "s";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "min";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const time = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "sec";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "min";
+
         console.log("Converting time:", { a, unit, tounit });
         return f.getTimeConversion(time, unit, tounit);
       },
       convertweight: a => {
-        const matchweight = a.match(/^weight:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const weight = matchweight ? matchweight[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "kg";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "lb";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const weight = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "kg";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "lb";
+
         console.log("Converting weight:", { a, unit, tounit });
         return f.getWeightConversion(weight, unit, tounit);
       },
       convertcurrency: a => {
-        const matchamount = a.match(/^amount:(.*)/);
-        const matchfrom = a.match(/^from:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const amount = matchamount ? matchamount[1].trim().split(/\s+/)[0] : null;
-        const from = matchfrom ? matchfrom[1].trim().split(/\s+/)[0] : "USD";
-        const to = matchto ? matchto[1].trim().split(/\s+/)[0] : "EUR";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const amount = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const from = matchvalue ? matchvalue[1].split(":")[1]: "USD";
+        const to = matchvalue ? matchvalue[2].split(":")[1] : "EUR";
+
         console.log("Converting currency:", { a, amount, from, to });
         return f.getCurrencyConversion(amount, from, to);
       },
       convertvolume: a => {
-        const matchvolume = a.match(/^volume:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const volume = matchvolume ? matchvolume[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "L";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "mL";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const volume = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "L";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "mL";
+
         console.log("Converting volume:", { a, unit, tounit });
         return f.getVolumeConversion(volume, unit, tounit);
       },
       convertpressure: a => {
-        const matchpressure = a.match(/^pressure:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const pressure = matchpressure ? matchpressure[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "Pa";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "atm";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const pressure = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "Pa";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "atm";
+
         console.log("Converting pressure:", { a, unit, tounit });
         return f.getPressureConversion(pressure, unit, tounit);
       },
       convertspeed: a => {
-        const matchspeed = a.match(/^speed:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const speed = matchspeed ? matchspeed[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "km/h";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "mph";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const speed = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "km/h";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "mph";
+
         console.log("Converting speed:", { a, unit, tounit });
         return f.getSpeedConversion(speed, unit, tounit);
       },
       convertenergy: a => {
-        const matchenergy = a.match(/^energy:(.*)/);
-        const match = a.match(/^unit:(.*)/);
-        const matchto = a.match(/^to:(.*)/);
-        const energy = matchenergy ? matchenergy[1].trim().split(/\s+/)[0] : null;
-        const unit = match ? match[1].trim().split(/\s+/)[0] : "J";
-        const tounit = matchto ? matchto[1].trim().split(/\s+/)[0] : "kWh";
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const energy = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1]: "J";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "kWh";
+
         console.log("Converting energy:", { a, unit, tounit });
         return f.getEnergyConversion(energy, unit, tounit);
       },

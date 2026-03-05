@@ -113,7 +113,7 @@
     {
       "id": 23,
       "cmd": "convert",
-      "description": "Converts units of measurement. (example: !convert 100 cm to inches or $convert 100 cm to inches)"
+      "description": "Converts units of measurement. (example: !convert value:100 unit:meters to:feet or $convert value:100 unit:meters to:feet)"
     },
     {
       "id": 24,
@@ -138,52 +138,52 @@
     {
       "id": 28,
       "cmd": "convertpressure",
-      "description": "Converts pressure units. (example: !convertpressure 1000 hPa to psi or $convertpressure 1000 hPa to psi)"
+      "description": "Converts pressure units. (example: !convertpressure value:1000 unit:hPa to:psi or $convertpressure value:1000 unit:hPa to:psi)"
     },
     {
       "id": 29,
       "cmd": "convertspeed",
-      "description": "Converts speed units. (example: !convertspeed 100 km/h to mph or $convertspeed 100 km/h to mph)"
+      "description": "Converts speed units. (example: !convertspeed value:1 unit:km/h to:mph or $convertspeed value:1 unit:km/h to:mph)"
     },
     {
       "id": 30,
       "cmd": "convertenergy",
-      "description": "Converts energy units. (example: !convertenergy 1000 J to kcal or $convertenergy 1000 J to kcal)"
+      "description": "Converts energy units. (example: !convertenergy value:1000 unit:J to:kcal or $convertenergy value:1000 unit:J to:kcal)"
     },
     {
       "id": 31,
       "cmd": "convertvolume",
-      "description": "Converts volume units. (example: !convertvolume 1 liter to gallons or $convertvolume 1 liter to gallons)"
+      "description": "Converts volume units. (example: !convertvolume value:1 unit:liter to:gallons or $convertvolume value:1 unit:liter to:gallons)"
     },
     {
       "id": 32,
       "cmd": "convertlength",
-      "description": "Converts length units. (example: !convertlength 100 meters to feet or $convertlength 100 meters to feet)"
+      "description": "Converts length units. (example: !convertlength value:1 unit:meters to:feet or $convertlength value:1 unit:meters to:feet)"
     },
     {
       "id": 33,
       "cmd": "convertweight",
-      "description": "Converts weight units. (example: !convertweight 70 kg to pounds or $convertweight 70 kg to pounds)"
+      "description": "Converts weight units. (example: !convertweight value:70 unit:kg to:pounds or $convertweight value:70 unit:kg to:pounds)"
     },
     {
       "id": 34,
       "cmd": "convertdatasize",
-      "description": "Converts data size units. (example: !convertdatasize 1024 MB to GB or $convertdatasize 1024 MB to GB)"
+      "description": "Converts data size units. (example: !convertdatasize value:1024 unit:MB to:GB or $convertdatasize value:1024 unit:MB to:GB)"
     },
     {
       "id": 35,
       "cmd": "converttemperature",
-      "description": "Converts temperature units. (example: !converttemperature 100 C to F or $converttemperature 100 C to F)"
+      "description": "Converts temperature units. (example: !converttemperature value:1 unit:C to:F or $converttemperature value:1 unit:C to:F)"
     },
     {
       "id": 36,
       "cmd": "converttime",
-      "description": "Converts time units. (example: !converttime 3600 seconds to hours or $converttime 3600 seconds to hours)"
+      "description": "Converts time units. (example: !converttime value:3600 unit:seconds to:hours or $converttime value:3600 unit:seconds to:hours)"
     },
     {
       "id": 37,
       "cmd": "convertcurrency",
-      "description": "Converts currency units. (example: !convertcurrency 100 USD to EUR or $convertcurrency 100 USD to EUR)"
+      "description": "Converts currency units. (example: !convertcurrency value:1 unit:USD to:EUR or $convertcurrency value:1 unit:USD to:EUR)"
     }
   ]
 }
