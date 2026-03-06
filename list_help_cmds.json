@@ -184,6 +184,11 @@
       "id": 37,
       "cmd": "convertcurrency",
       "description": "Converts currency units. (example: !convertcurrency value:1 unit:USD to:EUR or $convertcurrency value:1 unit:USD to:EUR)"
+    },
+    {
+      "id": 38,
+      "cmd": "colorlist",
+      "description": "Provides a list of colors with their hexadecimal values."
     }
   ]
 }

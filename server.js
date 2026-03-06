@@ -188,9 +188,11 @@ app.post('/chat', async (req, res) => {
       },
       radio: async () => await f.getRadioStationsByCountry(),
       youtube: async a => {
-        const m = a.match(/^playlist:(.*)/);
-        return await f.getYouTubePlaylist(m ? m[1].trim() : "");
+        const m = a.match(/playlistid:([\w-]+)/gim);
+        const playlistId = m ? m[0].split(":")[1] : "";
+        return await f.getYouTubePlaylist(playlistId);
       },
+      colorlist: () => f.getColorListHex(),
       inspiredby: () => f.getInspiredBy(),
       motivation: () => f.getMotivation(),
       bye: () => "Goodbye! Have a great day!",

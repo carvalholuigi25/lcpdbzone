@@ -262,11 +262,12 @@ function getCalcAgeResult(birthYear) {
 }
 
 function roundNum(num, dec = 2) {
-  let formatted = new Intl.NumberFormat('pt-PT', {
-      minimumFractionDigits: dec,
-      maximumFractionDigits: dec
-  }).format(num);
-  return parseFloat(formatted);
+  return parseFloat(num.toFixed(dec));
+  // let formatted = new Intl.NumberFormat('pt-PT', {
+  //     minimumFractionDigits: dec,
+  //     maximumFractionDigits: dec
+  // }).format(num);
+  // return parseFloat(formatted);
   // return +(Math.round(num + ('e+' + dec)) + ('e-' + dec));
 }
 
@@ -505,20 +506,49 @@ async function getRadioStationsByCountry(country = "Portugal") {
   }
 }
 
-async function getYouTubePlaylist(channelId) {
+async function getYouTubePlaylist(playlistId = "PLBCF2DAC6FFB574DE") {
   try {
     const apiKey = process.env.API_YOUTUBE_KEY;
-    const url = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${channelId}&key=${apiKey}`;
-    const response = await fetch(url);
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,id&playlistId=${playlistId}&maxResults=5&key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      }
+    });
     const data = await response.json();
+    console.log("YouTube API response:", data);
     if (!data.items || data.items.length === 0) {
-      return `No playlists found for channel ID ${channelId}.`;
+      return `No playlists found for playlist ID ${playlistId}.`;
     }
-    const playlistsList = data.items.map(playlist => playlist.snippet.title).join('\n');
-    return `Here are some playlists from the channel:\n${playlistsList}`;
+    const videosList = data.items.map(item => item.snippet.title).join('\n');
+    return `Here are some videos from the playlist:\n${videosList}`;
   } catch (error) {
     return "Error fetching YouTube playlists: " + error.message;
   }
+}
+
+function getColorListHex() {
+  const colors = [
+    { name: "Red", hex: "#FF0000" },
+    { name: "Green", hex: "#00FF00" },
+    { name: "Blue", hex: "#0000FF" },
+    { name: "Yellow", hex: "#FFFF00" },
+    { name: "Cyan", hex: "#00FFFF" },
+    { name: "Magenta", hex: "#FF00FF" },
+    { name: "Black", hex: "#000000" },
+    { name: "White", hex: "#FFFFFF" },
+    { name: "Gray", hex: "#808080" },
+    { name: "Orange", hex: "#FFA500" },
+    { name: "Purple", hex: "#800080" },
+    { name: "Pink", hex: "#FFC0CB" },
+    { name: "Brown", hex: "#A52A2A" },
+    { name: "Lime", hex: "#00FF00" },
+    { name: "Navy", hex: "#000080" },
+  ];
+
+  return colors.map(c => `${c.name} - ${c.hex}`).join('\n');
 }
 
 function getInspiredBy() {
@@ -539,4 +569,4 @@ function getMotivation() {
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
 
-export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYouTubePlaylist };
+export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYouTubePlaylist, getColorListHex };
