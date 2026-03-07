@@ -1,4 +1,5 @@
-import fs from 'fs';
+import fs, { access } from 'fs';
+import axios from 'axios';
 
 function setHouseNumZero(num = 1) {
   return num < 10 ? '0' + parseInt(num) : parseInt(num);
@@ -506,26 +507,39 @@ async function getRadioStationsByCountry(country = "Portugal") {
   }
 }
 
-async function getYouTubePlaylist(playlistId = "PLBCF2DAC6FFB574DE") {
+async function getYoutubeSearch(query = "angular") {
   try {
     const apiKey = process.env.API_YOUTUBE_KEY;
-    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,id&playlistId=${playlistId}&maxResults=5&key=${apiKey}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+    const response = await axios.get(
+      'https://www.googleapis.com/youtube/v3/search',
+      {
+        params: {
+          part: 'id,snippet',
+          q: query,
+          maxResults: 10,
+          type: 'video',
+          key: apiKey
+        }
+      },
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Origin': 'http://localhost:3000',
+          'access-control-allow-origin': '*'
+        }
       }
-    });
-    const data = await response.json();
-    console.log("YouTube API response:", data);
+    );
+
+    const data = response.data;
+
     if (!data.items || data.items.length === 0) {
-      return `No playlists found for playlist ID ${playlistId}.`;
+      return `No videos found for the search query "${query}".`;
     }
-    const videosList = data.items.map(item => item.snippet.title).join('\n');
-    return `Here are some videos from the playlist:\n${videosList}`;
+    const videosList = data.items.map(item => `<a href="https://www.youtube.com/watch?v=${item.id.videoId}" target="_blank">${item.snippet.title}</a>`).join('\n');
+    return `Here are some videos from the search results:\n${videosList}`;
   } catch (error) {
-    return "Error fetching YouTube playlists: " + error.message;
+    return "Error fetching YouTube videos: " + error.message;
   }
 }
 
@@ -569,4 +583,4 @@ function getMotivation() {
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
 
-export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYouTubePlaylist, getColorListHex };
+export { getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, detectLocation, getWeather, getListGames, getListMovies, getListAnimes, getListPodcasts, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex };

@@ -187,10 +187,10 @@ app.post('/chat', async (req, res) => {
         return f.getEnergyConversion(energy, unit, tounit);
       },
       radio: async () => await f.getRadioStationsByCountry(),
-      youtube: async a => {
-        const m = a.match(/playlistid:([\w-]+)/gim);
-        const playlistId = m ? m[0].split(":")[1] : "";
-        return await f.getYouTubePlaylist(playlistId);
+      youtube: async (a) => {
+        const queryMatch = a.match(/^search:(\w+)/gim);
+        const query = queryMatch ? queryMatch[0].split(":")[1] : "angular";
+        return await f.getYoutubeSearch(query);
       },
       colorlist: () => f.getColorListHex(),
       inspiredby: () => f.getInspiredBy(),
