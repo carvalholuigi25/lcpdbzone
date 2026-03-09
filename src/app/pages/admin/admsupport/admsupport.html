@@ -43,6 +43,17 @@
                   <i class="bi bi-clock"></i>
                   <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>
                 </small>
+
+                @if(warningCount > 0 && msg.role == 'user' && msg.id == messages[messages.length - 1].id) {
+                  <div class="warning mt-2">
+                    <i class="bi bi-exclamation-triangle-fill" alt="Warning" title="Warning"></i>
+                    <span class="ms-2" title="Warning">{{warningCount}}/{{maxWarnings}}</span>
+
+                    @if(warningCount >= maxWarnings) {
+                      <span class="ms-4" title="Warning expire time">Expires at: {{dateTimeWarnExpire | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                    }
+                  </div>
+                }
               </div>
             }
           }
@@ -59,15 +70,16 @@
           <input
             [(ngModel)]="userInput"
             (keyup.enter)="sendMessageStream()"
+            [disabled]="warningCount >= maxWarnings"
             placeholder="Digite sua mensagem..."
           />
-          <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()">
+          <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()" [disabled]="warningCount >= maxWarnings">
             <i class="bi bi-arrow-clockwise" alt="Refresh"></i>
           </button>
-          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!messages.length">
+          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!messages.length || warningCount >= maxWarnings">
             <i class="bi bi-x-lg" alt="Clear"></i>
           </button>
-          <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput">
+          <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput || warningCount >= maxWarnings">
             <i class="bi bi-send" alt="Send"></i>
           </button>
         </div>

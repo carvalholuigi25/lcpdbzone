@@ -18,6 +18,7 @@
     "module": "preserve",
     "paths": {
       "@/*": ["src/*"],
+      "@json/*": ["src/assets/json/*"],
       "@directives/*": ["src/app/directives/*"],
       "@guards/*": ["src/app/guards/*"],
       "@components/*": ["src/app/components/*"],

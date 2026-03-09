@@ -27,8 +27,13 @@ export class Admsupport implements OnInit, OnDestroy {
   messages: Message[] = [];
   userInput = '';
   loading = false;
+  maxWarnings = 3;
+  warningCount = 0;
+  timeValMs = 1 * 60 * 1000;
+  dateTimeWarnExpire = new Date().getTime() + this.timeValMs; // 1 minutes from now
 
   private abortController: AbortController | null = null;
+  private mylocalStorage: Storage | null = null;
 
   constructor(
     private chatService: ChatService,
@@ -37,8 +42,10 @@ export class Admsupport implements OnInit, OnDestroy {
     @Inject(DOCUMENT) private document: Document
   ) {
     const localStorage = this.document.defaultView?.localStorage;
+    this.mylocalStorage = localStorage || null;
 
     this.isSupportChatEnabled = localStorage?.getItem("supportChatEnabled") === "true";
+    this.warningCount = localStorage?.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")!) : 0;
 
     if(localStorage) {
       localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
@@ -46,6 +53,7 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.removeWarningsWhenDTExpires();
     this.loadInitialChatbot();
   }
 
@@ -65,9 +73,34 @@ export class Admsupport implements OnInit, OnDestroy {
     }
   }
 
+  removeWarningsWhenDTExpires() {
+    setTimeout(() => {
+      if(this.warningCount >= this.maxWarnings) {
+        const warnExpireStored = localStorage?.getItem("dateTimeWarnExpire") ? parseInt(localStorage.getItem("dateTimeWarnExpire")!) : 0;
+    
+        if(new Date().getTime() >= warnExpireStored) {
+          if(localStorage?.getItem("warningCount")) {
+            localStorage.removeItem("warningCount");
+            localStorage.setItem("warningCount", "0");
+          }
+
+          if(localStorage?.getItem("dateTimeWarnExpire")) {
+            localStorage.removeItem("dateTimeWarnExpire");
+            localStorage.setItem("dateTimeWarnExpire", "");
+          }
+        }
+      }
+    }, 1000 * 60 * 1);
+  }
+
   loadInitialChatbot() {
     if(this.messages.length === 0 && this.userInput.trim() === '') {
-      this.userInput = '$welcome';
+      if(this.warningCount >= this.maxWarnings) {
+        this.userInput = '$chatclosed';
+      } else {
+        this.userInput = '$welcome';
+      }
+
       this.sendMessageStream();
     }
   }
@@ -101,13 +134,42 @@ export class Admsupport implements OnInit, OnDestroy {
     }
   }
 
+  async checkMessageProfanity() {
+    const profanityList = (await import('profanityfilters.json')).profanityFilters || [];
+    if(profanityList && profanityList.some(word => this.userInput.includes(word))) {
+      // this.userInput = '';
+      this.userInput = this.userInput.replace(new RegExp(profanityList.join('|'), 'gi'), '****');
+
+      if(this.warningCount <= this.maxWarnings) {
+        this.warningCount++;
+      }
+
+      if(new Date().getTime() >= this.dateTimeWarnExpire) {
+        this.warningCount = 0;
+        this.dateTimeWarnExpire = new Date().getTime() + this.timeValMs; // reset timer
+        alert("Warnings reset. Please avoid using inappropriate language.");
+      } else {
+        if(this.warningCount >= this.maxWarnings) {
+          alert("Chat closed due to inappropriate language. It will be reopened at " + new Date(this.dateTimeWarnExpire).toLocaleTimeString() + ".");
+        } else {
+          alert("Please avoid using inappropriate language. Warning " + this.warningCount + " of " + this.maxWarnings);
+        }
+      }
+
+      if(this.mylocalStorage) {
+        this.mylocalStorage.setItem("warningCount", ""+this.warningCount);
+
+        if(this.warningCount >= this.maxWarnings) {
+          this.mylocalStorage.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
+        }
+      }
+    }
+  }
+
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 
-    // if(this.userInput.trim() === '$bye') {
-    //   this.clearMessage();
-    //   return;
-    // }
+    await this.checkMessageProfanity();
 
     const userId = this.id++;
     

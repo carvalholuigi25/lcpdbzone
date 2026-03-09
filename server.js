@@ -3,6 +3,8 @@ import cors from 'cors';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import * as f from './functions.js';
+import fs from 'fs';
+import { LocalStorage } from 'node-localstorage';
 
 dotenv.config();
 
@@ -14,8 +16,14 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+const localStorage = new LocalStorage('./chatWarnings');
+
 app.post('/chat', async (req, res) => {
   try {
+    const maxwarn = 3; 
+    const warnExpireTime = 1 * 60 * 1000;
+    let warn = parseInt(localStorage.getItem("warningCount")) ?? 0; 
+
     const prefix = "!", prefixalt = "$";
     const { model, messages } = req.body;
     const dt = "" + new Date().toISOString();
@@ -195,10 +203,34 @@ app.post('/chat', async (req, res) => {
       colorlist: () => f.getColorListHex(),
       inspiredby: () => f.getInspiredBy(),
       motivation: () => f.getMotivation(),
+      chatclosed: () => {
+        warn = parseInt(localStorage.getItem("warningCount"));
+        return warn >= maxwarn ? `This chat session has been closed due to reached warning limit. The chat will reset in ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()} (in ${(warnExpireTime / 60000)} minutes). Please be respectful and avoid using inappropriate language. <button onclick="location.reload()" class="btn btn-primary btnref ms-1">Refresh</button>` : `Please refrain from using inappropriate language. (Warning ${warn} of ${maxwarn}).`;
+      },
       bye: () => "Goodbye! Have a great day!",
     };
 
+
+    const profanityList = (msg) => {
+      return fs.promises.readFile('./profanityfilters.json', 'utf-8')
+        .then((data) => JSON.parse(data).profanityFilters || [])
+        .then(filters => filters.some(word => msg.includes(word)))
+        .catch(err => {
+          console.error('Error reading profanity filters:', err);
+          return [];
+        });
+      // return fs.promises.readFile('./profanityfilters.json', 'utf-8')
+      //   .then(data => JSON.parse(data))
+      //   .catch(err => {
+      //     console.error('Error reading profanity filters:', err);
+      //     return [];
+      //   });
+    };
+
     if (!msg) {
+      warn = 0; // reset warnings on valid command
+      localStorage.setItem("warningCount", warn);
+
       objresp.messages = [
         {
           role: "assistant",
@@ -208,6 +240,9 @@ app.post('/chat', async (req, res) => {
       ];
     } else if (msg.startsWith(prefix) || msg.startsWith(prefixalt)) {
       if (cmd === "ai") {
+        warn = 0; // reset warnings on valid command
+        localStorage.setItem("warningCount", warn);
+
         const completion = await openai.chat.completions.create({
           model: objresp.model,
           messages,
@@ -222,9 +257,33 @@ app.post('/chat', async (req, res) => {
         res.end();
         return;
       } else if (handlers[cmd]) {
+        warn = 0; // reset warnings on valid command
+        localStorage.setItem("warningCount", warn);
+
         const result = await handlers[cmd](args);
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
+      } else if(profanityList(msg)) {
+        const warni = parseInt(warn + 1) <= maxwarn ? parseInt(warn + 1) : 0;
+        
+        localStorage.setItem("warningCount", ""+warni);
+
+        if(warni >= maxwarn) {
+          localStorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + warnExpireTime));
+        }
+
+        const resmsgwarn = (warni >= maxwarn ? `This chat session has been closed due to reached warning limit. The chat will reset in ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()} (in ${(warnExpireTime / 60000)} minutes). Please be respectful and avoid using inappropriate language. <button onclick="location.reload()" class="btn btn-primary btnref ms-1">Refresh</button>` : `Please refrain from using inappropriate language. (Warning ${warni} of ${maxwarn}).`);
+
+        objresp.messages = [
+          {
+            role: "assistant",
+            content: resmsgwarn,
+            timestamp: dt,
+          },
+        ];
       } else {
+        warn = 0; // reset warnings on valid command
+        localStorage.setItem("warningCount", warn);
+
         objresp.messages = [
           {
             role: "assistant",
@@ -234,12 +293,15 @@ app.post('/chat', async (req, res) => {
         ];
       }
     } else {
+      warn = 0; // reset warnings on valid command
+      localStorage.setItem("warningCount", warn);
+
       objresp.messages = [
-        {
-          role: "assistant",
-          content: "Please start your message with a command prefix (e.g., '! or $').",
-          timestamp: dt,
-        },
+          {
+            role: "assistant",
+            content: "Please start your message with a command prefix (e.g., '! or $').",
+            timestamp: dt,
+          },
       ];
     }
 
