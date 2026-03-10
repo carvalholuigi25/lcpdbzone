@@ -55,6 +55,18 @@ app.post('/chat', async (req, res) => {
       return { cmd: first || '', args: rest.join(' ').trim() };
     })();
 
+    const resetWarnings = () => {
+      if(localStorage.getItem("dateTimeWarnExpire") && new Date().getTime() >= localStorage.getItem("dateTimeWarnExpire")) {
+        warn = 0; // reset warnings on valid command
+        localStorage.setItem("warningCount", warn);
+        localStorage.setItem("dateTimeWarnExpire", "");
+      }
+    }
+    
+    const getProfMsgWarnList = (warni, maxwarn, warnExpireTime) => {
+      return (warni >= maxwarn ? `This chat session has been closed due to reached warning limit. The chat will reset in ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()} (in ${(warnExpireTime / 60000)} minute(s)). Please be respectful and avoid using inappropriate language. <button onclick="location.reload()" class="btn btn-primary btnref ms-1">Refresh</button>` : `Please refrain from using inappropriate language. (Warning ${warni} of ${maxwarn}).`);
+    }
+
     const handlers = {
       hello: () => "Hello world!",
       welcome: () => "Welcome to our chatbot! How can I assist you today?",
@@ -205,11 +217,10 @@ app.post('/chat', async (req, res) => {
       motivation: () => f.getMotivation(),
       chatclosed: () => {
         warn = parseInt(localStorage.getItem("warningCount"));
-        return warn >= maxwarn ? `This chat session has been closed due to reached warning limit. The chat will reset in ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()} (in ${(warnExpireTime / 60000)} minutes). Please be respectful and avoid using inappropriate language. <button onclick="location.reload()" class="btn btn-primary btnref ms-1">Refresh</button>` : `Please refrain from using inappropriate language. (Warning ${warn} of ${maxwarn}).`;
+        return getProfMsgWarnList(warn, maxwarn, warnExpireTime);
       },
       bye: () => "Goodbye! Have a great day!",
     };
-
 
     const profanityList = (msg) => {
       return fs.promises.readFile('./profanityfilters.json', 'utf-8')
@@ -228,8 +239,7 @@ app.post('/chat', async (req, res) => {
     };
 
     if (!msg) {
-      warn = 0; // reset warnings on valid command
-      localStorage.setItem("warningCount", warn);
+      resetWarnings();
 
       objresp.messages = [
         {
@@ -240,8 +250,7 @@ app.post('/chat', async (req, res) => {
       ];
     } else if (msg.startsWith(prefix) || msg.startsWith(prefixalt)) {
       if (cmd === "ai") {
-        warn = 0; // reset warnings on valid command
-        localStorage.setItem("warningCount", warn);
+        resetWarnings();
 
         const completion = await openai.chat.completions.create({
           model: objresp.model,
@@ -257,13 +266,12 @@ app.post('/chat', async (req, res) => {
         res.end();
         return;
       } else if (handlers[cmd]) {
-        warn = 0; // reset warnings on valid command
-        localStorage.setItem("warningCount", warn);
+        resetWarnings();
 
         const result = await handlers[cmd](args);
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
       } else if(profanityList(msg)) {
-        const warni = parseInt(warn + 1) <= maxwarn ? parseInt(warn + 1) : 0;
+        const warni = parseInt(warn+1) <= maxwarn ? parseInt(warn + 1) : parseInt(maxwarn);
         
         localStorage.setItem("warningCount", ""+warni);
 
@@ -271,7 +279,7 @@ app.post('/chat', async (req, res) => {
           localStorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + warnExpireTime));
         }
 
-        const resmsgwarn = (warni >= maxwarn ? `This chat session has been closed due to reached warning limit. The chat will reset in ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()} (in ${(warnExpireTime / 60000)} minutes). Please be respectful and avoid using inappropriate language. <button onclick="location.reload()" class="btn btn-primary btnref ms-1">Refresh</button>` : `Please refrain from using inappropriate language. (Warning ${warni} of ${maxwarn}).`);
+        const resmsgwarn = getProfMsgWarnList(warni, maxwarn, warnExpireTime);
 
         objresp.messages = [
           {
