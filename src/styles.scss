@@ -201,6 +201,99 @@ body {
     bottom: 0;
 }
 
+.chat {
+  display: flex;
+  flex-direction: column;
+  background: #343541;
+  color: white;
+  border-radius: calc(16px + 8px);
+  margin-top: 1rem;
+  margin-bottom: calc(1rem + 1rem);
+}
+
+.chat-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: inherit;
+  height: calc(100vh / 1.5);
+  max-height: 100vh;
+  border-radius: calc(16px + 8px);
+}
+
+.chatclosedcurtain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px) !important;
+  z-index: 0;
+  border-radius: calc(16px + 8px);
+}
+
+.mchatclosedmsg {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  max-height: 100vh;
+  max-width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+  .chatclosed {
+    $talign: center;
+    text-align: $talign;
+
+    .chatclosedicon {
+      font-size: clamp(3rem, 3.5vw, 4rem);
+      text-align: $talign;
+    }
+
+    .chatclosedtitle {
+      font-size: clamp(1rem, 1.5vw, 2rem);
+      margin: 15px auto;
+      text-align: $talign;
+    }
+
+    .chatclosedmsg {
+      text-align: justify;
+      line-height: 2rem;
+      margin: 15px auto;
+      text-align: $talign;
+    }
+  }
+}
+
+.closedchat {
+  .assistant, .user, .system {
+    filter: blur(10px);
+  }
+
+  .input-container {
+    z-index: -1;
+    filter: blur(10px);
+  }
+}
+
+.fmessage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  max-height: 100vh;
+  max-width: 100%;
+}
+
 @media all and (min-width: 1200px) {
     .admin { 
         padding: 6rem calc(12rem + 1rem);

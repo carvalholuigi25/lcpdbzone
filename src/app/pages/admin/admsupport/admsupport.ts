@@ -30,7 +30,7 @@ export class Admsupport implements OnInit, OnDestroy {
   maxWarnings = 3;
   warningCount = 0;
   timeValMs = 1 * 60 * 1000;
-  dateTimeWarnExpire = new Date().getTime() + this.timeValMs; // 1 minutes from now
+  dateTimeWarnExpire: any = new Date().getTime() + this.timeValMs; // 1 minutes from now
 
   private abortController: AbortController | null = null;
   private mylocalStorage: Storage | null = null;
@@ -45,10 +45,13 @@ export class Admsupport implements OnInit, OnDestroy {
     this.mylocalStorage = localStorage || null;
 
     this.isSupportChatEnabled = localStorage?.getItem("supportChatEnabled") === "true";
-    this.warningCount = localStorage?.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")!) : 0;
+    this.warningCount = localStorage?.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")!) : (parseInt(this.mylocalStorage?.getItem("warningCount")! ?? 0));
+    this.dateTimeWarnExpire = localStorage?.getItem("dateTimeWarnExpire") ? parseInt(localStorage.getItem("dateTimeWarnExpire")!) : (parseInt(this.mylocalStorage?.getItem("dateTimeWarnExpire")! ?? (new Date().getTime() + this.timeValMs)));
 
     if(localStorage) {
       localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+      // localStorage.setItem("warningCount", ""+this.warningCount);
+      // localStorage.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
     }
   }
 
@@ -73,24 +76,43 @@ export class Admsupport implements OnInit, OnDestroy {
     }
   }
 
+  getClosedChatMsg(warnExpireTime: any) {
+    return `<div class="fmessage chatclosed">
+      <i class="bi bi-chat-text chatclosedicon"></i>
+      <h2 class="chatclosedtitle">Chat is closed</h2>
+      <span class="chatclosedmsg">The chat is currently closed due to reached of max warnings (Reason: <b>inappropriate language behaviour</b>)! The chat will reactivate after ${new Date(warnExpireTime).toLocaleString()}!</span>
+      <div class="d-block mt-3">
+        <button class="btn btn-primary btnclose" onclick="location.reload()">Refresh</button>
+      </div>
+    </div>`;
+  }
+
   removeWarningsWhenDTExpires() {
     setTimeout(() => {
       if(this.warningCount >= this.maxWarnings) {
-        const warnExpireStored = localStorage?.getItem("dateTimeWarnExpire") ? parseInt(localStorage.getItem("dateTimeWarnExpire")!) : 0;
+        const warnExpireStored = this.dateTimeWarnExpire;
     
-        if(new Date().getTime() >= warnExpireStored) {
+        if(!isNaN(warnExpireStored) && new Date().getTime() >= warnExpireStored) {
+          if(this.mylocalStorage?.getItem("warningCount")) {
+            this.mylocalStorage?.removeItem("warningCount");
+          }
+
+          if(this.mylocalStorage?.getItem("dateTimeWarnExpire")) {
+            this.mylocalStorage?.removeItem("dateTimeWarnExpire");
+          }
+
           if(localStorage?.getItem("warningCount")) {
             localStorage.removeItem("warningCount");
-            localStorage.setItem("warningCount", "0");
           }
 
           if(localStorage?.getItem("dateTimeWarnExpire")) {
             localStorage.removeItem("dateTimeWarnExpire");
-            localStorage.setItem("dateTimeWarnExpire", "");
           }
+
+          location.reload();
         }
       }
-    }, 1000 * 60 * 1);
+    }, this.timeValMs);
   }
 
   loadInitialChatbot() {
@@ -144,7 +166,7 @@ export class Admsupport implements OnInit, OnDestroy {
         this.warningCount++;
       }
 
-      if(new Date().getTime() >= this.dateTimeWarnExpire) {
+      if(this.dateTimeWarnExpire && new Date().getTime() >= this.dateTimeWarnExpire) {
         this.warningCount = 0;
         this.dateTimeWarnExpire = new Date().getTime() + this.timeValMs; // reset timer
         alert("Warnings reset. Please avoid using inappropriate language.");
@@ -160,7 +182,7 @@ export class Admsupport implements OnInit, OnDestroy {
         this.mylocalStorage.setItem("warningCount", ""+this.warningCount);
 
         if(this.warningCount >= this.maxWarnings) {
-          this.mylocalStorage.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
+          this.mylocalStorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + this.timeValMs));
         }
       }
     }

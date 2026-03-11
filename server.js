@@ -57,14 +57,22 @@ app.post('/chat', async (req, res) => {
 
     const resetWarnings = () => {
       if(localStorage.getItem("dateTimeWarnExpire") && new Date().getTime() >= localStorage.getItem("dateTimeWarnExpire")) {
-        warn = 0; // reset warnings on valid command
+        warn = 0;
         localStorage.setItem("warningCount", warn);
-        localStorage.setItem("dateTimeWarnExpire", "");
+        localStorage.removeItem("dateTimeWarnExpire");
       }
+    }
+
+    const getClosedChatMsg = (warnExpireTime) => {
+      return `<div class="fmessage chatclosed">
+        <i class="bi bi-chat-text chatclosedicon"></i>
+        <h2 class="chatclosedtitle">Chat is closed</h2>
+        <span class="chatclosedmsg">The chat is currently closed due to reached of max warnings (Reason: <b>inappropriate language behaviour</b>)! The chat will reactivate after ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()}!</span>
+      </div>`;
     }
     
     const getProfMsgWarnList = (warni, maxwarn, warnExpireTime) => {
-      return (warni >= maxwarn ? `This chat session has been closed due to reached warning limit. The chat will reset in ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()} (in ${(warnExpireTime / 60000)} minute(s)). Please be respectful and avoid using inappropriate language. <button onclick="location.reload()" class="btn btn-primary btnref ms-1">Refresh</button>` : `Please refrain from using inappropriate language. (Warning ${warni} of ${maxwarn}).`);
+      return (warni >= maxwarn ? getClosedChatMsg(warnExpireTime) : `Please refrain from using inappropriate language. (Warning ${warni == 0 ? warni+1 : warni} of ${maxwarn}).`);
     }
 
     const handlers = {
@@ -216,7 +224,7 @@ app.post('/chat', async (req, res) => {
       inspiredby: () => f.getInspiredBy(),
       motivation: () => f.getMotivation(),
       chatclosed: () => {
-        warn = parseInt(localStorage.getItem("warningCount"));
+        warn = localStorage.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")) : 0;
         return getProfMsgWarnList(warn, maxwarn, warnExpireTime);
       },
       bye: () => "Goodbye! Have a great day!",
@@ -225,7 +233,7 @@ app.post('/chat', async (req, res) => {
     const profanityList = (msg) => {
       return fs.promises.readFile('./profanityfilters.json', 'utf-8')
         .then((data) => JSON.parse(data).profanityFilters || [])
-        .then(filters => filters.some(word => msg.includes(word)))
+        .then(filters => filters.some(word => word.toLowerCase() === msg.toLowerCase()))
         .catch(err => {
           console.error('Error reading profanity filters:', err);
           return [];
@@ -257,12 +265,15 @@ app.post('/chat', async (req, res) => {
           messages,
           stream: true,
         });
+
         res.setHeader("Content-Type", "text/event-stream");
         res.setHeader("Cache-Control", "no-cache");
         res.setHeader("Connection", "keep-alive");
+
         for await (const chunk of completion) {
           res.write(chunk.choices[0]?.delta?.content || "");
         }
+
         res.end();
         return;
       } else if (handlers[cmd]) {
@@ -271,7 +282,7 @@ app.post('/chat', async (req, res) => {
         const result = await handlers[cmd](args);
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
       } else if(profanityList(msg)) {
-        const warni = parseInt(warn+1) <= maxwarn ? parseInt(warn + 1) : parseInt(maxwarn);
+        const warni = parseInt(warn+1) <= maxwarn ? parseInt(warn + 1) : parseInt((maxwarn-maxwarn));
         
         localStorage.setItem("warningCount", ""+warni);
 
@@ -289,8 +300,7 @@ app.post('/chat', async (req, res) => {
           },
         ];
       } else {
-        warn = 0; // reset warnings on valid command
-        localStorage.setItem("warningCount", warn);
+        resetWarnings();
 
         objresp.messages = [
           {
@@ -301,15 +311,14 @@ app.post('/chat', async (req, res) => {
         ];
       }
     } else {
-      warn = 0; // reset warnings on valid command
-      localStorage.setItem("warningCount", warn);
+      resetWarnings();
 
       objresp.messages = [
-          {
-            role: "assistant",
-            content: "Please start your message with a command prefix (e.g., '! or $').",
-            timestamp: dt,
-          },
+        {
+          role: "assistant",
+          content: "Please start your message with a command prefix (e.g., '! or $').",
+          timestamp: dt,
+        },
       ];
     }
 
@@ -317,11 +326,12 @@ app.post('/chat', async (req, res) => {
     res.setHeader("Accept", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+
     for (const msgo of objresp.messages) {
       res.write(msgo.content || "");
     }
-    res.end();
 
+    res.end();
   } catch (error) {
     res.status(500).json({ error: "Erro ao gerar resposta " + error });
   }

@@ -14,74 +14,84 @@
     </button>
 
     @if(isSupportChatEnabled) {
-      <div class="chat-container mt-3">
-        <div class="messages">
-          @if(messages) {
-            @for(msg of messages; track msg.id) {
-              <div class="message animate__animated animate__fadeIn" [ngClass]="msg.role">
-                  @if(messages.length > 1) {
-                    @if(msg.role == 'user') {
-                      <div class="avatar user-avatar">
-                        <i class="bi bi-person-fill" alt="User" title="User"></i>
-                      </div>
-                      <span class="ms-1 hidden">You: </span>
-                    } @else if(msg.role == 'assistant') {
-                      <div class="avatar assistant-avatar">
-                        <i class="bi bi-robot" alt="Assistant" title="Assistant"></i>
-                      </div>
-                      <span class="ms-1 hidden">Assistant: </span>
-                    } @else {
-                      <div class="avatar user-system">
-                        <i class="bi bi-question-circle" alt="System" title="System"></i>
-                      </div>
-                      <span class="ms-1 hidden">System: </span>
-                    }
-                  }
+      <div [class]="'chat ' + (warningCount >= maxWarnings ? 'closedchat' : '')">
+        <div class="chat-container">
+          @if(warningCount >= maxWarnings) {
+            <div class="chatclosedcurtain"></div>
+          }
 
-                <div class="mt-0" [innerHTML]="msg.content | safeHtml"></div>
-                <small class="mt-3">
-                  <i class="bi bi-clock"></i>
-                  <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>
-                </small>
+          <div class="messages">
+            @if(messages) {
+              @if(warningCount >= maxWarnings) {
+                <div class="mchatclosedmsg" [innerHTML]="getClosedChatMsg(dateTimeWarnExpire) | safeHtml"></div>
+              } @else {
+                @for(msg of messages; track msg.id) {
+                  <div class="message animate__animated animate__fadeIn" [ngClass]="msg.role">
+                      @if(messages.length > 1) {
+                        @if(msg.role == 'user') {
+                          <div class="avatar user-avatar">
+                            <i class="bi bi-person-fill" alt="User" title="User"></i>
+                          </div>
+                          <span class="ms-1 hidden">You: </span>
+                        } @else if(msg.role == 'assistant') {
+                          <div class="avatar assistant-avatar">
+                            <i class="bi bi-robot" alt="Assistant" title="Assistant"></i>
+                          </div>
+                          <span class="ms-1 hidden">Assistant: </span>
+                        } @else {
+                          <div class="avatar user-system">
+                            <i class="bi bi-question-circle" alt="System" title="System"></i>
+                          </div>
+                          <span class="ms-1 hidden">System: </span>
+                        }
+                      }
 
-                @if(warningCount > 0 && msg.role == 'user' && msg.id == messages[messages.length - 1].id) {
-                  <div class="warning mt-2">
-                    <i class="bi bi-exclamation-triangle-fill" alt="Warning" title="Warning"></i>
-                    <span class="ms-2" title="Warning">{{warningCount}}/{{maxWarnings}}</span>
+                    <div class="mt-0" [innerHTML]="msg.content | safeHtml"></div>
+                    <small class="mt-3">
+                      <i class="bi bi-clock"></i>
+                      <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                    </small>
 
-                    @if(warningCount >= maxWarnings) {
-                      <span class="ms-4" title="Warning expire time">Expires at: {{dateTimeWarnExpire | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                    @if(warningCount > 0 && msg.role == 'user' && msg.id == messages[messages.length - 1].id) {
+                      <div class="warning mt-2">
+                        <i class="bi bi-exclamation-triangle-fill" alt="Warning" title="Warning"></i>
+                        <span class="ms-2" title="Warning">{{warningCount}}/{{maxWarnings}}</span>
+
+                        @if(warningCount >= maxWarnings) {
+                          <span class="ms-4" title="Warning expire time">Expires at: {{dateTimeWarnExpire | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                        }
+                      </div>
                     }
                   </div>
                 }
+              }
+            }
+
+            @if(loading) {
+              <div class="message assistant">
+                <i class="bi bi-chat-dots-fill" alt="Digitando..." title="Digitando..."></i>
+                Digitando...
               </div>
             }
-          }
+          </div>
 
-          @if(loading) {
-            <div class="message assistant">
-              <i class="bi bi-chat-dots-fill" alt="Digitando..." title="Digitando..."></i>
-              Digitando...
-            </div>
-          }
-        </div>
-
-        <div class="input-container">
-          <input
-            [(ngModel)]="userInput"
-            (keyup.enter)="sendMessageStream()"
-            [disabled]="warningCount >= maxWarnings"
-            placeholder="Digite sua mensagem..."
-          />
-          <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()" [disabled]="warningCount >= maxWarnings">
-            <i class="bi bi-arrow-clockwise" alt="Refresh"></i>
-          </button>
-          <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!messages.length || warningCount >= maxWarnings">
-            <i class="bi bi-x-lg" alt="Clear"></i>
-          </button>
-          <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput || warningCount >= maxWarnings">
-            <i class="bi bi-send" alt="Send"></i>
-          </button>
+          <div class="input-container">
+            <input
+              [(ngModel)]="userInput"
+              (keyup.enter)="sendMessageStream()"
+              [disabled]="warningCount >= maxWarnings"
+              placeholder="Digite sua mensagem..."
+            />
+            <button type="button" class="btn btn-primary btnref" (click)="refreshMessageStream()" [disabled]="warningCount >= maxWarnings">
+              <i class="bi bi-arrow-clockwise" alt="Refresh"></i>
+            </button>
+            <button type="button" class="btn btn-secondary btnclear" (click)="clearMessage()" [disabled]="!messages.length || warningCount >= maxWarnings">
+              <i class="bi bi-x-lg" alt="Clear"></i>
+            </button>
+            <button type="button" class="btn btn-primary btnsend" (click)="sendMessageStream()" [disabled]="!userInput || warningCount >= maxWarnings">
+              <i class="bi bi-send" alt="Send"></i>
+            </button>
+          </div>
         </div>
       </div>
     }
