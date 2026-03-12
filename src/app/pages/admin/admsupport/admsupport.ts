@@ -33,7 +33,7 @@ export class Admsupport implements OnInit, OnDestroy {
   dateTimeWarnExpire: any = new Date().getTime() + this.timeValMs; // 1 minutes from now
 
   private abortController: AbortController | null = null;
-  private mylocalStorage: Storage | null = null;
+  private myphysicallocalstorage: Storage | null = null;
 
   constructor(
     private chatService: ChatService,
@@ -42,11 +42,11 @@ export class Admsupport implements OnInit, OnDestroy {
     @Inject(DOCUMENT) private document: Document
   ) {
     const localStorage = this.document.defaultView?.localStorage;
-    this.mylocalStorage = localStorage || null;
+    this.myphysicallocalstorage = localStorage || null;
 
     this.isSupportChatEnabled = localStorage?.getItem("supportChatEnabled") === "true";
-    this.warningCount = localStorage?.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")!) : (parseInt(this.mylocalStorage?.getItem("warningCount")! ?? 0));
-    this.dateTimeWarnExpire = localStorage?.getItem("dateTimeWarnExpire") ? parseInt(localStorage.getItem("dateTimeWarnExpire")!) : (parseInt(this.mylocalStorage?.getItem("dateTimeWarnExpire")! ?? (new Date().getTime() + this.timeValMs)));
+    this.warningCount = localStorage?.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")!) : (parseInt(this.myphysicallocalstorage?.getItem("warningCount")! ?? 0));
+    this.dateTimeWarnExpire = localStorage?.getItem("dateTimeWarnExpire") ? parseInt(localStorage.getItem("dateTimeWarnExpire")!) : (parseInt(this.myphysicallocalstorage?.getItem("dateTimeWarnExpire")! ?? (new Date().getTime() + this.timeValMs)));
 
     if(localStorage) {
       localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
@@ -77,8 +77,9 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   getClosedChatMsg(warnExpireTime: any) {
-    return `<div class="fmessage chatclosed">
-      <i class="bi bi-chat-text chatclosedicon"></i>
+    return `
+    <div class="fmessage chatclosed animate__animated animate__fadeIn">
+      <i class="bi bi-lock-fill chatclosedicon"></i>
       <h2 class="chatclosedtitle">Chat is closed</h2>
       <span class="chatclosedmsg">The chat is currently closed due to reached of max warnings (Reason: <b>inappropriate language behaviour</b>)! The chat will reactivate after ${new Date(warnExpireTime).toLocaleString()}!</span>
       <div class="d-block mt-3">
@@ -87,28 +88,34 @@ export class Admsupport implements OnInit, OnDestroy {
     </div>`;
   }
 
+  saveMyWarnings(warningCount: number = 0) {
+    if(this.myphysicallocalstorage?.getItem("warningCount")) {
+      this.myphysicallocalstorage?.removeItem("warningCount");
+      this.myphysicallocalstorage?.setItem("warningCount", ""+warningCount);
+    }
+
+    if(this.myphysicallocalstorage?.getItem("dateTimeWarnExpire")) {
+      this.myphysicallocalstorage?.removeItem("dateTimeWarnExpire");
+    }
+
+    if(localStorage?.getItem("warningCount")) {
+      localStorage.removeItem("warningCount");
+      localStorage.setItem("warningCount", ""+warningCount);
+    }
+
+    if(localStorage?.getItem("dateTimeWarnExpire")) {
+      localStorage.removeItem("dateTimeWarnExpire");
+    }
+  }
+
   removeWarningsWhenDTExpires() {
     setTimeout(() => {
       if(this.warningCount >= this.maxWarnings) {
         const warnExpireStored = this.dateTimeWarnExpire;
     
         if(!isNaN(warnExpireStored) && new Date().getTime() >= warnExpireStored) {
-          if(this.mylocalStorage?.getItem("warningCount")) {
-            this.mylocalStorage?.removeItem("warningCount");
-          }
-
-          if(this.mylocalStorage?.getItem("dateTimeWarnExpire")) {
-            this.mylocalStorage?.removeItem("dateTimeWarnExpire");
-          }
-
-          if(localStorage?.getItem("warningCount")) {
-            localStorage.removeItem("warningCount");
-          }
-
-          if(localStorage?.getItem("dateTimeWarnExpire")) {
-            localStorage.removeItem("dateTimeWarnExpire");
-          }
-
+          this.warningCount = 0;
+          this.saveMyWarnings(this.warningCount);
           location.reload();
         }
       }
@@ -157,13 +164,15 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   async checkMessageProfanity() {
-    const profanityList = (await import('profanityfilters.json')).profanityFilters || [];
-    if(profanityList && profanityList.some(word => this.userInput.includes(word))) {
+    const profanityList = (await import('profanityfilters.json')).badwords || [];
+    if(profanityList && profanityList.some(word => this.userInput.toLowerCase().includes(word.toLowerCase()))) {
       // this.userInput = '';
       this.userInput = this.userInput.replace(new RegExp(profanityList.join('|'), 'gi'), '****');
 
-      if(this.warningCount <= this.maxWarnings) {
+      if(this.warningCount < this.maxWarnings) {
         this.warningCount++;
+      } else {
+        this.warningCount = 0;
       }
 
       if(this.dateTimeWarnExpire && new Date().getTime() >= this.dateTimeWarnExpire) {
@@ -178,12 +187,32 @@ export class Admsupport implements OnInit, OnDestroy {
         }
       }
 
-      if(this.mylocalStorage) {
-        this.mylocalStorage.setItem("warningCount", ""+this.warningCount);
+      if(localStorage) {
+        localStorage.setItem("warningCount", ""+this.warningCount);
 
         if(this.warningCount >= this.maxWarnings) {
-          this.mylocalStorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + this.timeValMs));
+          localStorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + this.timeValMs));
         }
+      }
+
+      if(this.myphysicallocalstorage) {
+        this.myphysicallocalstorage.setItem("warningCount", ""+this.warningCount);
+
+        if(this.warningCount >= this.maxWarnings) {
+          this.myphysicallocalstorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + this.timeValMs));
+        }
+      }
+    }
+  }
+
+  resetWarnings() {
+    if(this.warningCount >= 0 && this.userInput == "$resetwarnings") {
+      if(localStorage) {
+        localStorage.setItem("warningCount", "0");
+      }
+
+      if(this.myphysicallocalstorage) {
+        this.myphysicallocalstorage!.setItem("warningCount", "0");
       }
     }
   }
@@ -192,6 +221,7 @@ export class Admsupport implements OnInit, OnDestroy {
     if (!this.userInput.trim() || this.loading) return;
 
     await this.checkMessageProfanity();
+    this.resetWarnings();
 
     const userId = this.id++;
     

@@ -16,12 +16,17 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const localStorage = new LocalStorage('./chatWarnings');
+const localStorage = new LocalStorage('./storage/local/chatwarnings');
+
+// const genNumbers = (min, max) => {
+//   return Math.floor(Math.random() * (max - min + 1)) + min;
+// }
 
 app.post('/chat', async (req, res) => {
   try {
     const maxwarn = 3; 
-    const warnExpireTime = 1 * 60 * 1000;
+    const warnExpireTime = 5 * 60 * 1000;
+
     let warn = parseInt(localStorage.getItem("warningCount")) ?? 0; 
 
     const prefix = "!", prefixalt = "$";
@@ -55,8 +60,17 @@ app.post('/chat', async (req, res) => {
       return { cmd: first || '', args: rest.join(' ').trim() };
     })();
 
-    const resetWarnings = () => {
-      if(localStorage.getItem("dateTimeWarnExpire") && new Date().getTime() >= localStorage.getItem("dateTimeWarnExpire")) {
+    const resetWarnings = (keepWarnings = false) => {
+      const dtexp = localStorage.getItem("dateTimeWarnExpire");
+      if(!keepWarnings && warn >= maxwarn && dtexp && new Date().getTime() >= dtexp) {
+        warn = 0;
+        localStorage.setItem("warningCount", warn);
+        localStorage.removeItem("dateTimeWarnExpire");
+      }
+    }
+
+    const forceResetWarnings = (keepWarnings = false) => {
+      if(keepWarnings && warn >= 0) {
         warn = 0;
         localStorage.setItem("warningCount", warn);
         localStorage.removeItem("dateTimeWarnExpire");
@@ -65,7 +79,7 @@ app.post('/chat', async (req, res) => {
 
     const getClosedChatMsg = (warnExpireTime) => {
       return `<div class="fmessage chatclosed">
-        <i class="bi bi-chat-text chatclosedicon"></i>
+        <i class="bi bi-lock-fill chatclosedicon"></i>
         <h2 class="chatclosedtitle">Chat is closed</h2>
         <span class="chatclosedmsg">The chat is currently closed due to reached of max warnings (Reason: <b>inappropriate language behaviour</b>)! The chat will reactivate after ${new Date(new Date().getTime() + warnExpireTime).toLocaleString()}!</span>
       </div>`;
@@ -223,7 +237,12 @@ app.post('/chat', async (req, res) => {
       colorlist: () => f.getColorListHex(),
       inspiredby: () => f.getInspiredBy(),
       motivation: () => f.getMotivation(),
+      resetwarnings: () => {
+        forceResetWarnings(true);
+        return "The warnings were reseted!";
+      },
       chatclosed: () => {
+        resetWarnings();
         warn = localStorage.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")) : 0;
         return getProfMsgWarnList(warn, maxwarn, warnExpireTime);
       },
@@ -232,18 +251,12 @@ app.post('/chat', async (req, res) => {
 
     const profanityList = (msg) => {
       return fs.promises.readFile('./profanityfilters.json', 'utf-8')
-        .then((data) => JSON.parse(data).profanityFilters || [])
-        .then(filters => filters.some(word => word.toLowerCase() === msg.toLowerCase()))
+        .then((data) => JSON.parse(data).badwords || [])
+        .then(filters => filters.some(word => word.toLowerCase(msg.toLowerCase())))
         .catch(err => {
           console.error('Error reading profanity filters:', err);
           return [];
         });
-      // return fs.promises.readFile('./profanityfilters.json', 'utf-8')
-      //   .then(data => JSON.parse(data))
-      //   .catch(err => {
-      //     console.error('Error reading profanity filters:', err);
-      //     return [];
-      //   });
     };
 
     if (!msg) {
@@ -282,6 +295,8 @@ app.post('/chat', async (req, res) => {
         const result = await handlers[cmd](args);
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
       } else if(profanityList(msg)) {
+        resetWarnings();
+
         const warni = parseInt(warn+1) <= maxwarn ? parseInt(warn + 1) : parseInt((maxwarn-maxwarn));
         
         localStorage.setItem("warningCount", ""+warni);

@@ -273,13 +273,19 @@ body {
 }
 
 .closedchat {
+  $blur: 10px;
+
   .assistant, .user, .system {
-    filter: blur(10px);
+    filter: blur($blur);
   }
 
   .input-container {
     z-index: -1;
-    filter: blur(10px);
+    filter: blur($blur);
+  }
+
+  .warnfooter {
+    filter: blur($blur);
   }
 }
 
@@ -292,6 +298,17 @@ body {
   height: auto;
   max-height: 100vh;
   max-width: 100%;
+}
+
+.warnfooter {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: auto;
+  max-width: 100%;
+  padding: 15px;
 }
 
 @media all and (min-width: 1200px) {

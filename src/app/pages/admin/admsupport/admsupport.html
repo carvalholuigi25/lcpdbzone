@@ -51,17 +51,6 @@
                       <i class="bi bi-clock"></i>
                       <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>
                     </small>
-
-                    @if(warningCount > 0 && msg.role == 'user' && msg.id == messages[messages.length - 1].id) {
-                      <div class="warning mt-2">
-                        <i class="bi bi-exclamation-triangle-fill" alt="Warning" title="Warning"></i>
-                        <span class="ms-2" title="Warning">{{warningCount}}/{{maxWarnings}}</span>
-
-                        @if(warningCount >= maxWarnings) {
-                          <span class="ms-4" title="Warning expire time">Expires at: {{dateTimeWarnExpire | date:'dd/MM/yyyy HH:mm:ss'}}</span>
-                        }
-                      </div>
-                    }
                   </div>
                 }
               }
@@ -92,6 +81,26 @@
               <i class="bi bi-send" alt="Send"></i>
             </button>
           </div>
+
+          @if(warningCount > 0) {
+            <div class="warnfooter">
+              <div class="warning">
+                <i class="bi bi-exclamation-triangle-fill" alt="Warning" title="Warning"></i>
+
+                <div class="d-inline-block ms-2">
+                  <span class="numwarnings" title="Nº of warnings">{{warningCount}}</span>
+                  <span class="divider">/</span>
+                  <span class="nummaxwarnings" title="Max nº of warnings">{{maxWarnings}}</span>
+                </div>
+
+                @if(warningCount >= maxWarnings) {
+                  <span class="ms-4" title="Warning expire time">
+                    <i class="bi bi-clock" [title]="'Expires at: ' + (dateTimeWarnExpire | date:'dd/MM/yyyy HH:mm:ss')"></i>
+                  </span>
+                }
+              </div>
+            </div>
+          }
         </div>
       </div>
     }

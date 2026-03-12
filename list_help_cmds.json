@@ -189,6 +189,11 @@
       "id": 38,
       "cmd": "colorlist",
       "description": "Provides a list of colors with their hexadecimal values."
+    },
+    {
+      "id": 39,
+      "cmd": "resetwarnings",
+      "description": "This command results a reset of warnings for chat to original state due to user prompted by one (or more) bad words in chat. (its for admins only)"
     }
   ]
 }
