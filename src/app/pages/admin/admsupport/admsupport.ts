@@ -209,23 +209,27 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   resetWarnings() {
-    if(this.warningCount >= 0 && (this.userInput == "$resetwarnings" || this.userInput == "!resetwarnings")) {
-      if(localStorage) {
-        if(localStorage.getItem("login") && JSON.parse(localStorage.getItem("login")!).role !== "admin") {
-          alert("This command is for admins only!");
-          return;
+    if(this.userInput == "$resetwarnings" || this.userInput == "!resetwarnings") {
+      if(this.warningCount > 0) {
+        if(localStorage) {
+          if(localStorage.getItem("login") && JSON.parse(localStorage.getItem("login")!).role !== "admin") {
+            alert("This command is for admins only!");
+            return;
+          }
+
+          localStorage.setItem("warningCount", "0");
         }
 
-        localStorage.setItem("warningCount", "0");
-      }
+        if(this.myphysicallocalstorage) {
+          this.myphysicallocalstorage!.setItem("warningCount", "0");
+        }
 
-      if(this.myphysicallocalstorage) {
-        this.myphysicallocalstorage!.setItem("warningCount", "0");
+        setTimeout(() => {
+          location.reload();
+        }, 1000 / 2);
+      } else {
+        alert("The warnings already reseted")!;
       }
-
-      setTimeout(() => {
-        location.reload();
-      }, 1000 / 2);
     }
   }
 

@@ -70,7 +70,7 @@ app.post('/chat', async (req, res) => {
     }
 
     const forceResetWarnings = (keepWarnings = false) => {
-      if(keepWarnings && warn >= 0) {
+      if(keepWarnings && warn > 0) {
         warn = 0;
         localStorage.setItem("warningCount", warn);
         localStorage.removeItem("dateTimeWarnExpire");
@@ -239,7 +239,7 @@ app.post('/chat', async (req, res) => {
       motivation: () => f.getMotivation(),
       resetwarnings: () => {
         forceResetWarnings(true);
-        return "The warnings were reseted!";
+        return warn > 0 ? "The warnings were reseted!" : "The warnings already reseted!";
       },
       chatclosed: () => {
         resetWarnings();
