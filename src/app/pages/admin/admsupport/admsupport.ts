@@ -114,9 +114,12 @@ export class Admsupport implements OnInit, OnDestroy {
         const warnExpireStored = this.dateTimeWarnExpire;
     
         if(!isNaN(warnExpireStored) && new Date().getTime() >= warnExpireStored) {
+          this.clearMessage();
           this.warningCount = 0;
           this.saveMyWarnings(this.warningCount);
-          location.reload();
+          this.userInput = '$resetwarnings';
+          this.sendMessageStream();
+          // location.reload();
         }
       }
     }, this.timeValMs);
@@ -206,14 +209,23 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   resetWarnings() {
-    if(this.warningCount >= 0 && this.userInput == "$resetwarnings") {
+    if(this.warningCount >= 0 && (this.userInput == "$resetwarnings" || this.userInput == "!resetwarnings")) {
       if(localStorage) {
+        if(localStorage.getItem("login") && JSON.parse(localStorage.getItem("login")!).role !== "admin") {
+          alert("This command is for admins only!");
+          return;
+        }
+
         localStorage.setItem("warningCount", "0");
       }
 
       if(this.myphysicallocalstorage) {
         this.myphysicallocalstorage!.setItem("warningCount", "0");
       }
+
+      setTimeout(() => {
+        location.reload();
+      }, 1000 / 2);
     }
   }
 
