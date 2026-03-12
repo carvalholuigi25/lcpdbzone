@@ -86,7 +86,7 @@ app.post('/chat', async (req, res) => {
     }
     
     const getProfMsgWarnList = (warni, maxwarn, warnExpireTime) => {
-      return (warni >= maxwarn ? getClosedChatMsg(warnExpireTime) : `Please refrain from using inappropriate language. (Warning ${warni == 0 ? warni+1 : warni} of ${maxwarn}).`);
+      return (warni >= maxwarn ? getClosedChatMsg(warnExpireTime) : `Please refrain from using inappropriate language. (Warning issued).`);
     }
 
     const handlers = {
@@ -252,7 +252,7 @@ app.post('/chat', async (req, res) => {
     const profanityList = (msg) => {
       return fs.promises.readFile('./profanityfilters.json', 'utf-8')
         .then((data) => JSON.parse(data).badwords || [])
-        .then(filters => filters.some(word => word.toLowerCase(msg.toLowerCase())))
+        .then(filters => filters.some(word => word.toLowerCase().includes(msg.toLowerCase())))
         .catch(err => {
           console.error('Error reading profanity filters:', err);
           return [];
@@ -294,7 +294,7 @@ app.post('/chat', async (req, res) => {
 
         const result = await handlers[cmd](args);
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
-      } else if(profanityList(msg)) {
+      } else if((msg !== prefixalt && msg !== prefix) && profanityList(msg)) {
         resetWarnings();
 
         const warni = parseInt(warn+1) <= maxwarn ? parseInt(warn + 1) : parseInt((maxwarn-maxwarn));

@@ -46,6 +46,8 @@ notes
 notes/
 public/assets/images/tvseries
 covinfo
+storage/local/*
+storage/local/chatwarnings/*
 package-lock.json
 .env
 .env.*

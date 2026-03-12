@@ -114,12 +114,15 @@ export class Admsupport implements OnInit, OnDestroy {
         const warnExpireStored = this.dateTimeWarnExpire;
     
         if(!isNaN(warnExpireStored) && new Date().getTime() >= warnExpireStored) {
-          this.clearMessage();
           this.warningCount = 0;
           this.saveMyWarnings(this.warningCount);
+          this.clearMessageWithoutInit();
           this.userInput = '$resetwarnings';
           this.sendMessageStream();
-          // location.reload();
+          
+          setTimeout(() => {
+            location.reload();
+          }, 100 * 5);
         }
       }
     }, this.timeValMs);
@@ -135,6 +138,17 @@ export class Admsupport implements OnInit, OnDestroy {
 
       this.sendMessageStream();
     }
+  }
+
+  clearMessageWithoutInit() {
+    if (this.loading && this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+
+    this.messages = [];
+    this.userInput = "";
+    this.loading = false;
   }
 
   clearMessage() {
