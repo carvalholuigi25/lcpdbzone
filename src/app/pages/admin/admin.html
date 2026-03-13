@@ -13,7 +13,7 @@
           <div class="row align-items-center justify-content-center g-3 my-3">
             @if (aryPages && aryPages.length > 0) {
               @for (ary of aryPages; track ary.id) {
-                <div class="col-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2">
+                <div class="col-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2 animate__animated animate__fadeIn">
                   <a class="lnk" [routerLink]="ary.link">
                     <div class="card carddata">
                       <div class="card-body">

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import * as f from './functions.js';
+import * as f from './serverfunctions.js';
 import fs from 'fs';
 import { LocalStorage } from 'node-localstorage';
 
@@ -18,14 +18,10 @@ const openai = new OpenAI({
 
 const localStorage = new LocalStorage('./storage/local/chatwarnings');
 
-// const genNumbers = (min, max) => {
-//   return Math.floor(Math.random() * (max - min + 1)) + min;
-// }
-
 app.post('/chat', async (req, res) => {
   try {
     const maxwarn = 3; 
-    const warnExpireTime = 5 * 60 * 1000;
+    const warnExpireTime = f.getWarnTimeExpireCalc(5);
 
     let warn = parseInt(localStorage.getItem("warningCount")) ?? 0; 
 
@@ -128,6 +124,11 @@ app.post('/chat', async (req, res) => {
       listpodcasts: async () => await f.getListPodcasts(),
       calc: a => f.getCalculatorResult(a),
       calcage: a => f.getCalcAgeResult(parseInt(a, 10)),
+      rng: a => {
+        const matchvalue = a.match(/number:(\d+)/gim)[0].split(":")[1].toString();
+        const num = matchvalue && typeof parseInt(matchvalue) === "number" ? parseInt(""+matchvalue) : 10;
+        return f.shuffleNums(num);
+      },
       countdown: a => {
         const matchto = a.match(/^to:(.*)/);
         const date = matchto ? matchto[1].trim() : 1;

@@ -46,7 +46,7 @@
                         }
                       }
 
-                    <div class="mt-0" [innerHTML]="msg.content | safeHtml"></div>
+                    <div class="message_content mt-0" [innerHTML]="msg.content | safeHtml"></div>
                     <small class="mt-3">
                       <i class="bi bi-clock"></i>
                       <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>

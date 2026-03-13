@@ -3,6 +3,7 @@ import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import * as f from '@myfunctions';
 
 interface Message {
   id?: string | number;
@@ -29,11 +30,12 @@ export class Admsupport implements OnInit, OnDestroy {
   loading = false;
   maxWarnings = 3;
   warningCount = 0;
-  timeValMs = 1 * 60 * 1000;
-  dateTimeWarnExpire: any = new Date().getTime() + this.timeValMs; // 1 minutes from now
+  timeValMs = 5 * 60 * 1000;
+  dateTimeWarnExpire: any = new Date().getTime() + this.timeValMs;
 
   private abortController: AbortController | null = null;
   private myphysicallocalstorage: Storage | null = null;
+  private mytimer: any;
 
   constructor(
     private chatService: ChatService,
@@ -65,6 +67,8 @@ export class Admsupport implements OnInit, OnDestroy {
       this.abortController.abort();
       this.abortController = null;
     }
+
+    this.clearTimer();
   }
 
   toggleSupport() {
@@ -146,6 +150,7 @@ export class Admsupport implements OnInit, OnDestroy {
       this.abortController = null;
     }
 
+    this.clearTimer();
     this.messages = [];
     this.userInput = "";
     this.loading = false;
@@ -157,6 +162,7 @@ export class Admsupport implements OnInit, OnDestroy {
       this.abortController = null;
     }
 
+    this.clearTimer();
     this.messages = [];
     this.userInput = "";
     this.loading = false;
@@ -168,6 +174,8 @@ export class Admsupport implements OnInit, OnDestroy {
       this.abortController.abort();
       this.abortController = null;
     }
+
+    this.clearTimer();
     this.loading = false;
   }
 
@@ -247,6 +255,13 @@ export class Admsupport implements OnInit, OnDestroy {
     }
   }
 
+  clearTimer() {
+    if(this.mytimer) {
+      clearInterval(this.mytimer);
+      this.mytimer = null;
+    }
+  }
+
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 
@@ -286,16 +301,55 @@ export class Admsupport implements OnInit, OnDestroy {
         conversation,
         (chunk) => {
           // ensure UI updates run inside Angular zone
-          this.ngZone.run(() => {
-            assistantMessage.content += chunk;
-            this.cdr.markForCheck();
-          });
+          this.clearTimer();
+          
+          if(["$time", "!time"].includes(userMessage.content)) {
+            const isTimeZoneModeEnabled = userMessage.content && userMessage.content.indexOf(" zone:") >= -1 ? true : false;
+            const tz = userMessage.content.match(/(\s+)zone:(.*)/mig)! ? userMessage.content.match(/(\s+)zone:(.*)/mig)![0].split(":")[1] : 'Europe/Lisbon';
+
+            this.mytimer = setInterval(() => {
+              assistantMessage.content = "";
+              
+              this.ngZone.run(() => {
+                assistantMessage.content += isTimeZoneModeEnabled ? "The time of timezone ("+tz+") is: " + f.getTimeByTimezone(tz) : "The time is: " + f.getTimeNow();
+                this.cdr.markForCheck();
+              });
+            }, 1000);
+          } else if(["$countdown", "!countdown"].includes(userMessage.content)) {
+            const ctval = userMessage.content.match(/^to:(.*)/mig)! ? userMessage.content.match(/^to:(.*)/mig)![0].split(":")[1] : "2026-06-04";
+
+            this.mytimer = setInterval(() => {
+              assistantMessage.content = "";
+              
+              this.ngZone.run(() => {
+                assistantMessage.content += f.getCountdownResult(ctval);
+                this.cdr.markForCheck();
+              });
+            }, 1000);
+          } else if(["$countup", "!countup"].includes(userMessage.content)) {
+            const ctval = userMessage.content.toString().match(/^from:(.*)/mig)! ? userMessage.content.toString().match(/^from:(.*)/mig)![0].split(":")[1] : "2026-06-04";
+
+            this.mytimer = setInterval(() => {
+              assistantMessage.content = "";
+              
+              this.ngZone.run(() => {
+                assistantMessage.content += f.getCountupResult(ctval);
+                this.cdr.markForCheck();
+              });
+            }, 1000);
+          } else {
+            this.ngZone.run(() => {
+              assistantMessage.content += chunk;
+              this.cdr.markForCheck();
+            });
+          }
         },
         this.abortController.signal
       );
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
         console.error(err);
+
         this.ngZone.run(() => {
           assistantMessage.content += '\n\n[Error receiving response]';
           this.cdr.markForCheck();

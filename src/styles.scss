@@ -300,6 +300,23 @@ body {
   max-width: 100%;
 }
 
+.message_content {
+  overflow: auto;
+  max-height: 30vh;
+}
+
+.mcolorblk {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.colorblk {
+  width: 20px;
+  height: 20px;
+  border-radius: calc(16px + 8px);
+}
+
 .warnfooter {
   position: relative;
   display: flex;

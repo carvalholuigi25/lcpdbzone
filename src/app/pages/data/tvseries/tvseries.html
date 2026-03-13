@@ -35,7 +35,7 @@
                 </div>
 
                 @for(tvseries of paginatedTvSeries$ | async; track tvseries.tvserieId) {
-                    <div class="col-12 col-sm-6 col-md-6 col-xl-3 my-2 p-3 mcardtvseries">
+                    <div class="col-12 col-sm-6 col-md-6 col-xl-3 col-xxl-2 my-2 p-3 mcardtvseries">
                         <a [routerLink]="['/data/tvseries', tvseries.tvserieId]">
                             <div class="card cardtvseries animate__animated animate__fadeIn">
                                 <div class="mybkgcont"></div>
