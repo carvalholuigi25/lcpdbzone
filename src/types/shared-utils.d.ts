@@ -1,0 +1,33 @@
+declare module '@mydir/shared-utils.mjs' {
+  export function getWarnTimeExpireCalc(v?: number): number;
+  export function setHouseNumZero(num?: number): string | number;
+  export function getTimeNow(): string;
+  export function getDateNow(): string;
+  export function getTimezone(): string;
+  export function getDateByTimezone(timeZone: string): string;
+  export function getTimeByTimezone(timeZone: string): string;
+  export function getDateTimeByTimezone(timeZone: string): string;
+  export function generateJoke(): string;
+  export function generateQuote(): string;
+  export function getListModels(): string;
+  export function roundNum(num: number, dec?: number): number;
+  export function genRandomNumbersSimple(min: number, max: number): number;
+  export function shuffleNums(numShuffle?: number): string;
+  export function getCountdownResult(targetDate: string): string;
+  export function getCountupResult(startDate: string): string;
+  export function getDataSizeConversion(size: number, fromUnit: string, toUnit: string): string;
+  export function getTimeConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getTemperatureConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getLengthConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getWeightConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getSpeedConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getPressureConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getVolumeConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getEnergyConversion(value: number, fromUnit: string, toUnit: string): string;
+  export function getInspiredBy(): string;
+  export function getMotivation(): string;
+  export function getColorListHex(): string;
+  export function getCurrencyConversion(value?: number, fromCurrency?: string, toCurrency?: string): Promise<string>;
+  export function getRadioStationsByCountry(country?: string): Promise<string>;
+  export function getYoutubeSearch(query?: string): Promise<string>;
+}

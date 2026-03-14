@@ -5,12 +5,26 @@ import dotenv from 'dotenv';
 import * as f from './serverfunctions.js';
 import fs from 'fs';
 import { LocalStorage } from 'node-localstorage';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
+
+if (!process.env.OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY is required');
+  process.exit(1);
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const chatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
+
+app.use('/chat', chatLimiter);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -145,6 +159,12 @@ app.post('/chat', async (req, res) => {
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "MB";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "GB";
 
+        // Validation
+        const validUnits = ['B', 'KB', 'MB', 'GB', 'TB'];
+        if (isNaN(size) || size <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toUpperCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toUpperCase())) throw new Error("Invalid to unit.");
+
         console.log("Converting data size:", { a, unit, tounit });
         return f.getDataSizeConversion(size, unit, tounit);
       },
@@ -153,6 +173,12 @@ app.post('/chat', async (req, res) => {
         const temp = matchvalue ? matchvalue[0].split(":")[1] : 1;
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "C";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "F";
+
+        // Validation
+        const validUnits = ['C', 'F', 'K'];
+        if (isNaN(temp)) throw new Error("Invalid value: must be a number.");
+        if (!validUnits.includes(unit.toUpperCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toUpperCase())) throw new Error("Invalid to unit.");
 
         console.log("Converting temperature:", { a, unit, tounit });
         return f.getTemperatureConversion(temp, unit, tounit);
@@ -163,6 +189,12 @@ app.post('/chat', async (req, res) => {
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "m";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "ft";
 
+        // Validation
+        const validUnits = ['m', 'km', 'mi', 'ft'];
+        if (isNaN(length) || length <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
+
         console.log("Converting length:", { a, unit, tounit });
         return f.getLengthConversion(length, unit, tounit);
       },
@@ -171,6 +203,12 @@ app.post('/chat', async (req, res) => {
         const time = matchvalue ? matchvalue[0].split(":")[1] : 1;
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "sec";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "min";
+
+        // Validation
+        const validUnits = ['milisec', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
+        if (isNaN(time) || time <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
 
         console.log("Converting time:", { a, unit, tounit });
         return f.getTimeConversion(time, unit, tounit);
@@ -181,6 +219,12 @@ app.post('/chat', async (req, res) => {
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "kg";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "lb";
 
+        // Validation
+        const validUnits = ['g', 'kg', 'lb', 'oz'];
+        if (isNaN(weight) || weight <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
+
         console.log("Converting weight:", { a, unit, tounit });
         return f.getWeightConversion(weight, unit, tounit);
       },
@@ -189,6 +233,11 @@ app.post('/chat', async (req, res) => {
         const amount = matchvalue ? matchvalue[0].split(":")[1] : 1;
         const from = matchvalue ? matchvalue[1].split(":")[1]: "USD";
         const to = matchvalue ? matchvalue[2].split(":")[1] : "EUR";
+
+        // Validation
+        if (isNaN(amount) || amount <= 0) throw new Error("Invalid amount: must be a positive number.");
+        if (!/^[A-Z]{3}$/.test(from)) throw new Error("Invalid from currency code.");
+        if (!/^[A-Z]{3}$/.test(to)) throw new Error("Invalid to currency code.");
 
         console.log("Converting currency:", { a, amount, from, to });
         return f.getCurrencyConversion(amount, from, to);
@@ -199,6 +248,12 @@ app.post('/chat', async (req, res) => {
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "L";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "mL";
 
+        // Validation
+        const validUnits = ['l', 'ml', 'gal', 'cup'];
+        if (isNaN(volume) || volume <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
+
         console.log("Converting volume:", { a, unit, tounit });
         return f.getVolumeConversion(volume, unit, tounit);
       },
@@ -207,6 +262,12 @@ app.post('/chat', async (req, res) => {
         const pressure = matchvalue ? matchvalue[0].split(":")[1] : 1;
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "Pa";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "atm";
+
+        // Validation
+        const validUnits = ['pa', 'kpa', 'bar', 'psi'];
+        if (isNaN(pressure) || pressure <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
 
         console.log("Converting pressure:", { a, unit, tounit });
         return f.getPressureConversion(pressure, unit, tounit);
@@ -217,6 +278,12 @@ app.post('/chat', async (req, res) => {
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "km/h";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "mph";
 
+        // Validation
+        const validUnits = ['m/s', 'km/h', 'mph'];
+        if (isNaN(speed) || speed < 0) throw new Error("Invalid value: must be a non-negative number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
+
         console.log("Converting speed:", { a, unit, tounit });
         return f.getSpeedConversion(speed, unit, tounit);
       },
@@ -225,6 +292,12 @@ app.post('/chat', async (req, res) => {
         const energy = matchvalue ? matchvalue[0].split(":")[1] : 1;
         const unit = matchvalue ? matchvalue[1].split(":")[1]: "J";
         const tounit = matchvalue ? matchvalue[2].split(":")[1] : "kWh";
+
+        // Validation
+        const validUnits = ['j', 'kj', 'cal', 'kcal'];
+        if (isNaN(energy) || energy <= 0) throw new Error("Invalid value: must be a positive number.");
+        if (!validUnits.includes(unit.toLowerCase())) throw new Error("Invalid from unit.");
+        if (!validUnits.includes(tounit.toLowerCase())) throw new Error("Invalid to unit.");
 
         console.log("Converting energy:", { a, unit, tounit });
         return f.getEnergyConversion(energy, unit, tounit);
@@ -293,7 +366,13 @@ app.post('/chat', async (req, res) => {
       } else if (handlers[cmd]) {
         resetWarnings();
 
-        const result = await handlers[cmd](args);
+        let result;
+        try {
+          result = await handlers[cmd](args);
+        } catch (error) {
+          result = error.message;
+          res.status(400);
+        }
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
       } else if((msg !== prefixalt && msg !== prefix) && profanityList(msg)) {
         resetWarnings();

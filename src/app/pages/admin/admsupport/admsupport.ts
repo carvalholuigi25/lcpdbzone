@@ -31,7 +31,7 @@ export class Admsupport implements OnInit, OnDestroy {
   maxWarnings = 3;
   warningCount = 0;
   timeValMs = 5 * 60 * 1000;
-  dateTimeWarnExpire: any = new Date().getTime() + this.timeValMs;
+  dateTimeWarnExpire: number = new Date().getTime() + this.timeValMs;
 
   private abortController: AbortController | null = null;
   private myphysicallocalstorage: Storage | null = null;
@@ -43,21 +43,23 @@ export class Admsupport implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private document: Document
   ) {
-    const localStorage = this.document.defaultView?.localStorage;
-    this.myphysicallocalstorage = localStorage || null;
+    const ls = this.document.defaultView?.localStorage;
 
-    this.isSupportChatEnabled = localStorage?.getItem("supportChatEnabled") === "true";
-    this.warningCount = localStorage?.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")!) : (parseInt(this.myphysicallocalstorage?.getItem("warningCount")! ?? 0));
-    this.dateTimeWarnExpire = localStorage?.getItem("dateTimeWarnExpire") ? parseInt(localStorage.getItem("dateTimeWarnExpire")!) : (parseInt(this.myphysicallocalstorage?.getItem("dateTimeWarnExpire")! ?? (new Date().getTime() + this.timeValMs)));
+    this.myphysicallocalstorage = ls!;
 
-    if(localStorage) {
-      localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
-      // localStorage.setItem("warningCount", ""+this.warningCount);
-      // localStorage.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
+    this.isSupportChatEnabled = ls?.getItem("supportChatEnabled") === "true";
+    this.warningCount = ls?.getItem("warningCount") ? parseInt(ls.getItem("warningCount")!) : 0;
+    this.dateTimeWarnExpire = ls?.getItem("dateTimeWarnExpire") ? parseInt(ls.getItem("dateTimeWarnExpire")!) : (new Date().getTime() + this.timeValMs);
+
+    if(ls) {
+      ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+      // ls.setItem("warningCount", ""+this.warningCount);
+      // ls.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
     }
   }
 
   ngOnInit(): void {
+    this.checkWarningsExpiry();
     this.removeWarningsWhenDTExpires();
     this.loadInitialChatbot();
   }
@@ -75,8 +77,9 @@ export class Admsupport implements OnInit, OnDestroy {
     this.isSupportChatEnabled = !this.isSupportChatEnabled;
     this.clearMessage();
 
-    if(this.document.defaultView?.localStorage) {
-      this.document.defaultView?.localStorage.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+    const ls = this.document.defaultView?.localStorage;
+    if(ls) {
+      ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
     }
   }
 
@@ -93,42 +96,34 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   saveMyWarnings(warningCount: number = 0) {
-    if(this.myphysicallocalstorage?.getItem("warningCount")) {
-      this.myphysicallocalstorage?.removeItem("warningCount");
-      this.myphysicallocalstorage?.setItem("warningCount", ""+warningCount);
+    const ls = this.document.defaultView?.localStorage;
+    if(ls) {
+      ls.setItem("warningCount", ""+warningCount);
+      ls.removeItem("dateTimeWarnExpire");
     }
+  }
 
-    if(this.myphysicallocalstorage?.getItem("dateTimeWarnExpire")) {
-      this.myphysicallocalstorage?.removeItem("dateTimeWarnExpire");
-    }
-
-    if(localStorage?.getItem("warningCount")) {
-      localStorage.removeItem("warningCount");
-      localStorage.setItem("warningCount", ""+warningCount);
-    }
-
-    if(localStorage?.getItem("dateTimeWarnExpire")) {
-      localStorage.removeItem("dateTimeWarnExpire");
+  checkWarningsExpiry() {
+    if(this.warningCount >= this.maxWarnings) {
+      const warnExpireStored = this.dateTimeWarnExpire;
+  
+      if(!isNaN(warnExpireStored) && new Date().getTime() >= warnExpireStored) {
+        this.warningCount = 0;
+        this.saveMyWarnings(this.warningCount);
+        this.clearMessageWithoutInit();
+        this.userInput = '$resetwarnings';
+        this.sendMessageStream();
+        
+        setTimeout(() => {
+          location.reload();
+        }, 100 * 5);
+      }
     }
   }
 
   removeWarningsWhenDTExpires() {
     setTimeout(() => {
-      if(this.warningCount >= this.maxWarnings) {
-        const warnExpireStored = this.dateTimeWarnExpire;
-    
-        if(!isNaN(warnExpireStored) && new Date().getTime() >= warnExpireStored) {
-          this.warningCount = 0;
-          this.saveMyWarnings(this.warningCount);
-          this.clearMessageWithoutInit();
-          this.userInput = '$resetwarnings';
-          this.sendMessageStream();
-          
-          setTimeout(() => {
-            location.reload();
-          }, 100 * 5);
-        }
-      }
+      this.checkWarningsExpiry();
     }, this.timeValMs);
   }
 
@@ -206,25 +201,20 @@ export class Admsupport implements OnInit, OnDestroy {
         alert("Warnings reset. Please avoid using inappropriate language.");
       } else {
         if(this.warningCount >= this.maxWarnings) {
+          this.dateTimeWarnExpire = new Date().getTime() + this.timeValMs;
           alert("Chat closed due to inappropriate language. It will be reopened at " + new Date(this.dateTimeWarnExpire).toLocaleTimeString() + ".");
         } else {
           alert("Please avoid using inappropriate language. Warning " + this.warningCount + " of " + this.maxWarnings);
         }
       }
 
-      if(localStorage) {
-        localStorage.setItem("warningCount", ""+this.warningCount);
+      const ls = this.document.defaultView?.localStorage;
+      if(ls) {
+        ls.setItem("warningCount", ""+this.warningCount);
 
         if(this.warningCount >= this.maxWarnings) {
-          localStorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + this.timeValMs));
-        }
-      }
-
-      if(this.myphysicallocalstorage) {
-        this.myphysicallocalstorage.setItem("warningCount", ""+this.warningCount);
-
-        if(this.warningCount >= this.maxWarnings) {
-          this.myphysicallocalstorage.setItem("dateTimeWarnExpire", ""+(new Date().getTime() + this.timeValMs));
+          this.dateTimeWarnExpire = new Date().getTime() + this.timeValMs;
+          ls.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
         }
       }
     }
@@ -233,24 +223,30 @@ export class Admsupport implements OnInit, OnDestroy {
   resetWarnings() {
     if(this.userInput == "$resetwarnings" || this.userInput == "!resetwarnings") {
       if(this.warningCount > 0) {
-        if(localStorage) {
-          if(localStorage.getItem("login") && JSON.parse(localStorage.getItem("login")!).role !== "admin") {
-            alert("This command is for admins only!");
+        const ls = this.document.defaultView?.localStorage;
+        const loginItem = ls?.getItem("login");
+        if(loginItem) {
+          try {
+            const login = JSON.parse(loginItem);
+            if(login.role !== "admin") {
+              alert("This command is for admins only!");
+              return;
+            }
+          } catch {
+            alert("Invalid login data!");
             return;
           }
-
-          localStorage.setItem("warningCount", "0");
         }
 
-        if(this.myphysicallocalstorage) {
-          this.myphysicallocalstorage!.setItem("warningCount", "0");
+        if(ls) {
+          ls.setItem("warningCount", "0");
         }
 
         setTimeout(() => {
           location.reload();
         }, 1000 / 2);
       } else {
-        alert("The warnings already reseted")!;
+        alert("The warnings are already reset");
       }
     }
   }
@@ -260,6 +256,57 @@ export class Admsupport implements OnInit, OnDestroy {
       clearInterval(this.mytimer);
       this.mytimer = null;
     }
+  }
+
+  private handleTimeCommand(userMessage: Message, assistantMessage: Message) {
+    const content = userMessage.content;
+    const isTimeZoneModeEnabled = content.includes('zone:');
+    let tz = 'Europe/Lisbon';
+    if (isTimeZoneModeEnabled) {
+      const match = content.match(/zone:\s*([^ ]+)/i);
+      if (match) {
+        tz = match[1];
+      }
+    }
+
+    this.mytimer = setInterval(() => {
+      this.ngZone.run(() => {
+        assistantMessage.content = isTimeZoneModeEnabled ? `The time of timezone (${tz}) is: ${f.getTimeByTimezone(tz)}` : `The time is: ${f.getTimeNow()}`;
+        this.cdr.markForCheck();
+      });
+    }, 1000);
+  }
+
+  private handleCountdownCommand(userMessage: Message, assistantMessage: Message) {
+    const content = userMessage.content;
+    let targetDate = '2026-06-04';
+    const match = content.match(/to:\s*([^ ]+)/i);
+    if (match) {
+      targetDate = match[1];
+    }
+
+    this.mytimer = setInterval(() => {
+      this.ngZone.run(() => {
+        assistantMessage.content = f.getCountdownResult(targetDate);
+        this.cdr.markForCheck();
+      });
+    }, 1000);
+  }
+
+  private handleCountupCommand(userMessage: Message, assistantMessage: Message) {
+    const content = userMessage.content;
+    let startDate = '2026-06-04';
+    const match = content.match(/from:\s*([^ ]+)/i);
+    if (match) {
+      startDate = match[1];
+    }
+
+    this.mytimer = setInterval(() => {
+      this.ngZone.run(() => {
+        assistantMessage.content = f.getCountupResult(startDate);
+        this.cdr.markForCheck();
+      });
+    }, 1000);
   }
 
   async sendMessageStream() {
@@ -296,53 +343,30 @@ export class Admsupport implements OnInit, OnDestroy {
     }
     this.abortController = new AbortController();
 
+    // Handle special commands locally
+    if (["$time", "!time"].includes(userMessage.content.split(' ')[0])) {
+      this.handleTimeCommand(userMessage, assistantMessage);
+      this.loading = false;
+      return;
+    } else if (["$countdown", "!countdown"].includes(userMessage.content.split(' ')[0])) {
+      this.handleCountdownCommand(userMessage, assistantMessage);
+      this.loading = false;
+      return;
+    } else if (["$countup", "!countup"].includes(userMessage.content.split(' ')[0])) {
+      this.handleCountupCommand(userMessage, assistantMessage);
+      this.loading = false;
+      return;
+    }
+
     try {
       await this.chatService.sendMessage(
         conversation,
         (chunk) => {
           // ensure UI updates run inside Angular zone
-          this.clearTimer();
-          
-          if(["$time", "!time"].includes(userMessage.content)) {
-            const isTimeZoneModeEnabled = userMessage.content && userMessage.content.indexOf(" zone:") >= -1 ? true : false;
-            const tz = userMessage.content.match(/(\s+)zone:(.*)/mig)! ? userMessage.content.match(/(\s+)zone:(.*)/mig)![0].split(":")[1] : 'Europe/Lisbon';
-
-            this.mytimer = setInterval(() => {
-              assistantMessage.content = "";
-              
-              this.ngZone.run(() => {
-                assistantMessage.content += isTimeZoneModeEnabled ? "The time of timezone ("+tz+") is: " + f.getTimeByTimezone(tz) : "The time is: " + f.getTimeNow();
-                this.cdr.markForCheck();
-              });
-            }, 1000);
-          } else if(["$countdown", "!countdown"].includes(userMessage.content)) {
-            const ctval = userMessage.content.match(/^to:(.*)/mig)! ? userMessage.content.match(/^to:(.*)/mig)![0].split(":")[1] : "2026-06-04";
-
-            this.mytimer = setInterval(() => {
-              assistantMessage.content = "";
-              
-              this.ngZone.run(() => {
-                assistantMessage.content += f.getCountdownResult(ctval);
-                this.cdr.markForCheck();
-              });
-            }, 1000);
-          } else if(["$countup", "!countup"].includes(userMessage.content)) {
-            const ctval = userMessage.content.toString().match(/^from:(.*)/mig)! ? userMessage.content.toString().match(/^from:(.*)/mig)![0].split(":")[1] : "2026-06-04";
-
-            this.mytimer = setInterval(() => {
-              assistantMessage.content = "";
-              
-              this.ngZone.run(() => {
-                assistantMessage.content += f.getCountupResult(ctval);
-                this.cdr.markForCheck();
-              });
-            }, 1000);
-          } else {
-            this.ngZone.run(() => {
-              assistantMessage.content += chunk;
-              this.cdr.markForCheck();
-            });
-          }
+          this.ngZone.run(() => {
+            assistantMessage.content += chunk;
+            this.cdr.markForCheck();
+          });
         },
         this.abortController.signal
       );
