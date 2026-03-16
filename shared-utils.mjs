@@ -2,15 +2,16 @@ import figlet from "figlet";
 import moment from "moment-timezone";
 
 async function getWelcomeMessage() {
+  const is3d = true;
   const title = await figlet.text("LCP", {
-    font: "Standard",
+    font: is3d ? "3D-ASCII" : "Standard",
     horizontalLayout: "full",
     verticalLayout: "full",
     width: 100,
     whitespaceBreak: true,
     showHardBlanks: false,
   });
-  return `<span class="d-block w-100">${title}</span><p class="mt-3">Welcome to our chatbot! How can I assist you today?</p>`;
+  return `<span class="titlewelcome">${title}</span><p class="mt-3 txtwelcome">Welcome to our chatbot! How can I assist you today?</p>`;
 }
 
 function getWarnTimeExpireCalc(v = 1) {

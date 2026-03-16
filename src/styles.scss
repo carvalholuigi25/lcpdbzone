@@ -328,6 +328,20 @@ body {
   padding: 15px;
 }
 
+.titlewelcome, .welcometitle {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.txtwelcome, .welcometxt {
+    display: block;
+}
+
 @media all and (min-width: 1200px) {
     .admin { 
         padding: 6rem calc(12rem + 1rem);

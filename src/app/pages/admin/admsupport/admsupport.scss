@@ -213,3 +213,17 @@ button {
     background: #444654;
   }
 }
+
+.titlewelcome, .welcometitle {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
+    box-sizing: border-box;
+}
+
+.txtwelcome, .welcometxt {
+    display: block;
+}
