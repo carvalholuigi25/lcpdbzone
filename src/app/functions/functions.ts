@@ -1,6 +1,24 @@
+import figlet from "figlet";
+import moment from "moment-timezone";
 import * as shared from '@mydir/shared-utils.mjs';
+import standard from "figlet/fonts/Standard";
 
-const { getWarnTimeExpireCalc, setHouseNumZero, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, roundNum, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch } = shared;
+figlet.parseFont("Standard", standard);
+
+const { getWarnTimeExpireCalc, setHouseNumZero, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, roundNum, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch, getListAllTimeZones, getWelcomeMessage } = shared;
+
+
+async function getMyWelcomeMessage() {
+  const title = await figlet.text("LCP", {
+    font: "Standard",
+    horizontalLayout: "full",
+    verticalLayout: "full",
+    width: 100,
+    whitespaceBreak: true,
+    showHardBlanks: false,
+  });
+  return `<span class="d-block w-100">${title}</span><p class="mt-3">Welcome to our chatbot! How can I assist you today?</p>`;
+}
 
 function getMyWarnTimeExpireCalc(v = 1) {
   return v * 60 * 1000;
@@ -100,6 +118,24 @@ function getMyDateTimeByTimezone(timeZone: string) {
     }
 }
 
+function getMyListAllTimeZones(method = "native") {
+  //methods: native -> IANA time zones, thirdpartylib -> moment-timezone
+  let timeZones;
+
+  try {
+    if(method == "native") {
+      timeZones = Intl.supportedValuesOf("timeZone").map((x, i) => { return "<p>" + i + ": " + x + "</p>";}).toString().replaceAll(",", "");
+    } else {
+      timeZones = moment.tz.names().map((x, i) => { return "<p>" + i + ": " + x + "</p>";}).toString().replaceAll(",", "");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    timeZones = err;
+  }
+  
+  return ""+timeZones;
+}
+
 async function getHelpCmds() {
   const {cmds} = JSON.parse(await require('@mydir/list_help_cmds.json'));
   return cmds || [];
@@ -152,4 +188,4 @@ function getMyMotivation() {
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
 
-export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers };
+export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage };

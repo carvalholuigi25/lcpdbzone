@@ -1,11 +1,26 @@
-import axios from 'axios';
+import figlet from "figlet";
 import fs from 'fs';
 import { create, all } from 'mathjs';
 import * as shared from './shared-utils.mjs';
+import standard from "figlet/fonts/Standard";
+
+figlet.parseFont("Standard", standard);
 
 const math = create(all);
 
-const { getWarnTimeExpireCalc, setHouseNumZero, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, roundNum, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch } = shared;
+const { getWarnTimeExpireCalc, setHouseNumZero, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, roundNum, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch, getListAllTimeZones } = shared;
+
+async function getWelcomeMessage() {
+  const title = await figlet.text("LCP", {
+    font: "Standard",
+    horizontalLayout: "full",
+    verticalLayout: "full",
+    width: 100,
+    whitespaceBreak: true,
+    showHardBlanks: false,
+  });
+  return `<span class="d-block w-100">${title}</span><p class="mt-3">Welcome to our chatbot! How can I assist you today?</p>`;
+}
 
 function getHelpCmds() {
   const {cmds} = JSON.parse(fs.readFileSync('./list_help_cmds.json', 'utf-8'));
@@ -42,4 +57,4 @@ function getCalcAgeResult(birthYear) {
   }
 }
 
-export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers };
+export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage };

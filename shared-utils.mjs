@@ -1,3 +1,18 @@
+import figlet from "figlet";
+import moment from "moment-timezone";
+
+async function getWelcomeMessage() {
+  const title = await figlet.text("LCP", {
+    font: "Standard",
+    horizontalLayout: "full",
+    verticalLayout: "full",
+    width: 100,
+    whitespaceBreak: true,
+    showHardBlanks: false,
+  });
+  return `<span class="d-block w-100">${title}</span><p class="mt-3">Welcome to our chatbot! How can I assist you today?</p>`;
+}
+
 function getWarnTimeExpireCalc(v = 1) {
   return v * 60 * 1000;
 }
@@ -92,6 +107,24 @@ function getListModels() {
     { name: "gpt-5-xlarge", description: "An advanced model for high-quality outputs and nuanced understanding." }
   ];
   return models.map(m => `${m.name} - ${m.description}`).join('\n');
+}
+
+function getListAllTimeZones(method = "native") {
+  //methods: native -> IANA time zones, thirdpartylib -> moment-timezone
+  let timeZones;
+
+  try {
+    if(method == "native") {
+      timeZones = Intl.supportedValuesOf("timeZone").map((x, i) => { return "<p>" + i + ": " + x + "</p>";}).toString().replaceAll(",", "");
+    } else {
+      timeZones = moment.tz.names().map((x, i) => { return "<p>" + i + ": " + x + "</p>";}).toString().replaceAll(",", "");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    timeZones = err;
+  }
+  
+  return ""+timeZones;
 }
 
 function roundNum(num, dec = 2) {
@@ -432,6 +465,7 @@ async function getYoutubeSearch(query = "angular") {
 }
 
 export {
+  getWelcomeMessage,
   getWarnTimeExpireCalc,
   setHouseNumZero,
   getTimeNow,
@@ -440,6 +474,7 @@ export {
   getDateByTimezone,
   getTimeByTimezone,
   getDateTimeByTimezone,
+  getListAllTimeZones,
   generateJoke,
   generateQuote,
   getListModels,

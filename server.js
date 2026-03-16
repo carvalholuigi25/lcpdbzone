@@ -101,7 +101,11 @@ app.post('/chat', async (req, res) => {
 
     const handlers = {
       hello: () => "Hello world!",
-      welcome: () => "Welcome to our chatbot! How can I assist you today?",
+      welcome: () => f.getWelcomeMessage(),
+      help: () => {
+        return "HELP: With prefix (! or $), use this avaliable list of commands: \r\n\n" +
+        f.getHelpCmds().map(x => `${x.id}. <b>${x.cmd}</b> - ${x.description}`).join("\r\n");
+      },
       time: a => {
         const tz = a.match(/^zone:(.*)/)?.[1]?.trim();
         return "The time is: " + (tz ? f.getTimeByTimezone(tz) : f.getTimeNow());
@@ -118,11 +122,13 @@ app.post('/chat', async (req, res) => {
         );
       },
       timezone: () => "The current timezone is: " + f.getTimezone(),
-      help: () =>
-        "HELP: With prefix (! or $), use this avaliable list of commands: \r\n\n" +
-        f.getHelpCmds()
-          .map(x => `${x.id}. <b>${x.cmd}</b> - ${x.description}`)
-          .join("\r\n"),
+      listtimezones: a => {
+        const listmethods = ['native', 'thirdpartylib'];
+        const methodMatch = a.match(/^method:(.*)/);
+        const mval = methodMatch ? methodMatch[1].trim() : "native";
+        if (!listmethods.includes(mval)) throw new Error("Invalid method. (list of methods: "+listmethods.split(",")+")");
+        return f.getListAllTimeZones(mval);
+      },
       listaimodels: () => "Here are the available models:\n" + f.getListModels(),
       joke: () => f.generateJoke(),
       quote: () => f.generateQuote(),

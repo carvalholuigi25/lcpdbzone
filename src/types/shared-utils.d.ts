@@ -1,4 +1,5 @@
 declare module '@mydir/shared-utils.mjs' {
+  export function getWelcomeMessage(): string;
   export function getWarnTimeExpireCalc(v?: number): number;
   export function setHouseNumZero(num?: number): string | number;
   export function getTimeNow(): string;
@@ -7,6 +8,7 @@ declare module '@mydir/shared-utils.mjs' {
   export function getDateByTimezone(timeZone: string): string;
   export function getTimeByTimezone(timeZone: string): string;
   export function getDateTimeByTimezone(timeZone: string): string;
+  export function getListAllTimeZones(method: string = "native"): any;
   export function generateJoke(): string;
   export function generateQuote(): string;
   export function getListModels(): string;
