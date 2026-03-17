@@ -14,6 +14,11 @@ async function getWelcomeMessage() {
   return `<span class="titlewelcome">${title}</span><p class="mt-3 txtwelcome">Welcome to our chatbot! How can I assist you today?</p>`;
 }
 
+function getByeMessage() {
+  const dh = new Date().getHours();
+  return "Goodbye! Have a good "+(dh >= 7 && dh <= 12 ? "morning" : (dh >= 13 && dh <= 18 ? "afternoon" : (dh >= 19 ? "night" : "early morning")))+"!";
+}
+
 function getWarnTimeExpireCalc(v = 1) {
   return v * 60 * 1000;
 }
@@ -465,8 +470,51 @@ async function getYoutubeSearch(query = "angular") {
   }
 }
 
+async function sendFeedback(from, to, name, subject, content, contenthtml = "") {
+ try {
+  //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
+   // Create transporter
+    // let transporter = nodemailer.createTransport({
+    //   host: process.env['EMAILSERVICEHOST'] ?? 'smtp.gmail.com',
+    //   port: process.env['EMAILSERVICEPORT'] ?? 465,
+    //   secure: process.env['EMAILSERVICESECURE'] ?? true,
+    //   auth: {
+    //     user: process.env['EMAILAUTHUSER'],
+    //     pass: process.env['EMAILAUTHPASS'],
+    //   },
+    // });
+
+    // const nodemailer = require("nodemailer");
+    // let transporter = nodemailer.createTransport({
+    //   service: process.env['EMAILSERVICE'] ?? "gmail",
+    //   auth: {
+    //     user: process.env['EMAILAUTHUSER'],
+    //     pass: process.env['EMAILAUTHPASS'],
+    //   },
+    // });
+
+  // Email options
+  let mailOptions = {
+    from: '"'+name+'" <'+from+'>',
+    to: ""+(to ?? process.env.EMAILSENDER),
+    subject: ""+subject,
+    text: ""+content,
+    html: ""+contenthtml,
+  };
+
+  // Send email
+  // let info = await transporter.sendMail(mailOptions);
+  // return "The feedback has been sent sucessfully to: " + to + "(id: " + info.messageId + ")";
+  return "The feedback has been sent sucessfully to: " + mailOptions;
+ } catch(err) {
+  return "Error when trying to send feedback to someone: " + err;
+ }
+}
+
 export {
   getWelcomeMessage,
+  getByeMessage,
+  sendFeedback,
   getWarnTimeExpireCalc,
   setHouseNumZero,
   getTimeNow,

@@ -106,6 +106,31 @@ app.post('/chat', async (req, res) => {
         return "HELP: With prefix (! or $), use this avaliable list of commands: \r\n\n" +
         f.getHelpCmds().map(x => `${x.id}. <b>${x.cmd}</b> - ${x.description}`).join("\r\n");
       },
+      rules: () => {
+        return f.getRulesMessage();
+      },
+      feedback: async a => {
+        const feedbackmatch = a.match(/from:(\w+)|to:(\w+)|name:(\w+)|subject:(\w+)|content:(\w+)|contenthtml:(\w+)/gim);
+        const from = feedbackmatch ? feedbackmatch[0].split(":")[1] : "";
+        const to = feedbackmatch ? feedbackmatch[1].split(":")[1] : process.env.EMAILSENDER;
+        const name = feedbackmatch ? feedbackmatch[2].split(":")[1] : "";
+        const subject = feedbackmatch ? feedbackmatch[3].split(":")[1] : "";
+        const content = feedbackmatch ? feedbackmatch[4].split(":")[1] : "";
+        const contenthtml = feedbackmatch ? feedbackmatch[5].split(":")[1] : "";
+
+        if(!from || from.length == 0) throw new Error("Please provide the email recipient!");
+        if(!to || to.length == 0) throw new Error("Please provide the email sender!");
+        if(!name || name.length == 0) throw new Error("Please provide the name from email sender!");
+        if(!subject || subject.length == 0) throw new Error("Please provide the subject!");
+        if(!content || content.length == 0) throw new Error("Please provide the content (write something of text here...)!");
+        // if(!contenthtml || contenthtml.length == 0) throw new Error("Please provide the html content (write something of html here...)!");
+
+        try {
+          return await f.sendFeedback(from, to, name, subject, content, contenthtml);
+        } catch (err) {
+          return console.error(err);
+        }
+      },
       time: a => {
         const tz = a.match(/^zone:(.*)/)?.[1]?.trim();
         return "The time is: " + (tz ? f.getTimeByTimezone(tz) : f.getTimeNow());
@@ -326,7 +351,7 @@ app.post('/chat', async (req, res) => {
         warn = localStorage.getItem("warningCount") ? parseInt(localStorage.getItem("warningCount")) : 0;
         return getProfMsgWarnList(warn, maxwarn, warnExpireTime);
       },
-      bye: () => "Goodbye! Have a great day!",
+      bye: () => f.getByeMessage(),
     };
 
     const profanityList = (msg) => {

@@ -204,6 +204,16 @@
       "id": 41,
       "cmd": "listtimezones",
       "description": "Returns the list of all avaliable timezones (usage: $listtimezones target:native) (options: native, thirdpartylib)"
+    },
+    {
+      "id": 42,
+      "cmd": "rules",
+      "description": "It displays the list of rules for usage of this chatbot"
+    },
+    {
+      "id": 43,
+      "cmd": "feedback",
+      "description": "Send a feedback message to the creator of this webapp (usage: $feedback from:[from] to:[to?] subject:[subject] content:[content] contenthtml:[contenthtml?], note: the symbol ? is optional)"
     }
   ]
 }

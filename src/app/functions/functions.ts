@@ -1,6 +1,6 @@
 import figlet from "figlet";
 import moment from "moment-timezone";
-import * as shared from '@mydir/shared-utils.mjs';
+import * as shared from '@mydir/shared-utils.js';
 import standard from "figlet/fonts/Standard";
 
 figlet.parseFont("Standard", standard);
@@ -19,6 +19,45 @@ async function getMyWelcomeMessage() {
     showHardBlanks: false,
   });
   return `<span class="titlewelcome">${title}</span><p class="mt-3 txtwelcome">Welcome to our chatbot! How can I assist you today?</p>`;
+}
+
+async function getMyRulesMessage() {
+  const is3d = true;
+
+  const title = await figlet.text("LCP", {
+    font: is3d ? "3D-ASCII" : "Standard",
+    horizontalLayout: "full",
+    verticalLayout: "full",
+    width: 100,
+    whitespaceBreak: true,
+    showHardBlanks: false,
+  });
+
+  return `
+    <span class="titlerules">${title}</span>
+    <p class="mt-3 txtrules">
+      THE CHATBOT RULES:
+
+      1º - Use this chatbot as tool but use it with moderate and responsibility;
+      2º - Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3);
+      3º - Be cool and dont be afraid to use this chatbot (if you have doubts, please use the command: $feedback msg:[your message here]);
+      4º - This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification;
+      5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or you will get banned and the chatbot will get timeout.
+
+      Enjoy!
+
+      Date: 2026-03-17 17:16:00
+
+      Regards,
+      The administration of LCP
+    </p>
+  `;
+}
+
+function getMyByeMessage() {
+  const dh = new Date().getHours();
+  const statusmsg = dh >= 7 && dh <= 12 ? "morning" : (dh >= 13 && dh <= 18 ? "afternoon" : (dh >= 19 && dh <= 0 ? "night" : "early morning"));
+  return "Goodbye! Have a good "+statusmsg+"!";
 }
 
 function getMyWarnTimeExpireCalc(v = 1) {
@@ -189,4 +228,4 @@ function getMyMotivation() {
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
 
-export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage };
+export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage, getMyWelcomeMessage, getMyRulesMessage, getMyByeMessage };

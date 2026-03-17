@@ -31,10 +31,11 @@ export class Admsupport implements OnInit, OnDestroy {
   maxWarnings = 3;
   warningCount = 0;
   timeValMs = 5 * 60 * 1000;
+  prefix = "$";
+  prefixalt = "!";
   dateTimeWarnExpire: number = new Date().getTime() + this.timeValMs;
 
   private abortController: AbortController | null = null;
-  private myphysicallocalstorage: Storage | null = null;
   private mytimer: any;
 
   constructor(
@@ -44,8 +45,6 @@ export class Admsupport implements OnInit, OnDestroy {
     @Inject(DOCUMENT) private document: Document
   ) {
     const ls = this.document.defaultView?.localStorage;
-
-    this.myphysicallocalstorage = ls!;
 
     this.isSupportChatEnabled = ls?.getItem("supportChatEnabled") === "true";
     this.warningCount = ls?.getItem("warningCount") ? parseInt(ls.getItem("warningCount")!) : 0;
@@ -111,7 +110,7 @@ export class Admsupport implements OnInit, OnDestroy {
         this.warningCount = 0;
         this.saveMyWarnings(this.warningCount);
         this.clearMessageWithoutInit();
-        this.userInput = '$resetwarnings';
+        this.userInput = this.prefix+'resetwarnings';
         this.sendMessageStream();
         
         setTimeout(() => {
@@ -129,12 +128,7 @@ export class Admsupport implements OnInit, OnDestroy {
 
   loadInitialChatbot() {
     if(this.messages.length === 0 && this.userInput.trim() === '') {
-      if(this.warningCount >= this.maxWarnings) {
-        this.userInput = '$chatclosed';
-      } else {
-        this.userInput = '$welcome';
-      }
-
+      this.userInput = (this.warningCount >= this.maxWarnings) ? this.prefix+'chatclosed' : this.prefix+'welcome';
       this.sendMessageStream();
     }
   }
@@ -172,6 +166,12 @@ export class Admsupport implements OnInit, OnDestroy {
 
     this.clearTimer();
     this.loading = false;
+
+    setTimeout(() => {
+      this.messages = [];
+      this.userInput = "";
+      this.loadInitialChatbot();
+    }, 1000 * 2);
   }
 
   async refreshMessageStream() {
@@ -202,9 +202,9 @@ export class Admsupport implements OnInit, OnDestroy {
       } else {
         if(this.warningCount >= this.maxWarnings) {
           this.dateTimeWarnExpire = new Date().getTime() + this.timeValMs;
-          alert("Chat closed due to inappropriate language. It will be reopened at " + new Date(this.dateTimeWarnExpire).toLocaleTimeString() + ".");
+          alert(`Chat closed due to inappropriate language. It will be reopened at ${new Date(this.dateTimeWarnExpire).toLocaleTimeString()}.`);
         } else {
-          alert("Please avoid using inappropriate language. Warning " + this.warningCount + " of " + this.maxWarnings);
+          alert(`Please avoid using inappropriate language. Warning ${this.warningCount} of ${this.maxWarnings}`);
         }
       }
 
@@ -221,7 +221,7 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   resetWarnings() {
-    if(this.userInput == "$resetwarnings" || this.userInput == "!resetwarnings") {
+    if(this.userInput == this.prefix+"resetwarnings" || this.userInput == this.prefixalt+"resetwarnings") {
       if(this.warningCount > 0) {
         const ls = this.document.defaultView?.localStorage;
         const loginItem = ls?.getItem("login");
@@ -344,17 +344,20 @@ export class Admsupport implements OnInit, OnDestroy {
     this.abortController = new AbortController();
 
     // Handle special commands locally
-    if (["$time", "!time"].includes(userMessage.content.split(' ')[0])) {
+    if ([this.prefix+"time", this.prefixalt+"time"].includes(userMessage.content.split(' ')[0])) {
       this.handleTimeCommand(userMessage, assistantMessage);
       this.loading = false;
       return;
-    } else if (["$countdown", "!countdown"].includes(userMessage.content.split(' ')[0])) {
+    } else if ([this.prefix+"countdown", this.prefixalt+"countdown"].includes(userMessage.content.split(' ')[0])) {
       this.handleCountdownCommand(userMessage, assistantMessage);
       this.loading = false;
       return;
-    } else if (["$countup", "!countup"].includes(userMessage.content.split(' ')[0])) {
+    } else if ([this.prefix+"countup", this.prefixalt+"countup"].includes(userMessage.content.split(' ')[0])) {
       this.handleCountupCommand(userMessage, assistantMessage);
       this.loading = false;
+      return;
+    } else if ([this.prefix+"bye", this.prefixalt+"bye"].includes(userMessage.content.split(' ')[0])) {
+      this.endInteraction();
       return;
     }
 
@@ -383,7 +386,7 @@ export class Admsupport implements OnInit, OnDestroy {
       this.loading = false;
       this.abortController = null;
 
-      if(this.userInput.trim() === '$bye' || this.userInput.trim() === '!bye') {
+      if(this.userInput.trim() === this.prefix+'bye' || this.userInput.trim() === this.prefixalt+'bye') {
         this.endInteraction();
       }
     }

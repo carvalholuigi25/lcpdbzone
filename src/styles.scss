@@ -328,17 +328,23 @@ body {
   padding: 15px;
 }
 
-.titlewelcome, .welcometitle {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    white-space: pre-wrap;
-    word-break: break-all;
-    word-wrap: break-word;
-    box-sizing: border-box;
+.titlewelcome, .welcometitle,
+.titlerules, .rulestitle {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  white-space: pre-wrap;
+  word-break: break-all;
+  word-wrap: break-word;
+  box-sizing: border-box;
+  text-align: center;
+  margin: 15px auto;
 }
 
-.txtwelcome, .welcometxt {
+.txtwelcome, .welcometxt,
+.txtrules, .rulestxt {
     display: block;
 }
 
