@@ -11,7 +11,7 @@
   },
   "include": [
     "src/**/*.ts"
-, "src/app/modules/routes/data/datalazyroutes.module copy.ts.bkp"  ],
+, "src/app/modules/routes/data/datalazyroutes.module copy.ts.bkp", "src/main.d.ts"  ],
   "exclude": [
     "src/**/*.spec.ts"
   ]

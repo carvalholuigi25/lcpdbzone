@@ -1,8 +1,8 @@
-declare module '@mydir/shared-utils.js' {
+declare module '@mydir/shared-utils.mjs' {
   export function getWelcomeMessage(): string;
   export function getByeMessage(): string;
   export function getRulesMessage(): string;
-  export function sendFeedback(from: string, to: string, name: string, subject: string, content: string, contenthtml?: string): Promise<any>;
+  export function sendFeedback(sgMail: any, from: string, subject: string, content: string, contenthtml?: string): Promise<any>;
   export function getWarnTimeExpireCalc(v?: number): number;
   export function setHouseNumZero(num?: number): string | number;
   export function getTimeNow(): string;

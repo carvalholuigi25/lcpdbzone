@@ -1,8 +1,8 @@
-import figlet from "figlet";
 import fs from 'fs';
+import figlet from "figlet";
 import standard from "figlet/fonts/Standard";
 import { create, all } from 'mathjs';
-import * as shared from './shared-utils.js';
+import * as shared from './shared-utils.mjs';
 
 figlet.parseFont("Standard", standard);
 
@@ -42,9 +42,11 @@ async function getRulesMessage() {
 
       1º - Use this chatbot as tool but use it with moderate and responsibility;
       2º - Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3);
-      3º - Be cool and dont be afraid to use this chatbot (if you have doubts, please use the command: $feedback msg:[your message here]);
+      3º - Be cool and dont be afraid to use this chatbot;
       4º - This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification;
-      5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or you will get banned and the chatbot will get timeout.
+      5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time).
+
+      If you have doubts or any issues, please use the command:$feedback from:[from] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.
 
       Enjoy!
 
@@ -56,42 +58,32 @@ async function getRulesMessage() {
   `;
 }
 
-async function sendFeedback(from, to, name, subject, content, contenthtml = "") {
+async function sendFeedback(sgMail, from, subject, content, contenthtml) {
  try {
   //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
-   // Create transporter
-    // let transporter = nodemailer.createTransport({
-    //   host: process.env['EMAILSERVICEHOST'] ?? 'smtp.gmail.com',
-    //   port: process.env['EMAILSERVICEPORT'] ?? 465,
-    //   secure: process.env['EMAILSERVICESECURE'] ?? true,
-    //   auth: {
-    //     user: process.env['EMAILAUTHUSER'],
-    //     pass: process.env['EMAILAUTHPASS'],
-    //   },
-    // });
 
-    // const nodemailer = require("nodemailer");
-    // let transporter = nodemailer.createTransport({
-    //   service: process.env['EMAILSERVICE'] ?? "gmail",
-    //   auth: {
-    //     user: process.env['EMAILAUTHUSER'],
-    //     pass: process.env['EMAILAUTHPASS'],
-    //   },
-    // });
+  // const objdata = {
+  //   to: process.env.CONTACT_EMAIL ?? process.env.EMAILSENDER,
+  //   from: from,
+  //   subject: subject,
+  //   text: content,
+  //   html: `${contenthtml}`
+  // };
 
-  // Email options
-  let mailOptions = {
-    from: '"'+name+'" <'+from+'>',
-    to: ""+(to ?? process.env.EMAILSENDER),
+  const objdata = {
+    to: ""+process.env.CONTACT_EMAIL ?? ""+process.env.EMAILSENDER,
+    from: ""+from,
     subject: ""+subject,
     text: ""+content,
-    html: ""+contenthtml,
+    html: `<p>${contenthtml ?? content}</p>`
   };
 
-  // Send email
-  // let info = await transporter.sendMail(mailOptions);
-  // return "The feedback has been sent sucessfully to: " + to + "(id: " + info.messageId + ")";
-  return "The feedback has been sent sucessfully to: " + mailOptions;
+  return await sgMail.send(objdata).then((res) => {
+    console.log(res);
+    return "The feedback has been sent to " + objdata.to;
+  }).catch((err) => {
+    return "Error when trying to send feedback to someone: " + err;
+  });
  } catch(err) {
   return "Error when trying to send feedback to someone: " + err;
  }

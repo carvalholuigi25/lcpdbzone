@@ -470,42 +470,24 @@ async function getYoutubeSearch(query = "angular") {
   }
 }
 
-async function sendFeedback(from, to, name, subject, content, contenthtml = "") {
- try {
-  //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
-   // Create transporter
-    // let transporter = nodemailer.createTransport({
-    //   host: process.env['EMAILSERVICEHOST'] ?? 'smtp.gmail.com',
-    //   port: process.env['EMAILSERVICEPORT'] ?? 465,
-    //   secure: process.env['EMAILSERVICESECURE'] ?? true,
-    //   auth: {
-    //     user: process.env['EMAILAUTHUSER'],
-    //     pass: process.env['EMAILAUTHPASS'],
-    //   },
-    // });
+async function sendFeedback(sgMail, from, subject, content, contenthtml) {
+  try {
+    //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
 
-    // const nodemailer = require("nodemailer");
-    // let transporter = nodemailer.createTransport({
-    //   service: process.env['EMAILSERVICE'] ?? "gmail",
-    //   auth: {
-    //     user: process.env['EMAILAUTHUSER'],
-    //     pass: process.env['EMAILAUTHPASS'],
-    //   },
-    // });
+    const objdata = {
+      to: ""+process.env.CONTACT_EMAIL ?? ""+process.env.EMAILSENDER,
+      from: ""+from,
+      subject: ""+subject,
+      text: ""+content,
+      html: `<p>${contenthtml ?? content}</p>`
+    };
 
-  // Email options
-  let mailOptions = {
-    from: '"'+name+'" <'+from+'>',
-    to: ""+(to ?? process.env.EMAILSENDER),
-    subject: ""+subject,
-    text: ""+content,
-    html: ""+contenthtml,
-  };
-
-  // Send email
-  // let info = await transporter.sendMail(mailOptions);
-  // return "The feedback has been sent sucessfully to: " + to + "(id: " + info.messageId + ")";
-  return "The feedback has been sent sucessfully to: " + mailOptions;
+    return await sgMail.send(objdata).then((res) => {
+      console.log(res);
+      return "The feedback has been sent to " + objdata.to;
+    }).catch((err) => {
+      return "Error when trying to send feedback to someone: " + err;
+    });
  } catch(err) {
   return "Error when trying to send feedback to someone: " + err;
  }

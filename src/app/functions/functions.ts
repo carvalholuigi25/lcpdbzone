@@ -1,12 +1,11 @@
 import figlet from "figlet";
 import moment from "moment-timezone";
-import * as shared from '@mydir/shared-utils.js';
+import * as shared from '@mydir/shared-utils.mjs';
 import standard from "figlet/fonts/Standard";
 
 figlet.parseFont("Standard", standard);
 
 const { getWarnTimeExpireCalc, setHouseNumZero, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, roundNum, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch, getListAllTimeZones, getWelcomeMessage } = shared;
-
 
 async function getMyWelcomeMessage() {
   const is3d = true;
@@ -40,9 +39,11 @@ async function getMyRulesMessage() {
 
       1º - Use this chatbot as tool but use it with moderate and responsibility;
       2º - Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3);
-      3º - Be cool and dont be afraid to use this chatbot (if you have doubts, please use the command: $feedback msg:[your message here]);
+      3º - Be cool and dont be afraid to use this chatbot;
       4º - This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification;
-      5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or you will get banned and the chatbot will get timeout.
+      5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time).
+
+      If you have doubts or any issues, please use the command: $feedback from:[from] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.
 
       Enjoy!
 

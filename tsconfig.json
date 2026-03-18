@@ -31,6 +31,7 @@
       "@services/*": ["src/app/services/*"],
       "@myfunctions": ["src/app/functions/functions.ts"],
       "@myserverfunctions": ["./functions.js"],
+      "@sendgridm": ["./node_modules/@sendgrid/mail/index.js"]
     }
   },
   "angularCompilerOptions": {
