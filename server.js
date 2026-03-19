@@ -1,12 +1,13 @@
+import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import * as f from './serverfunctions.js';
-import fs from 'fs';
-import { LocalStorage } from 'node-localstorage';
 import rateLimit from 'express-rate-limit';
 import sgMail from '@sendgrid/mail';
+import nodemailer from 'nodemailer';
+import { LocalStorage } from 'node-localstorage';
+import * as f from './serverfunctions.js';
 
 dotenv.config();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -129,6 +130,27 @@ app.post('/chat', async (req, res) => {
         if(IsContentHTMLRequired && (!contenthtml || contenthtml.length == 0)) throw new Error("Please provide the html content (write something of html here...)! \r\n" + usagecmd);
 
         return await f.sendFeedback(sgMail, from, subject, content, contenthtml);
+      },
+      feedback2: async a => {
+        const IsContentHTMLRequired = false;
+        const defemailsender = process.env.EMAILSENDER ?? process.env.CONTACT_EMAIL;
+
+        const feedbackmatch = a.match(/from:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|name:(\w+)|subject:(\w+)|content:(\w+)|contenthtml:(\w+)$/gim);
+        const from = feedbackmatch ? feedbackmatch[0].split(":")[1] : defemailsender;
+        const name = feedbackmatch ? feedbackmatch[1].split(":")[1] : "";
+        const subject = feedbackmatch ? feedbackmatch[2].split(":")[1] : "";
+        const content = feedbackmatch ? feedbackmatch[3].split(":")[1].toString() : "";
+        const contenthtml = IsContentHTMLRequired ? feedbackmatch ? feedbackmatch[4].split(":")[1].toString() : "" : "";
+
+        const usagecmd = "Usage: $feedback2 from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?]";
+
+        if(!from || from.length == 0) throw new Error("Please provide the email recipient! \r\n" + usagecmd);
+        if(!name || name.length == 0) throw new Error("Please provide the name from email recipient! \r\n" + usagecmd);
+        if(!subject || subject.length == 0) throw new Error("Please provide the subject! \r\n" + usagecmd);
+        if(!content || content.length == 0) throw new Error("Please provide the content (write something of text here...)! \r\n" + usagecmd);
+        if(IsContentHTMLRequired && (!contenthtml || contenthtml.length == 0)) throw new Error("Please provide the html content (write something of html here...)! \r\n" + usagecmd);
+
+        return await f.sendFeedback2(nodemailer, from, name, subject, content, contenthtml);
       },
       time: a => {
         const tz = a.match(/^zone:(.*)/)?.[1]?.trim();

@@ -213,7 +213,12 @@
     {
       "id": 43,
       "cmd": "feedback",
-      "description": "Send a feedback message to the creator of this webapp (usage: $feedback from:[from] to:[to?] subject:[subject] content:[content] contenthtml:[contenthtml?], note: the symbol ? is optional)"
+      "description": "Send a feedback message (by library sendgrid) to the creator of this webapp (usage: $feedback from:[from] subject:[subject] content:[content] contenthtml:[contenthtml?], note: the symbol ? is optional)"
+    },
+    {
+      "id": 44,
+      "cmd": "feedback2",
+      "description": "Send a feedback message (by library nodemailer) to the creator of this webapp (usage: $feedback2 from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?], note: the symbol ? is optional)"
     }
   ]
 }

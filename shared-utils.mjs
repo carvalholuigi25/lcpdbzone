@@ -471,15 +471,17 @@ async function getYoutubeSearch(query = "angular") {
 }
 
 async function sendFeedback(sgMail, from, subject, content, contenthtml) {
-  try {
-    //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
+ try {
+  //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
+
+  const to = process.env.CONTACT_EMAIL || process.env.EMAILSENDER;
 
     const objdata = {
-      to: ""+process.env.CONTACT_EMAIL ?? ""+process.env.EMAILSENDER,
+      to: ""+to,
       from: ""+from,
       subject: ""+subject,
       text: ""+content,
-      html: `<p>${contenthtml ?? content}</p>`
+      html: `<b>${contenthtml ?? content}</b>`
     };
 
     return await sgMail.send(objdata).then((res) => {
@@ -493,10 +495,44 @@ async function sendFeedback(sgMail, from, subject, content, contenthtml) {
  }
 }
 
+async function sendFeedback2(nodemailer, from, name, subject, content, contenthtml) {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAILSERVICE ?? 'gmail',
+      host: process.env.EMAILHOST ?? 'smtp.gmail.com',
+      port: process.env.EMAILPORT ?? 465,
+      secure: process.env.EMAILSECURE ?? true,
+      auth: {
+        user: process.env.EMAILSMTPUSER || '',
+        pass: process.env.EMAILSMTPPASS || '',
+      }
+    });
+
+    const to = process.env.CONTACT_EMAIL || process.env.EMAILSENDER;
+
+    return await transporter.sendMail({
+      from: name ? '"'+name+'" <'+from+'>' : ""+from,
+      to: to,
+      subject: ""+subject,
+      text: ""+content,
+      html: `<b>${contenthtml ?? content}</b>`
+    }).then(r => {
+      console.log(r);
+      return "The feedback has been sent to " + to + " (Response: " + r + ")";
+    }).catch(err => {
+      console.error(err);
+      return "Error when trying to send feedback to someone: " + err;
+    });
+  } catch(err) {
+    return "Error when trying to send feedback to someone: " + err;
+  }
+}
+
 export {
   getWelcomeMessage,
   getByeMessage,
   sendFeedback,
+  sendFeedback2,
   getWarnTimeExpireCalc,
   setHouseNumZero,
   getTimeNow,
