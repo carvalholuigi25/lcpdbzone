@@ -2,6 +2,7 @@ import fs from 'fs';
 import figlet from "figlet";
 import standard from "figlet/fonts/Standard";
 import { create, all } from 'mathjs';
+import { htmlToText } from "html-to-text";
 import * as shared from './shared-utils.mjs';
 
 figlet.parseFont("Standard", standard);
@@ -98,15 +99,19 @@ async function sendFeedback2(nodemailer, from, name, subject, content, contentht
 
     const to = process.env.CONTACT_EMAIL || process.env.EMAILSENDER;
 
-    return await transporter.sendMail({
+    const objdata = {
       from: name ? '"'+name+'" <'+from+'>' : ""+from,
       to: to,
       subject: ""+subject,
-      text: ""+content,
-      html: `<b>${contenthtml ?? content}</b>`
-    }).then(r => {
+      text: '"'+content+'"',
+      html: htmlToText(contenthtml ?? content)
+    };
+
+    console.log(objdata);
+
+    return await transporter.sendMail(objdata).then(r => {
       console.log(r);
-      return "The feedback has been sent to " + to + " (Response: " + r + ")";
+      return "The feedback has been sent to " + to;
     }).catch(err => {
       console.error(err);
       return "Error when trying to send feedback to someone: " + err;
