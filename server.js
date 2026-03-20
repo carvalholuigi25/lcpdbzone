@@ -116,25 +116,6 @@ app.post('/chat', async (req, res) => {
         const IsContentHTMLRequired = false;
         const defemailsender = process.env.EMAILSENDER ?? process.env.CONTACT_EMAIL;
 
-        const feedbackmatch = a.match(/from:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|subject:(\w+)|content:(\w+)|contenthtml:(\w+)$/gim);
-        const from = feedbackmatch ? feedbackmatch[0].split(":")[1] : defemailsender;
-        const subject = feedbackmatch ? feedbackmatch[1].split(":")[1] : "";
-        const content = feedbackmatch ? feedbackmatch[2].split(":")[1].toString() : "";
-        const contenthtml = IsContentHTMLRequired ? feedbackmatch ? feedbackmatch[3].split(":")[1].toString() : "" : "";
-
-        const usagecmd = "Usage: $feedback from:[from] subject:[subject] content:[content] contenthtml:[contenthtml?]";
-
-        if(!from || from.length == 0) throw new Error("Please provide the email recipient! \r\n" + usagecmd);
-        if(!subject || subject.length == 0) throw new Error("Please provide the subject! \r\n" + usagecmd);
-        if(!content || content.length == 0) throw new Error("Please provide the content (write something of text here...)! \r\n" + usagecmd);
-        if(IsContentHTMLRequired && (!contenthtml || contenthtml.length == 0)) throw new Error("Please provide the html content (write something of html here...)! \r\n" + usagecmd);
-
-        return await f.sendFeedback(sgMail, from, subject, content, contenthtml);
-      },
-      feedback2: async a => {
-        const IsContentHTMLRequired = false;
-        const defemailsender = process.env.EMAILSENDER ?? process.env.CONTACT_EMAIL;
-
         const feedbackmatch = a.match(/from:([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|name:(\w+)|subject:(\w+)|content:(\w+)|contenthtml:(\w+)$/gim);
         const from = feedbackmatch ? feedbackmatch[0].split(":")[1] : defemailsender;
         const name = feedbackmatch ? feedbackmatch[1].split(":")[1] : "";
@@ -142,7 +123,7 @@ app.post('/chat', async (req, res) => {
         const content = feedbackmatch ? feedbackmatch[3].split(":")[1].toString() : "";
         const contenthtml = IsContentHTMLRequired ? feedbackmatch ? feedbackmatch[4].split(":")[1].toString() : "" : "";
 
-        const usagecmd = "Usage: $feedback2 from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?]";
+        const usagecmd = "Usage: $feedback from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?]";
 
         if(!from || from.length == 0) throw new Error("Please provide the email recipient! \r\n" + usagecmd);
         if(!name || name.length == 0) throw new Error("Please provide the name from email recipient! \r\n" + usagecmd);
@@ -150,7 +131,18 @@ app.post('/chat', async (req, res) => {
         if(!content || content.length == 0) throw new Error("Please provide the content (write something of text here...)! \r\n" + usagecmd);
         if(IsContentHTMLRequired && (!contenthtml || contenthtml.length == 0)) throw new Error("Please provide the html content (write something of html here...)! \r\n" + usagecmd);
 
-        return await f.sendFeedback2(nodemailer, from, name, subject, content, contenthtml);
+        return await f.sendFeedback(nodemailer, from, name, subject, content, contenthtml);
+      },
+      theme: a => {
+        const themematch = a.match(/name:(\w+)$/gim);
+        const theme = themematch ? themematch[0].split(":")[1] : "default";
+        const options = ["default", "matrix", "liquidglass", "glassmorphism", "visionglass", "red", "green", "blue", "yellow"];
+        const usagecmd = "Usage: $theme name:[name] (options: " + options.toString().split(",") + ")";
+
+        if(!theme || theme.length == 0) throw new Error("Please provide the theme name! \r\n" + usagecmd);
+        if(!options.includes(theme)) throw new Error("This theme "+ theme +" does not exist. Please request it through the $feedback command or send email to creator of this webapp.");
+
+        return f.setTheme(localStorage, theme);
       },
       time: a => {
         const tz = a.match(/^zone:(.*)/)?.[1]?.trim();

@@ -33,6 +33,7 @@ export class Admsupport implements OnInit, OnDestroy {
   timeValMs = 5 * 60 * 1000;
   prefix = "$";
   prefixalt = "!";
+  chatthemename: string = "mychattheme default";
   dateTimeWarnExpire: number = new Date().getTime() + this.timeValMs;
 
   private abortController: AbortController | null = null;
@@ -49,6 +50,7 @@ export class Admsupport implements OnInit, OnDestroy {
     this.isSupportChatEnabled = ls?.getItem("supportChatEnabled") === "true";
     this.warningCount = ls?.getItem("warningCount") ? parseInt(ls.getItem("warningCount")!) : 0;
     this.dateTimeWarnExpire = ls?.getItem("dateTimeWarnExpire") ? parseInt(ls.getItem("dateTimeWarnExpire")!) : (new Date().getTime() + this.timeValMs);
+    this.loadThemeChat(ls);
 
     if(ls) {
       ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
@@ -70,6 +72,14 @@ export class Admsupport implements OnInit, OnDestroy {
     }
 
     this.clearTimer();
+  }
+
+  loadThemeChat(ls: Storage | any | undefined) {
+    this.chatthemename = 'mychattheme ' + this.getThemeName(ls);    
+  }
+
+  getThemeName(ls: Storage | any | undefined) {
+    return ls ? ls?.getItem("cbsettings") ? JSON.parse(ls?.getItem("cbsettings")!).appearence.theme : "default" : "default";
   }
 
   toggleSupport() {
@@ -309,6 +319,32 @@ export class Admsupport implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  private handleThemeCommand(userMessage: Message, assistantMessage: Message) {
+    const ls = localStorage;
+    const content = userMessage.content;
+    const match = content.match(/name:\s*(\w+)/mig);
+    const options = ["default", "matrix", "liquidglass", "glassmorphism", "visionglass", "red", "green", "blue", "yellow"];
+    const usagecmd = "Usage: $theme name:[name] (options: " + options.toString().split(",") + ")";
+    let theme = match ? match[0].split(":")[1] : "";
+
+    this.mytimer = setTimeout(() => {
+      this.ngZone.run(() => {
+        if(!theme || theme.length == 0) {
+          assistantMessage.content = "Please provide the theme name! \r\n" + usagecmd;
+        } else {
+          if(!options.includes(theme)) {
+            assistantMessage.content = "This theme "+ theme +" does not exist. Please request it through the $feedback command or send email to creator of this webapp.";
+          } else {
+            assistantMessage.content = `${f.setTheme(ls, theme)}`;
+          }
+        }
+
+        this.loadThemeChat(ls);
+        this.cdr.markForCheck();
+      });
+    }, 500);
+  }
+
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 
@@ -354,6 +390,10 @@ export class Admsupport implements OnInit, OnDestroy {
       return;
     } else if ([this.prefix+"countup", this.prefixalt+"countup"].includes(userMessage.content.split(' ')[0])) {
       this.handleCountupCommand(userMessage, assistantMessage);
+      this.loading = false;
+      return;
+    } else if ([this.prefix+"theme", this.prefixalt+"theme"].includes(userMessage.content.split(' ')[0])) {
+      this.handleThemeCommand(userMessage, assistantMessage);
       this.loading = false;
       return;
     } else if ([this.prefix+"bye", this.prefixalt+"bye"].includes(userMessage.content.split(' ')[0])) {

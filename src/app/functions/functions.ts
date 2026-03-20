@@ -229,4 +229,25 @@ function getMyMotivation() {
   return motivations[Math.floor(Math.random() * motivations.length)];
 }
 
-export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage, getMyWelcomeMessage, getMyRulesMessage, getMyByeMessage };
+function setTheme(ls: any, themeName = "default") {
+  try {
+    if(ls && ls.getItem("cbsettings")) {
+      ls.removeItem("cbsettings");
+    }
+
+    if(themeName && !ls.getItem("cbsettings")) {
+      ls.setItem("cbsettings", JSON.stringify({appearence: {theme: themeName}}));
+    }
+
+    const theme = ls.getItem("cbsettings") ? JSON.parse(ls.getItem("cbsettings")).appearence.theme : themeName;
+    return theme && theme !== "" ? "The theme "+themeName+" has been set it sucessfully." : "Something wrong with setting with theme "+themeName+"...";
+  } catch (error) {
+    return "Error: The theme "+themeName+" couldn't be set. Here's details: " + error;
+  }
+}
+
+function getTheme(ls: any, theme: string) {
+  return ls.getItem("cbsettings") && JSON.parse(ls.getItem("cbsettings")).appearence.theme || (theme ?? "default");
+}
+
+export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage, getMyWelcomeMessage, getMyRulesMessage, getMyByeMessage, setTheme, getTheme };

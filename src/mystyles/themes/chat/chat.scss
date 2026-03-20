@@ -1,0 +1,160 @@
+@use '../../animations/myanims.scss';
+
+@mixin themeChatDef() {
+    background-color: inherit;
+    color: inherit;
+}
+
+@mixin themeMatrixChat() {
+    background-color: black !important;
+    color: #00ff00 !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeLiquidGlassChat() {
+    $blur: 25px;
+    $radius: 24px;
+
+    position: relative;
+    overflow: hidden;
+    border-radius: $radius;
+    backdrop-filter: blur($blur) saturate(200%);
+    -webkit-backdrop-filter: blur($blur) saturate(200%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25),rgba(255, 255, 255, 0.05)) !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -50%;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.35), transparent 60%) !important;
+        pointer-events: none;
+        animation: liquidMove 8s linear infinite;
+    }
+
+    @include themeSharedComps();
+}
+
+@mixin themeGlassmorphismChat() {
+    background: rgba(255, 0, 251, 0.5) !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 0, 255, 0.3) !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeVisionGlassChat() {
+  position: relative;
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(30px) brightness(1.2);
+  -webkit-backdrop-filter: blur(30px) brightness(1.2);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 0 20px rgba(255, 255, 255, 0.2);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.4), transparent 40%) !important;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  @include themeSharedComps();
+}
+
+@mixin themeRedChat() {
+    background-color: red !important;
+    color: white !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeGreenChat() {
+    background-color: green !important;
+    color: white !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeBlueChat() {
+    background-color: blue !important;
+    color: white !important;
+    
+    @include themeSharedComps();
+}
+
+@mixin themeYellowChat() {
+    background-color: yellow !important;
+    color: black !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeSharedComps() {
+    .messages {
+        background: inherit;
+
+        .message {
+            &.user {
+                background-color: rgba(78, 78, 78, 0.5);
+                color: inherit;
+            }
+
+            &.assistant, &.system {
+                background-color: rgba(78, 78, 78, 0.5);
+                color: inherit;
+            }
+        }
+    }
+
+    .input-container {
+        background-color: rgba(78, 78, 78, 0.5);
+        color: inherit;
+    }
+}
+
+.mychattheme {
+    &.default {
+      @include themeChatDef();
+    }
+
+    &.matrix {
+      @include themeMatrixChat();
+    }
+
+    &.liquidglass {
+      @include themeLiquidGlassChat();
+    }
+
+    &.glassmorphism {
+      @include themeGlassmorphismChat();
+    }
+
+    &.visionglass {
+       @include themeVisionGlassChat();
+    }
+
+    &.red {
+       @include themeRedChat();
+    }
+
+    &.green {
+       @include themeGreenChat();
+    }
+
+    &.blue {
+       @include themeBlueChat();
+    }
+
+    &.yellow {
+       @include themeYellowChat();
+    }
+}

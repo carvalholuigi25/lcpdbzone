@@ -1,3 +1,5 @@
+@use '../../animations/myanims.scss';
+
 @mixin liquid-glass(
   $radius: 24px,
   $blur: 25px
@@ -37,17 +39,5 @@
     .header {
       @include liquid-glass();
     }
-  }
-}
-
-@keyframes liquidMove {
-  0% {
-    transform: translate(-10%, -10%);
-  }
-  50% {
-    transform: translate(10%, 10%);
-  }
-  100% {
-    transform: translate(-10%, -10%);
   }
 }

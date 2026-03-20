@@ -47,7 +47,7 @@ async function getRulesMessage() {
       4º - This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification;
       5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time).
 
-      If you have doubts or any issues, please use the command: $feedback2 from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.
+      If you have doubts or any issues, please use the command: $feedback from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.
 
       Enjoy!
 
@@ -59,32 +59,7 @@ async function getRulesMessage() {
   `;
 }
 
-async function sendFeedback(sgMail, from, subject, content, contenthtml) {
- try {
-  //src: https://developers.google.com/workspace/gmail/imap/imap-smtp?hl=pt-br and https://chatgpt.com/c/69b98b98-dd00-8333-b1bf-14570cfe9eff
-
-  const to = process.env.CONTACT_EMAIL || process.env.EMAILSENDER;
-
-    const objdata = {
-      to: ""+to,
-      from: ""+from,
-      subject: ""+subject,
-      text: ""+content,
-      html: `<b>${contenthtml ?? content}</b>`
-    };
-
-    return await sgMail.send(objdata).then((res) => {
-      console.log(res);
-      return "The feedback has been sent to " + objdata.to;
-    }).catch((err) => {
-      return "Error when trying to send feedback to someone: " + err;
-    });
- } catch(err) {
-  return "Error when trying to send feedback to someone: " + err;
- }
-}
-
-async function sendFeedback2(nodemailer, from, name, subject, content, contenthtml) {
+async function sendFeedback(nodemailer, from, name, subject, content, contenthtml) {
   try {
     const transporter = nodemailer.createTransport({
       service: process.env.EMAILSERVICE ?? 'gmail',
@@ -162,4 +137,25 @@ function getCalcAgeResult(birthYear) {
   }
 }
 
-export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage, getByeMessage, getRulesMessage, sendFeedback, sendFeedback2 };
+function setTheme(ls, themeName = "default") {
+  try {
+    if(ls && ls.getItem("cbsettings")) {
+      ls.removeItem("cbsettings");
+    }
+
+    if(themeName && !ls.getItem("cbsettings")) {
+      ls.setItem("cbsettings", JSON.stringify({appearence: {theme: themeName}}));
+    }
+
+    const theme = ls.getItem("cbsettings") ? JSON.parse(ls.getItem("cbsettings")).appearence.theme : themeName;
+    return theme && theme !== "" ? "The theme has been set it sucessfully." : "Something wrong with setting with theme...";
+  } catch (error) {
+    return "Error: The theme couldn't be set. Here's details: " + error;
+  }
+}
+
+function getTheme(ls, theme) {
+  return ls.getItem("cbsettings") && JSON.parse(ls.getItem("cbsettings")).appearence.theme || (theme ?? "default");
+}
+
+export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage, getByeMessage, getRulesMessage, sendFeedback, setTheme, getTheme };

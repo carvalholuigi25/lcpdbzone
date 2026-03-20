@@ -14,7 +14,7 @@
     </button>
 
     @if(isSupportChatEnabled) {
-      <div [class]="'chat ' + (warningCount >= maxWarnings ? 'closedchat' : '')">
+      <div [class]="'chat ' + this.chatthemename + ' ' + (warningCount >= maxWarnings ? 'closedchat' : '')">
         <div class="chat-container">
           @if(warningCount >= maxWarnings) {
             <div class="chatclosedcurtain"></div>
