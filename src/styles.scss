@@ -1,12 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @use 'bootstrap/scss/bootstrap';
 @use 'bootstrap-icons/font/bootstrap-icons.css';
+@use 'fonts/fonts.scss';
 @use 'mystyles/all.scss';
-
-@font-face {
-  font-family: myFirstFont;
-  src: url('fonts/orbitron/static/Orbitron-Bold.ttf');
-}
 
 * {
     margin: 0;
