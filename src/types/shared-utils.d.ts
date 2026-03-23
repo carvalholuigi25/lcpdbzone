@@ -4,6 +4,7 @@ declare module '@mydir/shared-utils.mjs' {
   export function getRulesMessage(): string;
   export function setTheme(ls: any, themeName: string): string;
   export function getTheme(ls: any, theme?: string): string;
+  export function listDefThemes(): string[];
   export function sendFeedback(sgMail: any, from: string, subject: string, content: string, contenthtml?: string): Promise<any>;
   export function sendFeedback2(nodemailer: any, from: string, name: string, subject: string, content: string, contenthtml?: string): Promise<any>;
   export function getWarnTimeExpireCalc(v?: number): number;

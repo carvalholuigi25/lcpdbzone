@@ -57,7 +57,7 @@ async function getMyRulesMessage() {
 
 function getMyByeMessage() {
   const dh = new Date().getHours();
-  const statusmsg = dh >= 7 && dh <= 12 ? "morning" : (dh >= 13 && dh <= 18 ? "afternoon" : (dh >= 19 && dh <= 0 ? "night" : "early morning"));
+  const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 6 ? "night" : "early morning"));
   return "Goodbye! Have a good "+statusmsg+"!";
 }
 
@@ -250,4 +250,8 @@ function getTheme(ls: any, theme: string) {
   return ls.getItem("cbsettings") && JSON.parse(ls.getItem("cbsettings")).appearence.theme || (theme ?? "default");
 }
 
-export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage, getMyWelcomeMessage, getMyRulesMessage, getMyByeMessage, setTheme, getTheme };
+function listDefThemes() {
+  return ["default", "matrix", "liquidglass", "glassmorphism", "visionglass", "red", "green", "blue", "yellow", "orange", "purple", "ocean", "earth", "gold", "silver", "bronze", "dark", "white", "rgb"];
+}
+
+export { getMyWarnTimeExpireCalc as getWarnTimeExpireCalc, getMyTimezone as getTimezone, getMyTimeNow as getTimeNow, getMyTimeByTimezone as getTimeByTimezone, getMyDateNow as getDateNow, getMyDateByTimezone as getDateByTimezone, getMyDateTimeByTimezone as getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getMyInspiredBy as getInspiredBy, getMyMotivation as getMotivation, getRadioStationsByCountry, getYoutubeSearch, getMyColorListHex as getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getMyListAllTimeZones, getWelcomeMessage, getMyWelcomeMessage, getMyRulesMessage, getMyByeMessage, setTheme, getTheme, listDefThemes };

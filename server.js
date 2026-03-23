@@ -136,7 +136,7 @@ app.post('/chat', async (req, res) => {
       theme: a => {
         const themematch = a.match(/name:(\w+)$/gim);
         const theme = themematch ? themematch[0].split(":")[1] : "default";
-        const options = ["default", "matrix", "liquidglass", "glassmorphism", "visionglass", "red", "green", "blue", "yellow"];
+        const options = f.listDefThemes();
         const usagecmd = "Usage: $theme name:[name] (options: " + options.toString().split(",") + ")";
 
         if(!theme || theme.length == 0) throw new Error("Please provide the theme name! \r\n" + usagecmd);

@@ -173,6 +173,34 @@
     @include themeSharedComps();
 }
 
+@mixin themeSharedComps() {
+    .messages {
+        background: inherit;
+
+        .message {
+            &.user {
+                background-color: rgba(78, 78, 78, 0.5);
+                color: inherit;
+            }
+
+            &.assistant, &.system {
+                background-color: rgba(78, 78, 78, 0.5);
+                color: inherit;
+            }
+        }
+    }
+
+    .input-container {
+        background-color: rgba(78, 78, 78, 0.5);
+        color: inherit;
+
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+}
+
+
+
 @mixin themeRedChat() {
     background-color: red !important;
     color: white !important;
@@ -201,30 +229,75 @@
     @include themeSharedComps();
 }
 
-@mixin themeSharedComps() {
-    .messages {
-        background: inherit;
+@mixin themeOrangeChat() {
+    background-color: orange !important;
+    color: black !important;
 
-        .message {
-            &.user {
-                background-color: rgba(78, 78, 78, 0.5);
-                color: inherit;
-            }
+    @include themeSharedComps();
+}
 
-            &.assistant, &.system {
-                background-color: rgba(78, 78, 78, 0.5);
-                color: inherit;
-            }
-        }
-    }
+@mixin themePurpleChat() {
+    background-color: purple !important;
+    color: white !important;
 
-    .input-container {
-        background-color: rgba(78, 78, 78, 0.5);
-        color: inherit;
+    @include themeSharedComps();
+}
 
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-    }
+@mixin themeOceanChat() {
+    background-color: #017b92 !important;
+    color: white !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeEarthChat() {
+    background-color: green !important;
+    color: white !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeGoldChat() {
+    background-color: gold !important;
+    color: black !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeSilverChat() {
+    background-color: silver !important;
+    color: black !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeBronzeChat() {
+    background-color: #cd7f32 !important;
+    color: black !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeDarkChat() {
+    background-color: #121212 !important;
+    color: white !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeWhiteChat() {
+    background-color: #f1f1f1 !important;
+    color: black !important;
+
+    @include themeSharedComps();
+}
+
+@mixin themeRGBChat() {
+    background: #00FF37;
+    background: linear-gradient(90deg, rgba(0, 255, 0, 1) 0%, rgba(255, 0, 0, 1) 50%, rgba(0, 0, 255, 1) 100%) !important;
+    color: white !important;
+
+    @include themeSharedComps();
 }
 
 .mychattheme {
@@ -262,5 +335,45 @@
 
     &.yellow {
        @include themeYellowChat();
+    }
+
+    &.orange { 
+        @include themeOrangeChat();
+    }
+
+    &.purple { 
+        @include themePurpleChat();
+    }
+
+    &.ocean { 
+        @include themeOceanChat();
+    }
+
+    &.earth { 
+        @include themeEarthChat();
+    }
+
+    &.gold { 
+        @include themeGoldChat();
+    }
+
+    &.silver { 
+        @include themeSilverChat();
+    }
+
+    &.bronze { 
+        @include themeBronzeChat();
+    }
+
+    &.dark { 
+        @include themeDarkChat();
+    }
+
+    &.white { 
+        @include themeWhiteChat();
+    }
+
+    &.rgb {
+        @include themeRGBChat();
     }
 }

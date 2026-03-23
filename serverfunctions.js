@@ -11,6 +11,39 @@ const math = create(all);
 
 const { getWarnTimeExpireCalc, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch, getListAllTimeZones } = shared;
 
+function getRules() {
+  const ruleslist = [{
+    id: 1,
+    desc: "Use this chatbot as tool but use it with moderate and responsibility"
+  },
+  {
+    id: 2,
+    desc: "Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3)"
+  },
+  {
+    id: 3,
+    desc: "Be cool and dont be afraid to use this chatbot"
+  },
+  {
+    id: 4,
+    desc: "This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification"
+  },
+  {
+    id: 5,
+    desc: "Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time)"
+  }];
+
+  const ruleslen = ruleslist.length;
+
+  return ruleslist && ruleslen > 0 ? `
+    <ul class="ruleslist m-0">
+      ${ruleslist.map((x, i) => {
+        return `<li><b>${(i+1)}.</b> ${x.desc}${(i==ruleslen-1 ? "." : ";")}</li>`;
+      }).toString().replaceAll(",", "")}
+    </ul>
+  ` : `No rules!`;
+}
+
 async function getWelcomeMessage() {
   const is3d = true;
   const title = await figlet.text("LCP", {
@@ -36,16 +69,14 @@ async function getRulesMessage() {
     showHardBlanks: false,
   });
 
+  const rules = getRules();
+
   return `
     <span class="titlerules">${title}</span>
     <p class="mt-3 txtrules">
       THE CHATBOT RULES:
 
-      1º - Use this chatbot as tool but use it with moderate and responsibility;
-      2º - Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3);
-      3º - Be cool and dont be afraid to use this chatbot;
-      4º - This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification;
-      5º - Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time).
+      ${rules}
 
       If you have doubts or any issues, please use the command: $feedback from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.
 
@@ -78,7 +109,7 @@ async function sendFeedback(nodemailer, from, name, subject, content, contenthtm
       from: name ? '"'+name+'" <'+from+'>' : ""+from,
       to: to,
       subject: ""+subject,
-      text: '"'+content+'"',
+      text: ""+content,
       html: htmlToText(contenthtml ?? content)
     };
 
@@ -137,6 +168,10 @@ function getCalcAgeResult(birthYear) {
   }
 }
 
+function listDefThemes() {
+  return ["default", "matrix", "liquidglass", "glassmorphism", "visionglass", "red", "green", "blue", "yellow", "orange", "purple", "ocean", "earth", "gold", "silver", "bronze", "dark", "white", "rgb"];
+}
+
 function setTheme(ls, themeName = "default") {
   try {
     if(ls && ls.getItem("cbsettings")) {
@@ -158,4 +193,4 @@ function getTheme(ls, theme) {
   return ls.getItem("cbsettings") && JSON.parse(ls.getItem("cbsettings")).appearence.theme || (theme ?? "default");
 }
 
-export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage, getByeMessage, getRulesMessage, sendFeedback, setTheme, getTheme };
+export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage, getByeMessage, getRulesMessage, sendFeedback, setTheme, getTheme, listDefThemes };

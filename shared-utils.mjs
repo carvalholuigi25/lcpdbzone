@@ -17,7 +17,8 @@ async function getWelcomeMessage() {
 
 function getByeMessage() {
   const dh = new Date().getHours();
-  return "Goodbye! Have a good "+(dh >= 7 && dh <= 12 ? "morning" : (dh >= 13 && dh <= 18 ? "afternoon" : (dh >= 19 ? "night" : "early morning")))+"!";
+  const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 6 ? "night" : "early morning"));
+  return "Goodbye! Have a good "+statusmsg+"!";
 }
 
 function getWarnTimeExpireCalc(v = 1) {

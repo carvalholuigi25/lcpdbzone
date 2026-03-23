@@ -323,7 +323,7 @@ export class Admsupport implements OnInit, OnDestroy {
     const ls = localStorage;
     const content = userMessage.content;
     const match = content.match(/name:\s*(\w+)/mig);
-    const options = ["default", "matrix", "liquidglass", "glassmorphism", "visionglass", "red", "green", "blue", "yellow"];
+    const options = f.listDefThemes();
     const usagecmd = "Usage: $theme name:[name] (options: " + options.toString().split(",") + ")";
     let theme = match ? match[0].split(":")[1] : "";
 
@@ -343,6 +343,16 @@ export class Admsupport implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       });
     }, 500);
+  }
+
+  private handleByeCommand(assistantMessage: Message) {
+    this.mytimer = setInterval(() => {
+      this.ngZone.run(() => {
+        assistantMessage.content = f.getMyByeMessage();
+        this.endInteraction();
+        this.cdr.markForCheck();
+      });
+    }, 1000);
   }
 
   async sendMessageStream() {
@@ -397,7 +407,7 @@ export class Admsupport implements OnInit, OnDestroy {
       this.loading = false;
       return;
     } else if ([this.prefix+"bye", this.prefixalt+"bye"].includes(userMessage.content.split(' ')[0])) {
-      this.endInteraction();
+      this.handleByeCommand(assistantMessage);
       return;
     }
 
