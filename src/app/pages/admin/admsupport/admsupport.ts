@@ -2,7 +2,7 @@ import { SafeHtmlPipe } from '@/app/pipes';
 import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import * as f from '@myfunctions';
 
 interface Message {
@@ -14,7 +14,7 @@ interface Message {
 
 @Component({
   selector: 'app-admsupport',
-  imports: [CommonModule, FormsModule, SafeHtmlPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SafeHtmlPipe],
   standalone: true,
   templateUrl: './admsupport.html',
   styleUrl: './admsupport.scss',
@@ -28,6 +28,8 @@ export class Admsupport implements OnInit, OnDestroy {
   messages: Message[] = [];
   userInput = '';
   loading = false;
+  isAgeVerificationEnabled = true;
+  accessChatbot = true;
   maxWarnings = 3;
   warningCount = 0;
   timeValMs = 5 * 60 * 1000;
@@ -36,8 +38,13 @@ export class Admsupport implements OnInit, OnDestroy {
   chatthemename: string = "mychattheme default";
   dateTimeWarnExpire: number = new Date().getTime() + this.timeValMs;
 
+  ageverificationform = new FormGroup({
+    dateBirthday: new FormControl('', [Validators.required]),
+  });
+
   private abortController: AbortController | null = null;
   private mytimer: any;
+  private ls: Storage | undefined;
 
   constructor(
     private chatService: ChatService,
@@ -45,24 +52,25 @@ export class Admsupport implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private document: Document
   ) {
-    const ls = this.document.defaultView?.localStorage;
+    this.ls = this.getActualLocalStorage();
 
-    this.isSupportChatEnabled = ls?.getItem("supportChatEnabled") === "true";
-    this.warningCount = ls?.getItem("warningCount") ? parseInt(ls.getItem("warningCount")!) : 0;
-    this.dateTimeWarnExpire = ls?.getItem("dateTimeWarnExpire") ? parseInt(ls.getItem("dateTimeWarnExpire")!) : (new Date().getTime() + this.timeValMs);
-    this.loadThemeChat(ls);
+    this.isSupportChatEnabled = this.ls?.getItem("supportChatEnabled") === "true";
+    this.warningCount = this.ls?.getItem("warningCount") ? parseInt(this.ls.getItem("warningCount")!) : 0;
+    this.dateTimeWarnExpire = this.ls?.getItem("dateTimeWarnExpire") ? parseInt(this.ls.getItem("dateTimeWarnExpire")!) : (new Date().getTime() + this.timeValMs);
+    this.accessChatbot = this.getAccessChatbot();
+    this.loadThemeChat(this.ls);
 
-    if(ls) {
-      ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
-      // ls.setItem("warningCount", ""+this.warningCount);
-      // ls.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
+    if(this.ls) {
+      this.ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+      // this.ls.setItem("warningCount", ""+this.warningCount);
+      // this.ls.setItem("dateTimeWarnExpire", ""+this.dateTimeWarnExpire);
     }
   }
 
   ngOnInit(): void {
     this.checkWarningsExpiry();
     this.removeWarningsWhenDTExpires();
-    this.loadInitialChatbot();
+    this.loadChatbotStuff();
   }
 
   ngOnDestroy(): void {
@@ -72,6 +80,36 @@ export class Admsupport implements OnInit, OnDestroy {
     }
 
     this.clearTimer();
+  }
+
+  getActualLocalStorage() {
+    return this.document.defaultView?.localStorage;
+  }
+
+  private calculateAge(dob: Date): number {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  }
+
+  loadChatbotStuff() {
+    const age = this.getAge();
+
+    if(this.ls) {
+      if(this.ls?.getItem("login") && !this.ls?.getItem("accessChatbot")) {
+        this.ls.setItem("accessChatbot", "true");
+      }
+    }
+
+    if(age && age >= 18) {
+      this.loadInitialChatbot();      
+    } else {
+      this.loadAgeVerification();
+    }
   }
 
   loadThemeChat(ls: Storage | any | undefined) {
@@ -86,9 +124,8 @@ export class Admsupport implements OnInit, OnDestroy {
     this.isSupportChatEnabled = !this.isSupportChatEnabled;
     this.clearMessage();
 
-    const ls = this.document.defaultView?.localStorage;
-    if(ls) {
-      ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
+    if(this.ls) {
+      this.ls.setItem("supportChatEnabled", ""+this.isSupportChatEnabled);
     }
   }
 
@@ -105,10 +142,9 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   saveMyWarnings(warningCount: number = 0) {
-    const ls = this.document.defaultView?.localStorage;
-    if(ls) {
-      ls.setItem("warningCount", ""+warningCount);
-      ls.removeItem("dateTimeWarnExpire");
+    if(this.ls) {
+      this.ls.setItem("warningCount", ""+warningCount);
+      this.ls.removeItem("dateTimeWarnExpire");
     }
   }
 
@@ -134,6 +170,93 @@ export class Admsupport implements OnInit, OnDestroy {
     setTimeout(() => {
       this.checkWarningsExpiry();
     }, this.timeValMs);
+  }
+
+  loadAgeVerification() {
+    const loginval = this.ls && this.ls.getItem("login");
+    if (this.isAgeVerificationEnabled) {
+      if (loginval) {
+        const loginData = JSON.parse(loginval);
+        const dbval = loginData.dateBirthday.toString().split("T")[0] ?? loginData.dateBirthday;
+        const dob = new Date(dbval);
+        const age = this.calculateAge(dob);
+        this.accessChatbot = age >= 18;
+      } else {
+        this.accessChatbot = false; // Show form if no login
+      }
+    } else {
+      this.accessChatbot = true;
+    }
+  }
+
+  getAge() {
+    const {dateBirthday} = this.ageverificationform.value;
+    let dob: Date | null = null;
+
+    if (dateBirthday) {
+      dob = new Date(dateBirthday);
+    } else if (this.ls && this.ls.getItem("login")) {
+      const loginData = JSON.parse(this.ls.getItem("login")!);
+      const dbval = loginData.dateBirthday.toString().split("T")[0] ?? loginData.dateBirthday;
+      dob = new Date(dbval);
+    } else {
+      dob = new Date(this.getActualDateBirthday());
+    }
+
+    if (dob && !isNaN(dob.getTime())) {
+      return this.calculateAge(dob);
+    }
+    return 0;
+  }
+
+  getActualDateBirthday() {
+    return this.ls && this.ls.getItem("userDateBirthday") ? ""+this.ls.getItem("userDateBirthday") : "";
+  }
+
+  onSubmitAgeVerification() {
+    const {dateBirthday} = this.ageverificationform.value;
+    const logindobval = this.ls && this.ls.getItem("login") ? JSON.parse(this.ls.getItem("login")!).dateBirthday : (dateBirthday || this.getActualDateBirthday());
+    const dob = new Date(logindobval);
+
+    if(this.accessChatbot) {
+      this.accessChatbot = false;
+
+      if(this.ls) {
+        if(this.ls.getItem("accessChatbot")) {
+          this.ls.removeItem("accessChatbot");
+        }
+
+        if(this.ls.getItem("userDateBirthday")) {
+          this.ls.removeItem("userDateBirthday");
+        }
+      }
+    }
+
+    if (isNaN(dob.getTime())) {
+      throw new Error("Invalid date!");
+    }
+
+    const age = this.calculateAge(dob);
+
+    if(age >= 18) {
+      this.isAgeVerificationEnabled = false;
+      this.ls?.setItem("accessChatbot", "true");
+      alert("Access granted, now you have access to this chatbot!");
+    } else {
+      this.isAgeVerificationEnabled = true;
+      this.ls?.setItem("accessChatbot", "false");
+      alert("Access denied. You must be at least 18 years old (or above)");
+    }
+
+    this.ls?.setItem("userDateBirthday", ""+dateBirthday);
+    this.accessChatbot = this.getAccessChatbot();
+    this.ageverificationform.reset();
+    this.ageverificationform.clearValidators();
+    this.loadInitialChatbot();
+  }
+
+  getAccessChatbot() {
+    return this.ls && this.ls.getItem("accessChatbot") ? this.ls.getItem("accessChatbot") === "true" : false;
   }
 
   loadInitialChatbot() {
@@ -218,7 +341,7 @@ export class Admsupport implements OnInit, OnDestroy {
         }
       }
 
-      const ls = this.document.defaultView?.localStorage;
+      const ls = this.getActualLocalStorage();
       if(ls) {
         ls.setItem("warningCount", ""+this.warningCount);
 
@@ -233,7 +356,7 @@ export class Admsupport implements OnInit, OnDestroy {
   resetWarnings() {
     if(this.userInput == this.prefix+"resetwarnings" || this.userInput == this.prefixalt+"resetwarnings") {
       if(this.warningCount > 0) {
-        const ls = this.document.defaultView?.localStorage;
+        const ls = this.getActualLocalStorage();
         const loginItem = ls?.getItem("login");
         if(loginItem) {
           try {

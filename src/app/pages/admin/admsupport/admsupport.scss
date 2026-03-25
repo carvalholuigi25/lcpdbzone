@@ -235,3 +235,27 @@ button {
 .txtrules, .rulestxt {
     display: block;
 }
+
+.ageverificationform {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: auto;
+  min-height: calc(100vh - 40vh);
+  max-width: 100%;
+  padding: 15px;
+  border-radius: calc(16px + 4px);
+
+  .icodate {
+    font-size: 2rem;
+    line-height: 2rem;
+  }
+
+  .btn {
+    text-align: center;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Injectable } from '@angular/core';
 import process from 'process';
 

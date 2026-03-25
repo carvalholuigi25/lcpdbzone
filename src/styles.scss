@@ -344,6 +344,19 @@ body {
     display: block;
 }
 
+.ageverificationform {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: auto;
+  min-height: calc(100vh - 40vh);
+  max-width: 100%;
+  padding: 15px;
+  border-radius: calc(16px + 4px);
+}
+
 @media all and (min-width: 1200px) {
     .admin { 
         padding: 6rem calc(12rem + 1rem);
