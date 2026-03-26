@@ -73,20 +73,15 @@ async function getRulesMessage() {
 
   return `
     <span class="titlerules">${title}</span>
-    <p class="mt-3 txtrules">
-      THE CHATBOT RULES:
-
+    <div class="mt-3 txtrules">
+      <p>THE CHATBOT RULES:</p>
       ${rules}
-
-      If you have doubts or any issues, please use the command: $feedback from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.
-
-      Enjoy!
-
-      Date: 2026-03-17 17:16:00
-
-      Regards,
-      The administration of LCP
-    </p>
+      <p>If you have doubts or any issues, please use the command: $feedback from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?] or contact us at: <a href="mailto:luiscarvalho239@gmail.com">LCP's official email creator</a>.</p>
+      <p>Enjoy!</p>
+      <p>Date: 2026-03-17 17:16:00</p>
+      <p>Regards,</p>
+      <p>The administration of LCP</p>
+    </div>
   `;
 }
 

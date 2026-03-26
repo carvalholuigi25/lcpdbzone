@@ -99,16 +99,24 @@ export class Admsupport implements OnInit, OnDestroy {
   loadChatbotStuff() {
     const age = this.getAge();
 
-    if(this.ls) {
-      if(this.ls?.getItem("login") && !this.ls?.getItem("accessChatbot")) {
-        this.ls.setItem("accessChatbot", "true");
-      }
-    }
+    this.refreshAccessChatbot();
 
     if(age && age >= 18) {
       this.loadInitialChatbot();      
     } else {
       this.loadAgeVerification();
+    }
+  }
+
+  refreshAccessChatbot() {
+    if(this.ls) {
+      if(this.ls?.getItem("login") && !this.ls?.getItem("accessChatbot")) {
+        this.ngZone.run(() => {
+          this.ls!.setItem("accessChatbot", "true");
+          location.reload();
+          this.cdr.markForCheck();
+        });
+      }
     }
   }
 
@@ -182,7 +190,7 @@ export class Admsupport implements OnInit, OnDestroy {
         const age = this.calculateAge(dob);
         this.accessChatbot = age >= 18;
       } else {
-        this.accessChatbot = false; // Show form if no login
+        this.accessChatbot = false;
       }
     } else {
       this.accessChatbot = true;

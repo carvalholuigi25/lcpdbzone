@@ -342,6 +342,14 @@ body {
 .txtwelcome, .welcometxt,
 .txtrules, .rulestxt {
     display: block;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-all;
+
+    *:not(:first-child) {
+      margin-top: 1rem !important;
+      margin-bottom: 0 !important;
+    }
 }
 
 .ageverificationform {
