@@ -29,7 +29,7 @@ export class Admsupport implements OnInit, OnDestroy {
   userInput = '';
   loading = false;
   isAgeVerificationEnabled = true;
-  accessChatbot = true;
+  accessChatbot = false;
   maxWarnings = 3;
   warningCount = 0;
   timeValMs = 5 * 60 * 1000;

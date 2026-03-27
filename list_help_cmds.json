@@ -219,6 +219,11 @@
       "id": 44,
       "cmd": "theme",
       "description": "Set the theme for chatbot (usage: $theme name:[name]) (options: default, matrix, liquidglass, glassmorphism, visionglass, red, green, blue, yellow, etc...)"
+    },
+    {
+      "id": 45,
+      "cmd": "translate",
+      "description": "It will translate your message. Usage: $translate text:'your text here' to:english (or lang:en)"
     }
   ]
 }

@@ -35,6 +35,18 @@ const openai = new OpenAI({
 
 const localStorage = new LocalStorage('./storage/local/chatwarnings');
 
+// Cache profanity filters at startup
+let cachedProfanityFilters = [];
+fs.promises.readFile('./profanityfilters.json', 'utf-8')
+  .then((data) => {
+    cachedProfanityFilters = JSON.parse(data).badwords || [];
+    console.log(`Loaded ${cachedProfanityFilters.length} profanity filters`);
+  })
+  .catch(err => {
+    console.error('Error loading profanity filters at startup:', err);
+    cachedProfanityFilters = [];
+  });
+
 app.post('/chat', async (req, res) => {
   try {
     const maxwarn = 3; 
@@ -346,6 +358,55 @@ app.post('/chat', async (req, res) => {
         console.log("Converting energy:", { a, unit, tounit });
         return f.getEnergyConversion(energy, unit, tounit);
       },
+      convert: a => {
+        const matchvalue = a.match(/value:(\d+)|unit:(\w+)|to:(\w+)/gim);
+        const value = matchvalue ? matchvalue[0].split(":")[1] : 1;
+        const unit = matchvalue ? matchvalue[1].split(":")[1] : "m";
+        const tounit = matchvalue ? matchvalue[2].split(":")[1] : "ft";
+
+        // Auto-detect unit type and route to appropriate converter
+        const lengthUnits = ['m', 'km', 'mi', 'ft'];
+        const tempUnits = ['c', 'f', 'k'];
+        const weightUnits = ['g', 'kg', 'lb', 'oz'];
+        const dataUnits = ['b', 'kb', 'mb', 'gb', 'tb'];
+        const timeUnits = ['milisec', 'sec', 'min', 'hour', 'day', 'week', 'month', 'year'];
+        const volumeUnits = ['l', 'ml', 'gal', 'cup'];
+        const speedUnits = ['m/s', 'km/h', 'mph'];
+        const pressureUnits = ['pa', 'kpa', 'bar', 'psi'];
+        const energyUnits = ['j', 'kj', 'cal', 'kcal'];
+        const currencyRegex = /^[A-Z]{3}$/;
+
+        const unitLower = unit.toLowerCase();
+        const tunitLower = tounit.toLowerCase();
+
+        try {
+          if (lengthUnits.includes(unitLower) && lengthUnits.includes(tunitLower)) {
+            return f.getLengthConversion(value, unit, tounit);
+          } else if (tempUnits.includes(unitLower) && tempUnits.includes(tunitLower)) {
+            return f.getTemperatureConversion(value, unit, tounit);
+          } else if (weightUnits.includes(unitLower) && weightUnits.includes(tunitLower)) {
+            return f.getWeightConversion(value, unit, tounit);
+          } else if (dataUnits.includes(unitLower) && dataUnits.includes(tunitLower)) {
+            return f.getDataSizeConversion(value, unit, tounit);
+          } else if (timeUnits.includes(unitLower) && timeUnits.includes(tunitLower)) {
+            return f.getTimeConversion(value, unit, tounit);
+          } else if (volumeUnits.includes(unitLower) && volumeUnits.includes(tunitLower)) {
+            return f.getVolumeConversion(value, unit, tounit);
+          } else if (speedUnits.includes(unitLower) && speedUnits.includes(tunitLower)) {
+            return f.getSpeedConversion(value, unit, tounit);
+          } else if (pressureUnits.includes(unitLower) && pressureUnits.includes(tunitLower)) {
+            return f.getPressureConversion(value, unit, tounit);
+          } else if (energyUnits.includes(unitLower) && energyUnits.includes(tunitLower)) {
+            return f.getEnergyConversion(value, unit, tounit);
+          } else if (currencyRegex.test(unit.toUpperCase()) && currencyRegex.test(tounit.toUpperCase())) {
+            return f.getCurrencyConversion(value, unit, tounit);
+          } else {
+            throw new Error(`Unknown unit type: '${unit}' to '${tounit}'. Please use a specific convert command like $convertlength, $converttemp, etc.`);
+          }
+        } catch (error) {
+          throw new Error(error.message || `Conversion failed: ${error}`);
+        }
+      },
       radio: async () => await f.getRadioStationsByCountry(),
       youtube: async (a) => {
         const queryMatch = a.match(/^search:(\w+)/gim);
@@ -365,16 +426,105 @@ app.post('/chat', async (req, res) => {
         return getProfMsgWarnList(warn, maxwarn, warnExpireTime);
       },
       bye: () => f.getByeMessage(),
+      translate: async a => {
+        // Extract text and target language
+        const textMatch = a.match(/text:([^]*)(?=\s+(?:to|lang):|$)/i);
+        const langMatch = a.match(/(?:to|lang):(\w+)/i);
+        
+        const text = textMatch ? textMatch[1].trim().replace(/^["']|["']$/g, '') : "";
+        const targetLang = langMatch ? langMatch[1].toLowerCase() : "english";
+
+        // Validation
+        if (!text || text.length === 0) {
+          throw new Error("Please provide text to translate. Usage: $translate text:\"your text here\" to:spanish (or lang:es)");
+        }
+
+        const validLanguages = {
+          english: 'en',
+          spanish: 'es',
+          french: 'fr',
+          german: 'de',
+          italian: 'it',
+          portuguese: 'pt',
+          russian: 'ru',
+          chinese: 'zh',
+          japanese: 'ja',
+          korean: 'ko',
+          arabic: 'ar',
+          hindi: 'hi',
+          dutch: 'nl',
+          polish: 'pl',
+          turkish: 'tr',
+          vietnamese: 'vi',
+          thai: 'th',
+          hebrew: 'he',
+          greek: 'el',
+          swedish: 'sv',
+          en: 'en',
+          es: 'es',
+          fr: 'fr',
+          de: 'de',
+          it: 'it',
+          pt: 'pt',
+          ru: 'ru',
+          zh: 'zh',
+          ja: 'ja',
+          ko: 'ko',
+          ar: 'ar',
+          hi: 'hi',
+          nl: 'nl',
+          pl: 'pl',
+          tr: 'tr',
+          vi: 'vi',
+          th: 'th',
+          he: 'he',
+          el: 'el',
+          sv: 'sv'
+        };
+
+        if (!validLanguages[targetLang]) {
+          throw new Error(`Invalid language: '${targetLang}'. Supported languages: English, Spanish, French, German, Italian, Portuguese, Russian, Chinese, Japanese, Korean, Arabic, Hindi, Dutch, Polish, Turkish, Vietnamese, Thai, Hebrew, Greek, Swedish`);
+        }
+
+        try {
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-5-nano',
+            messages: [
+              {
+                role: "system",
+                content: `You are a translator. Translate the user's text to ${validLanguages[targetLang]} language. Only respond with the translated text, nothing else.`
+              },
+              {
+                role: "user",
+                content: text
+              }
+            ],
+            temperature: 0.3,
+          });
+
+          const translatedText = completion.choices[0]?.message?.content || "Translation failed";
+          console.log("Translation:", { originalText: text, targetLanguage: targetLang, translatedText });
+          
+          return `**Translated to ${targetLang}:**\n${translatedText}`;
+        } catch (error) {
+          throw new Error(`Translation error: ${error.message}`);
+        }
+      },
     };
 
-    const profanityList = (msg) => {
-      return fs.promises.readFile('./profanityfilters.json', 'utf-8')
-        .then((data) => JSON.parse(data).badwords || [])
-        .then(filters => filters.some(word => word.toLowerCase().includes(msg.toLowerCase())))
-        .catch(err => {
-          console.error('Error reading profanity filters:', err);
-          return [];
-        });
+    // Check if message contains profanity (validates against cached filters)
+    const containsProfanity = (msg) => {
+      const msgLower = msg.toLowerCase().trim();
+      if (!msgLower || cachedProfanityFilters.length === 0) return false;
+
+      return cachedProfanityFilters.some(word => {
+        const wordLower = word.toLowerCase().trim();
+        if (!wordLower) return false;
+
+        const escapedWord = wordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b${escapedWord}\\b`, 'i');
+        return regex.test(msgLower);
+      });
     };
 
     if (!msg) {
@@ -418,7 +568,7 @@ app.post('/chat', async (req, res) => {
           res.status(400);
         }
         objresp.messages = [{ role: "assistant", content: result, timestamp: dt }];
-      } else if((msg !== prefixalt && msg !== prefix) && profanityList(msg)) {
+      } else if((msg !== prefixalt && msg !== prefix) && containsProfanity(msg)) {
         resetWarnings();
 
         const warni = parseInt(warn+1) <= maxwarn ? parseInt(warn + 1) : parseInt((maxwarn-maxwarn));
@@ -441,10 +591,14 @@ app.post('/chat', async (req, res) => {
       } else {
         resetWarnings();
 
+        const isMsgContainsProf = ((msg.startsWith(prefix) || msg.startsWith(prefixalt)) && containsProfanity(msg)) || localStorage.getItem("warningCount") ? true : false;
+
+        const msgcontent = isMsgContainsProf ? "Please refrain from using inappropriate language. (Warning issued)." : "I'm not sure how to respond to that. Can you rephrase?";
+
         objresp.messages = [
           {
             role: "assistant",
-            content: "I'm not sure how to respond to that. Can you rephrase?",
+            content: msgcontent,
             timestamp: dt,
           },
         ];

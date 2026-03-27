@@ -48,6 +48,7 @@ public/assets/images/tvseries
 covinfo
 storage/local/*
 storage/local/chatwarnings/*
+storage/local/chatwarnings/warningCount
 package-lock.json
 .env
 .env.*
