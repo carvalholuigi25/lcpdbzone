@@ -499,7 +499,7 @@ app.post('/chat', async (req, res) => {
                 content: text
               }
             ],
-            temperature: 0.3,
+            temperature: 1,
           });
 
           const translatedText = completion.choices[0]?.message?.content || "Translation failed";
