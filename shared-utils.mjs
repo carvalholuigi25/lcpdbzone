@@ -17,7 +17,7 @@ async function getWelcomeMessage() {
 
 function getByeMessage() {
   const dh = new Date().getHours();
-  const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 6 ? "night" : "early morning"));
+  const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 22 ? "evening" : "night"));
   return "Goodbye! Have a good "+statusmsg+"!";
 }
 
@@ -399,7 +399,11 @@ function getColorListHex() {
     { name: "Gray", hex: "#808080" },
     { name: "Orange", hex: "#FFA500" }
   ];
-  return colors.map(c => `${c.name}: ${c.hex}`).join('\n');
+  return colors.map(c => `
+  <div class="colorlistblk">
+    <span>${c.name} - ${c.hex}</span> 
+    <div style="background-color: ${c.hex};" class="coloricolist"></div>
+  </div>`).join('\n');
 }
 
 async function getCurrencyConversion(value = 1, fromCurrency = "EUR", toCurrency = "USD") {
@@ -530,6 +534,27 @@ function getTheme(theme) {
   return ls.getItem("cbsettings") && JSON.parse(ls.getItem("cbsettings")).appearence.theme || (theme ?? "default");
 }
 
+function getWeather(type = "city", city = "Braga") {
+  const apiKey = process.env['API_OPENWEATHER_KEY'];
+  const qparam = type === "city" ? `q=${encodeURIComponent(city)}` : `lat=${encodeURIComponent(city.lat)}&lon=${encodeURIComponent(city.lon)}`;
+  const url = `https://api.openweathermap.org/data/2.5/weather?${qparam}&appid=${apiKey}&units=metric`;
+  return fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      if (data.cod !== 200) {
+        throw new Error("Error fetching weather data: " + data.message);
+      }
+
+      const { name, weather, main } = data;
+      const weatherInfo = `The current weather in ${name} is ${weather[0].description} with a temperature of ${main.temp}°C.`;
+      return weatherInfo;
+    }
+    )
+    .catch(error => {
+      return "Error fetching weather data: " + error.message;
+    });
+}
+
 export {
   getWelcomeMessage,
   getByeMessage,
@@ -567,5 +592,6 @@ export {
   getColorListHex,
   getCurrencyConversion,
   getRadioStationsByCountry,
-  getYoutubeSearch
+  getYoutubeSearch,
+  getWeather
 };

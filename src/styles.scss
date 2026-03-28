@@ -365,6 +365,25 @@ body {
   border-radius: calc(16px + 4px);
 }
 
+.colorlistblk {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: -2rem 0;
+
+    .coloricolist {
+        display: inline-flex;
+        width: 20px; 
+        height: 20px; 
+        border-radius: calc(20px + 4px);
+        margin: 15px;
+    }
+}
+
 @media all and (min-width: 1200px) {
     .admin { 
         padding: 6rem calc(12rem + 1rem);
