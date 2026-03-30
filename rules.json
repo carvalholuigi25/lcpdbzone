@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {
+      "id": 1,
+      "desc": "Use this chatbot as tool but use it with moderate and responsibility"
+    },
+    {
+      "id": 2,
+      "desc": "Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3)"
+    },
+    {
+      "id": 3,
+      "desc": "Be cool and dont be afraid to use this chatbot"
+    },
+    {
+      "id": 4,
+      "desc": "This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification"
+    },
+    {
+      "id": 5,
+      "desc": "Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time)"
+    }
+  ]
+}

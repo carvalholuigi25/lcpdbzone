@@ -384,6 +384,14 @@ body {
     }
 }
 
+.myvideoblk, .myaudioblk {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    margin: 15px auto;
+}
+
 @media all and (min-width: 1200px) {
     .admin { 
         padding: 6rem calc(12rem + 1rem);

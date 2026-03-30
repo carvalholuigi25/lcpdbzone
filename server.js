@@ -9,8 +9,28 @@ import nodemailer from 'nodemailer';
 import { LocalStorage } from 'node-localstorage';
 import * as f from './serverfunctions.js';
 
+
+function loadProfanityFilters() {
+  // Cache profanity filters at startup
+  let cpfilters = [];
+  fs.promises.readFile('./profanityfilters.json', 'utf-8')
+  .then((data) => {
+    cpfilters = JSON.parse(data).badwords || [];
+    console.log(`Loaded ${cpfilters.length} profanity filters`);
+    return cpfilters;
+  })
+  .catch(err => {
+    console.error('Error loading profanity filters at startup:', err);
+    cpfilters = [];
+    return cpfilters;
+  });
+}
+
 dotenv.config();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+if(process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 if (!process.env.OPENAI_API_KEY) {
   console.error('OPENAI_API_KEY is required');
@@ -18,8 +38,7 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+const port = process.env.PORT || 3000;
 
 const chatLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -27,25 +46,17 @@ const chatLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 
-app.use('/chat', chatLimiter);
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const localStorage = new LocalStorage('./storage/local/chatwarnings');
+const cachedProfanityFilters = loadProfanityFilters();
 
-// Cache profanity filters at startup
-let cachedProfanityFilters = [];
-fs.promises.readFile('./profanityfilters.json', 'utf-8')
-  .then((data) => {
-    cachedProfanityFilters = JSON.parse(data).badwords || [];
-    console.log(`Loaded ${cachedProfanityFilters.length} profanity filters`);
-  })
-  .catch(err => {
-    console.error('Error loading profanity filters at startup:', err);
-    cachedProfanityFilters = [];
-  });
+app.use(cors());
+app.use(express.json());
+app.use('/chat', chatLimiter);
 
 app.post('/chat', async (req, res) => {
   try {
@@ -117,8 +128,9 @@ app.post('/chat', async (req, res) => {
     const handlers = {
       hello: () => f.getHelloMessageCMD(),
       welcome: () => f.getWelcomeMessage(),
+      bye: () => f.getByeMessage(),
       help: () => f.getHelpListCMD(),
-      rules: () => f.getRulesMessage(),
+      rules: async () => await f.getRulesMessage(),
       feedback: async a => await f.sendFeedbackCMD(a, nodemailer),
       theme: a => f.setThemeCMD(localStorage, a),
       time: a => f.setTimeCMD(a),
@@ -136,7 +148,7 @@ app.post('/chat', async (req, res) => {
       listanimes: async () => await f.getListAnimes(),
       listpodcasts: async () => await f.getListPodcasts(),
       calc: a => f.getCalculatorResult(a),
-      calcage: a => f.getCalcAgeResult(parseInt(a, 10)),
+      calcage: a => f.getCalcAgeResult(a),
       rng: a => f.getRNGCMD(a),
       countdown: a => f.getCountdownCMD(a),
       countup: a => f.getCountUpCMD(a),
@@ -158,8 +170,11 @@ app.post('/chat', async (req, res) => {
       motivation: () => f.getMotivation(),
       resetwarnings: () => f.setResetWarningsCMD(forceResetWarnings(true)),
       chatclosed: () => f.setChatClosedCMD(resetWarnings, warn, maxwarn, warnExpireTime),
-      bye: () => f.getByeMessage(),
       translate: async a => await f.setTranslationCMD(a, openai),
+      news: async a => await f.setNewsCMD(a),
+      spotify: async a => await f.setSpotifyMusicCMD(a),
+      video: async a => await f.setVideoCMD(a),
+      audio: async a => await f.setAudioCMD(a),
     };
 
     // Check if message contains profanity (validates against cached filters)
@@ -277,10 +292,10 @@ app.post('/chat', async (req, res) => {
 
     res.end();
   } catch (error) {
-    res.status(500).json({ error: "Erro ao gerar resposta " + error });
+    res.status(500).json({ error: "Error when generating response: " + error });
   }
 });
 
-app.listen(3000, () => {
-  console.log('Servidor rodando na porta 3000');
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

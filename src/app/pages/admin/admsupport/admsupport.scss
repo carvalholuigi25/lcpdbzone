@@ -267,3 +267,11 @@ button {
     margin-right: auto !important;
   }
 }
+
+.myvideoblk, .myaudioblk {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    margin: 15px auto;
+}

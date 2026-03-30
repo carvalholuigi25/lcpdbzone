@@ -224,6 +224,26 @@
       "id": 45,
       "cmd": "translate",
       "description": "It will translate your message. Usage: $translate text:'your text here' to:english (or lang:en)"
+    },
+    {
+      "id": 46,
+      "cmd": "news",
+      "description": "It will provide you with the latest news. Usage: $news search:your search query here country:pt category:technology lang:en (default is 'en' for English)"
+    },
+    {
+      "id": 47,
+      "cmd": "spotify",
+      "description": "It will search for music on Spotify. Usage: $spotify search:'your search query here'"
+    },
+    {
+      "id": 48,
+      "cmd": "video",
+      "description": "It will search for videos on YouTube or your local video files. Usage: $video id:'your search query here' or path:'your local video path' local:(true or false, default is false)"
+    },
+    {
+      "id": 49,
+      "cmd": "audio",
+      "description": "It will search for audio on Spotify or your local audio files. Usage: $audio id:'your search query here' or path:'your local audio path' local:(true or false, default is false)"
     }
   ]
 }

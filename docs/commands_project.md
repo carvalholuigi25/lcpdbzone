@@ -28,10 +28,12 @@
 >
 > ### Note
 >
-> The *project* is currently in **beta** stage. Please be aware that anything can be added, changed or removed commands for *project*.
+> The *project* is currently in **beta** stage. Please be aware that anything can be added, changed or removed commands in any time for *project*.
 >
 > &nbsp;
 >
+
+&nbsp;
 
 >
 > &nbsp;

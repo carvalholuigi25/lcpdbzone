@@ -9,7 +9,7 @@
 | help | Provides a list of available commands and their descriptions. | :white_check_mark: |
 | bye | Returns a goodbye message to the user. | :white_check_mark: |
 | ai | Engages the AI chatbot for a conversation. ("example: !ai gpt-5-nano or $ai gpt-5-nano 'text'") | :white_check_mark: |
-| timezone | Returns the current timezone of the server. | :white_check_mark:
+| timezone | Returns the current timezone of the server. | :white_check_mark: |
 | date | Returns the current date. (You can also specify a timezone, example: !date zone:America/New_York or $date zone:America/New_York) | :white_check_mark: |
 | datetime | Returns the current date and time. (You can also specify a timezone, example: "!datetime zone:America/New_York or $datetime zone:America/New_York)" | :white_check_mark: |
 | time | Returns the current time. (You can also specify a timezone, example: !time zone:America/New_York or $time zone:America/New_York) | :white_check_mark: |
@@ -42,23 +42,29 @@
 | converttime | Converts time units. (example: !converttime value:3600 unit:seconds to:hours or $converttime value:3600 unit:seconds to:hours) | :construction: |
 | convertcurrency | Converts currency units. (example: !convertcurrency value:1 unit:USD to:EUR or $convertcurrency value:1 unit:USD to:EUR) | :construction: |
 | colorlist | Provides a list of colors with their hexadecimal values. | :white_check_mark: |
-| resetwarnings | This command results a reset of warnings for chat to original state due to user prompted by one (or more) bad words in chat. (its for admins only) | :white_check_mark: |~
+| resetwarnings | This command results a reset of warnings for chat to original state due to user prompted by one (or more) bad words in chat. (its for admins only) | :white_check_mark: |
 | rng | Generates random number (usage: $rng number:10 or !rng number:10) | :white_check_mark: |
 | listtimezones | Returns the list of all avaliable timezones (usage: $listtimezones target:native) (options: native, thirdpartylib) | :white_check_mark: |
 | rules | It displays the list of rules for usage of this chatbot | :white_check_mark: |
 | feedback | Send a feedback message (by library nodemailer) to the creator of this webapp (usage: $feedback from:[from] name:[name] subject:[subject] content:[content] contenthtml:[contenthtml?], note: the symbol ? is optional) | :white_check_mark: |
 | theme | Set the theme for chatbot (usage: $theme name:[name]) (options: default, matrix, liquidglass, glassmorphism, visionglass, red, green, blue, yellow, etc...) | :white_check_mark: |
 | translate | It will translate your message. Usage: $translate text:\"your text here\" to:english (or lang:en) | :white_check_mark: |
+| news | It displays the current (or newest) news of world. | :white_check_mark: |
+| spotify | It uses the official spotify public web api to search the audio info or play your audio or podcasts (Usage: $spotify search:'top hits') | :construction: |
+| video | It plays your video by youtube (or your local video file) through iframe (Usage: $video id:VIDEO_ID [path?]:YOUR_VIDEO_FILE_HERE.mp4 local:(true or false)) | :construction: |
+| audio | It plays your audio by spotify (or your local audio file) through iframe (Usage: $audio id:TRACK_ID [path?]:YOUR_AUDIO_FILE_HERE.mp4 local:(true or false)) | :construction: |
 
 >
 > &nbsp;
 >
 > ### Note
 >
-> The *chatbot* is currently in **beta** stage. Please be aware that anything can be added, changed or removed commands for *chatbot*.
+> The *chatbot* is currently in **beta** stage. Please be aware that anything can be added, changed or removed commands in any time for *chatbot*.
 >
 > &nbsp;
 >
+
+&nbsp;
 
 >
 > &nbsp;

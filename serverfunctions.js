@@ -1,4 +1,5 @@
 import fs from 'fs';
+import axios from 'axios';
 import figlet from "figlet";
 import standard from "figlet/fonts/Standard";
 import { create, all } from 'mathjs';
@@ -12,36 +13,15 @@ const math = create(all);
 const { getWarnTimeExpireCalc, getTimeNow, getDateNow, getTimezone, getDateByTimezone, getTimeByTimezone, getDateTimeByTimezone, generateJoke, generateQuote, getListModels, genRandomNumbersSimple, shuffleNums, getCountdownResult, getCountupResult, getDataSizeConversion, getTimeConversion, getTemperatureConversion, getLengthConversion, getWeightConversion, getSpeedConversion, getPressureConversion, getVolumeConversion, getEnergyConversion, getInspiredBy, getMotivation, getColorListHex, getCurrencyConversion, getRadioStationsByCountry, getYoutubeSearch, getListAllTimeZones, getWeather } = shared;
 
 function getRules() {
-  const ruleslist = [{
-    id: 1,
-    desc: "Use this chatbot as tool but use it with moderate and responsibility"
-  },
-  {
-    id: 2,
-    desc: "Don't insult to this chatbot and also, ai and/or users or the chatbot will get timeout (max warnings are 3)"
-  },
-  {
-    id: 3,
-    desc: "Be cool and dont be afraid to use this chatbot"
-  },
-  {
-    id: 4,
-    desc: "This chatbot is for people with +18 years old and for people below of 18 years old, they will not able to use to this chatbot due to law of age verification"
-  },
-  {
-    id: 5,
-    desc: "Don't send anything bad things for this chatbot (spam, piracy, etc) or the chatbot will get timeout and you will get banned temporarily (1 week is max ban time)"
-  }];
-
+  const {rules} = JSON.parse(fs.readFileSync('./rules.json', 'utf-8')) || {};
+  const ruleslist = rules && Array.isArray(rules) ? rules : [];
   const ruleslen = ruleslist.length;
 
-  return ruleslist && ruleslen > 0 ? `
-    <ul class="ruleslist m-0">
-      ${ruleslist.map((x, i) => {
-        return `<li><b>${(i+1)}.</b> ${x.desc}${(i==ruleslen-1 ? "." : ";")}</li>`;
-      }).toString().replaceAll(",", "")}
-    </ul>
-  ` : `No rules!`;
+  const rulesitems = ruleslist.map((x, i) => {
+    return `<li><b>${(i+1)}.</b> ${x.desc}${(i==ruleslen-1 ? "." : ";")}</li>`;
+  }).toString().replaceAll(",", "")
+
+  return ruleslist && ruleslen > 0 ? `<ul class="ruleslist m-0">${rulesitems}</ul>` : `No rules!`;
 }
 
 async function getWelcomeMessage() {
@@ -122,6 +102,47 @@ async function sendFeedback(nodemailer, from, name, subject, content, contenthtm
   }
 }
 
+async function getNews(a, srch, lang = "en", category = "technology", country = "pt") {
+  return axios.get('https://gnews.io/api/v4/top-headlines', {
+    params: {
+      apikey: process.env.API_GNEWS_KEY,
+      lang: lang || "en",
+      country: country || "pt",
+      category: category || "technology",
+      max: 5,
+      p: 1,
+      q: srch ? srch.trim() : ""
+    },
+    headers: {
+      'Accept': 'application/json; charset=utf-8',
+      'Content-Type': 'application/json; charset=utf-8'
+    }
+  }).then(response => {
+    const articles = response.data.articles;
+    if (articles.length === 0) {
+      return "No news found.";
+    }
+    return "Top news:\n" + articles.map(article => `
+      <div class="newsarticle">
+        <h3>${article.title} - ${article.source.name}</h3>
+        <p>(${article.description})</p>
+        <a href="${article.source.url ?? article.url}" target="_blank" rel="noopener noreferrer">Read more</a>
+      </div>
+    `).join("\n");
+  }).catch(error => {
+    console.error("GNews API error:", error);
+    return "Error fetching news: " + error.message;
+  });
+}
+
+function getVideo(id, islocal = false) {
+  return "<div class='myvideoblk "+(islocal ? 'localblk' : 'youtubeblk')+"'><iframe width='560' height='315' src='"+(islocal ? id : 'https://www.youtube.com/embed/' + id)+"' title='"+(islocal ? 'Local video player' : 'YouTube video player')+"' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe></div>";
+}
+
+function getAudio(id, islocal = false) {
+  return "<div class='myaudioblk "+(islocal ? 'localblk' : 'spotifyblk')+"'><iframe width='560' height='315' src='"+(islocal ? id : 'https://open.spotify.com/embed/track/' + id)+"' title='"+(islocal ? 'Local audio player' : 'Spotify audio player')+"' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe></div>";
+}
+
 function getByeMessage() {
   const dh = new Date().getHours();
   const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 22 ? "evening" : "night"));
@@ -156,7 +177,7 @@ function getCalcAgeResult(birthYear) {
       throw new Error("Invalid birth year.");
     }
     const age = currentYear - birthYear;
-    return `You are approximately ${age} years old.`;
+    return `You are approximately ${parseInt(age, 10)} years old.`;
   }
   catch (error) {
     return "Error calculating age: " + error.message;
@@ -188,6 +209,52 @@ function getTheme(ls, theme) {
   return ls.getItem("cbsettings") && JSON.parse(ls.getItem("cbsettings")).appearence.theme || (theme ?? "default");
 }
 
+async function getSpotifyAccessToken() {
+  const clientId = process.env.API_SPOTIFY_CLIENTID;
+  const clientSecret = process.env.API_SPOTIFY_CLIENTSECRET;
+  const tokenUrl = 'https://accounts.spotify.com/api/token';
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+  try {
+    const response = await axios.post(tokenUrl, 'grant_type=client_credentials', {
+      headers: {
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    return response.data.access_token;
+  } catch (error) {
+    console.error('Error fetching Spotify access token:', error);
+    throw new Error('Failed to get Spotify access token');
+  }
+}
+
+async function getSpotifyMusic(q) {
+  // Implement Spotify music search functionality here, using public Spotify API
+
+  const token = await getSpotifyAccessToken();
+
+  await axios.get('https://api.spotify.com/v1/search', {
+    params: {
+      q: q,
+      type: 'track',
+      limit: 5
+    },
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  }).then(response => {
+    const tracks = response.data.tracks.items;
+    if (tracks.length === 0) {
+      return "No tracks found for: " + q;
+    }
+    return "Top Spotify tracks for '" + q + "':\n" + tracks.map(track => `${track.name} by ${track.artists.map(artist => artist.name).join(", ")}`).join("\n");
+  }).catch(error => {
+    console.error("Spotify API error:", error);
+    return "Error fetching Spotify tracks: " + error.message;
+  });
+}
+
 function getHelloMessageCMD() {
   return "Hello world!";
 }
@@ -196,7 +263,7 @@ function getHelpListCMD() {
   return "HELP: With prefix (! or $), use this avaliable list of commands: \r\n\n" + getHelpCmds().map(x => `${x.id}. <b>${x.cmd}</b> - ${x.description}`).join("\r\n");
 }
 
-async function sendFeedbackCMD(a, nodeemailer) {
+async function sendFeedbackCMD(a, nodemailer) {
   const IsContentHTMLRequired = false;
   const defemailsender = process.env.EMAILSENDER ?? process.env.CONTACT_EMAIL;
 
@@ -609,4 +676,50 @@ async function setTranslationCMD(a, openai) {
   }
 }
 
-export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage, getByeMessage, getRulesMessage, sendFeedback, setTheme, getTheme, listDefThemes, getHelloMessageCMD, getHelpListCMD, sendFeedbackCMD, setThemeCMD, setTimeCMD, setDateCMD, setDateTimeCMD, getTimeZoneCMD, getListTimeZonesCMD, getListAIModelsCMD, getEMAILAddressCMD, setWeatherCMD, getRNGCMD, getCountdownCMD, getCountupCMD, getDataSizeConversionCMD, getTemperatureConversionCMD, getLengthConversionCMD, getTimeConversionCMD, getWeightConversionCMD, getCurrencyConversionCMD, getVolumeConversionCMD, getPressureConversionCMD, getSpeedConversionCMD, getEnergyConversionCMD, getAllConversionsCMD, getYouTubeSearchResultsCMD, setResetWarningsCMD, setChatClosedCMD, setTranslationCMD };
+async function setNewsCMD(a) {
+  const langMatch = a.match(/lang:(\w+)/);
+  const lang = langMatch ? langMatch[1].trim() : "en";
+  const srchMatch = a.match(/search:([^]*?)(?=\s+(?:lang:|category:|country:|$))/i);
+  const srch = srchMatch ? srchMatch[1].trim() : "";
+  const catMatch = a.match(/category:(\w+)/);
+  const category = catMatch ? catMatch[1].trim() : "general";
+  const countryMatch = a.match(/country:(\w+)/);
+  const country = countryMatch ? countryMatch[1].trim() : "pt";
+
+  if (!lang || lang.length === 0) throw new Error("Please provide the language code! Usage: $news lang:en category:technology country:us");
+  if (!category || category.length === 0) throw new Error("Please provide the news category! Usage: $news lang:en category:technology country:us");
+  if (!country || country.length === 0) throw new Error("Please provide the country code! Usage: $news lang:en category:technology country:us");
+  // if (!srch || srch.length === 0) throw new Error("Please provide the search query! Usage: $news search:bitcoin lang:en category:technology country:us");
+
+  return await getNews(a, srch, lang, category, country);
+}
+
+async function setSpotifyMusicCMD(a) {
+  const queryMatch = a.match(/^search:(\w+)/gim);
+  const query = queryMatch ? queryMatch[0].split(":")[1] : "top hits";
+  return await getSpotifyMusic(query);
+}
+
+async function setVideoCMD(a) {
+  const idMatch = a.match(/^id:(\w+)/gim);
+  const id = idMatch ? idMatch[0].split(":")[1] : null;
+  const pathMatch = a.match(/^path:(\/.*\.(mp4|webm|ogg))$/gim);
+  const path = pathMatch ? pathMatch[0].split(":")[1] : null;
+  const islocal = a.match(/^local:(true|false)/gim) ? a.match(/^local:(true|false)/gim)[0].split(":")[1].toLowerCase() === "true" : false;
+  if (!id && !islocal) throw new Error("Please provide a YouTube video ID. Usage: $video id:VIDEO_ID local:false");
+  if (!path && islocal) throw new Error("Please provide your local video file path. Usage: $video path:/path/to/video.mp4 local:true");
+  return getVideo(islocal ? path : id, islocal);
+}
+
+async function setAudioCMD(a) {
+  const idMatch = a.match(/^id:(\w+)/gim);
+  const id = idMatch ? idMatch[0].split(":")[1] : null;
+  const pathMatch = a.match(/^path:(\/.*\.(mp3|wav|ogg|flac|aac))$/gim);
+  const path = pathMatch ? pathMatch[0].split(":")[1] : null;
+  const islocal = a.match(/^local:(true|false)/gim) ? a.match(/^local:(true|false)/gim)[0].split(":")[1].toLowerCase() === "true" : false;
+  if (!id && !islocal) throw new Error("Please provide a Spotify track ID. Usage: $audio id:TRACK_ID local:false");
+  if (!path && islocal) throw new Error("Please provide your local audio file path. Usage: $audio path:/path/to/audio.mp3 local:true");
+  return getAudio(islocal ? path : id, islocal);
+}
+
+export { getWarnTimeExpireCalc, getTimezone, getTimeNow, getTimeByTimezone, getDateNow, getDateByTimezone, getDateTimeByTimezone, getHelpCmds, generateJoke, generateQuote, getListModels, getCalculatorResult, getCalcAgeResult, getCountdownResult, getCountupResult, getDataSizeConversion, getTemperatureConversion, getTimeConversion, getCurrencyConversion, getLengthConversion, getWeightConversion, getVolumeConversion, getPressureConversion, getSpeedConversion, getEnergyConversion, getInspiredBy, getMotivation, getRadioStationsByCountry, getYoutubeSearch, getColorListHex, shuffleNums, genRandomNumbersSimple as genRandomNumbers, getListAllTimeZones, getWelcomeMessage, getByeMessage, getRulesMessage, sendFeedback, setTheme, getTheme, listDefThemes, getHelloMessageCMD, getHelpListCMD, sendFeedbackCMD, setThemeCMD, setTimeCMD, setDateCMD, setDateTimeCMD, getTimeZoneCMD, getListTimeZonesCMD, getListAIModelsCMD, getEMAILAddressCMD, setWeatherCMD, getRNGCMD, getCountdownCMD, getCountupCMD, getDataSizeConversionCMD, getTemperatureConversionCMD, getLengthConversionCMD, getTimeConversionCMD, getWeightConversionCMD, getCurrencyConversionCMD, getVolumeConversionCMD, getPressureConversionCMD, getSpeedConversionCMD, getEnergyConversionCMD, getAllConversionsCMD, getYouTubeSearchResultsCMD, setResetWarningsCMD, setChatClosedCMD, setTranslationCMD, setSpotifyMusicCMD, setNewsCMD, setVideoCMD, setAudioCMD };
