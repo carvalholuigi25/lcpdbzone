@@ -52,6 +52,7 @@
     "@ng-bootstrap/ng-bootstrap": "^20.0.0",
     "@popperjs/core": "^2.11.8",
     "@sendgrid/mail": "^8.1.6",
+    "@videojs/html": "^10.0.0-beta.11",
     "animate.css": "^4.1.1",
     "axios": "^1.13.6",
     "bootstrap": "^5.3.8",

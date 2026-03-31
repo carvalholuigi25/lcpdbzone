@@ -45,6 +45,7 @@ Thumbs.db
 notes
 notes/
 public/assets/images/tvseries
+public/assets/videos
 covinfo
 storage/local/*
 storage/local/chatwarnings/*

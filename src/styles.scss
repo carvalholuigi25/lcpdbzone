@@ -4,6 +4,8 @@
 @use 'fonts/fonts.scss';
 @use 'mystyles/all.scss';
 
+// @import '@mydir/node_modules/video.js/dist/video-js.min.css';
+
 * {
     margin: 0;
     padding: 0;
@@ -387,9 +389,30 @@ body {
 .myvideoblk, .myaudioblk {
     display: block;
     width: auto;
-    max-width: 100%;
     height: auto;
+    max-width: 100%;
+    max-height: 100%;
     margin: 15px auto;
+}
+
+.youtubeblk, .videolocalblk, .videojsblk {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    min-width: 30vw;
+
+    .ratio {
+        border-radius: calc(16px + 8px);
+    }
+}
+
+.audiolocalblk {
+    audio {
+        width: 100%;
+        max-width: 100%;
+        border-radius: calc(16px + 8px);
+    }
 }
 
 @media all and (min-width: 1200px) {

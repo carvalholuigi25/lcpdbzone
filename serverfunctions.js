@@ -136,16 +136,41 @@ async function getNews(a, srch, lang = "en", category = "technology", country = 
 }
 
 function getVideo(id, islocal = false) {
-  return "<div class='myvideoblk "+(islocal ? 'localblk' : 'youtubeblk')+"'><iframe width='560' height='315' src='"+(islocal ? id : 'https://www.youtube.com/embed/' + id)+"' title='"+(islocal ? 'Local video player' : 'YouTube video player')+"' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe></div>";
+  const videoSrc = String(id || "").trim();
+  const isRemoteVideo = !islocal && /^(https?:\/\/.*\.(mp4|webm|ogg))(\?.*)?$/i.test(videoSrc);
+  const isYouTubeId = !islocal && /^[0-9A-Za-z_-]{11}$/.test(videoSrc);
+
+  if (islocal || isRemoteVideo) {
+    const sourceType = videoSrc.match(/\.(mp4|webm|ogg)(\?.*)?$/i)?.[1]?.toLowerCase() || 'mp4';
+    // const playerId = `videojs-player-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const playerId = `my-video`; // Use a fixed ID since we only have one video player in the DOM
+    const viplayer = `
+      <video id="${playerId}" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360" data-setup='{}'>
+        <source src="${videoSrc}" type="video/${sourceType}">
+        Your browser does not support the video tag.
+      </video>
+    `;
+
+    return `<div class='myvideoblk ${islocal ? 'videolocalblk' : 'videojsblk'}' data-vjs-player><div class="ratio ratio-16x9">${viplayer}</div></div>`;
+  }
+
+  if (isYouTubeId) {
+    return `<div class='myvideoblk ${islocal ? 'videolocalblk' : 'videojsblk'}'><div class="ratio ratio-16x9"><iframe src="https://www.youtube.com/embed/${videoSrc}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" width="640" height="360" allowfullscreen></iframe></div></div>`;
+  }
+
+  return `<div class='myvideoblk youtubeblk'><p>Invalid video source or unsupported format. Use a local video path with local:true or a direct remote video URL (.mp4, .webm, .ogg).</p></div>`;
 }
 
 function getAudio(id, islocal = false) {
-  return "<div class='myaudioblk "+(islocal ? 'localblk' : 'spotifyblk')+"'><iframe width='560' height='315' src='"+(islocal ? id : 'https://open.spotify.com/embed/track/' + id)+"' title='"+(islocal ? 'Local audio player' : 'Spotify audio player')+"' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share' referrerpolicy='strict-origin-when-cross-origin' allowfullscreen></iframe></div>";
+  // const isspotify = !islocal && /^[0-9a-zA-Z]{22}$/.test(id);
+  const aplayer = islocal ? `<audio controls><source src="${id}" type="audio/mpeg">Your browser does not support the audio element.</audio>` : `<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/${id}?utm_source=generator" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+
+  return `<div class='myaudioblk ${islocal ? 'audiolocalblk' : 'spotifyblk'}'>${aplayer}</div>`;
 }
 
 function getByeMessage() {
   const dh = new Date().getHours();
-  const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 22 ? "evening" : "night"));
+  const statusmsg = dh >= 6 && dh < 12 ? "morning" : (dh >= 12 && dh < 18 ? "afternoon" : (dh >= 18 && dh < 0 ? "evening" : "night"));
   return "Goodbye! Have a good "+statusmsg+"!";
 }
 
@@ -701,18 +726,21 @@ async function setSpotifyMusicCMD(a) {
 }
 
 async function setVideoCMD(a) {
-  const idMatch = a.match(/^id:(\w+)/gim);
-  const id = idMatch ? idMatch[0].split(":")[1] : null;
-  const pathMatch = a.match(/^path:(\/.*\.(mp4|webm|ogg))$/gim);
-  const path = pathMatch ? pathMatch[0].split(":")[1] : null;
-  const islocal = a.match(/^local:(true|false)/gim) ? a.match(/^local:(true|false)/gim)[0].split(":")[1].toLowerCase() === "true" : false;
-  if (!id && !islocal) throw new Error("Please provide a YouTube video ID. Usage: $video id:VIDEO_ID local:false");
-  if (!path && islocal) throw new Error("Please provide your local video file path. Usage: $video path:/path/to/video.mp4 local:true");
+  const idMatch = a.match(/(?:id:\s*"([^"]+)"|id:\s*([^\s]+))/i);
+  const id = idMatch ? (idMatch[1] || idMatch[2]) : null;
+  const pathMatch = a.match(/(?:path:\s*"([^"]+)"|path:\s*([^\s]+))/i);
+  const path = pathMatch ? (pathMatch[1] || pathMatch[2]) : null;
+  const islocalMatch = a.match(/local:\s*(true|false)/i);
+  const islocal = islocalMatch ? islocalMatch[1].toLowerCase() === "true" : false;
+
+  if (!id && !islocal) throw new Error("Please provide a YouTube video ID or remote video URL. Usage: $video id:\"VIDEO_ID\" local:false");
+  if (!path && islocal) throw new Error("Please provide your local video file path. Usage: $video path:\"/path/to/video.mp4\" local:true");
+
   return getVideo(islocal ? path : id, islocal);
 }
 
 async function setAudioCMD(a) {
-  const idMatch = a.match(/^id:(\w+)/gim);
+  const idMatch = a.match(/^id\s*:\s*"([^"]+)"$/gim);
   const id = idMatch ? idMatch[0].split(":")[1] : null;
   const pathMatch = a.match(/^path:(\/.*\.(mp3|wav|ogg|flac|aac))$/gim);
   const path = pathMatch ? pathMatch[0].split(":")[1] : null;
