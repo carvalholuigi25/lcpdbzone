@@ -17,6 +17,7 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
+      "*": ["./src/*"],
       "@/*": ["src/*"],
       "@mydir/*": ["./*"],
       "@json/*": ["src/assets/json/*"],

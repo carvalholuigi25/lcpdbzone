@@ -1,3 +1,4 @@
+import { Videojsplayer } from '@/app/components/videos/videojsplayer/videojsplayer';
 import { SafeHtmlPipe } from '@/app/pipes';
 import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
@@ -14,7 +15,7 @@ interface Message {
 
 @Component({
   selector: 'app-admsupport',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SafeHtmlPipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SafeHtmlPipe, Videojsplayer],
   standalone: true,
   templateUrl: './admsupport.html',
   styleUrl: './admsupport.scss',
@@ -37,6 +38,7 @@ export class Admsupport implements OnInit, OnDestroy {
   prefixalt = "!";
   chatthemename: string = "mychattheme default";
   dateTimeWarnExpire: number = new Date().getTime() + this.timeValMs;
+  previewNewVideoPlayer: boolean = false;
 
   ageverificationform = new FormGroup({
     dateBirthday: new FormControl('', [Validators.required]),
@@ -94,6 +96,22 @@ export class Admsupport implements OnInit, OnDestroy {
       age--;
     }
     return age;
+  }
+
+  extractvideosrc(content: string): string | null {
+    const regex = /^\$video\s+path:"([^"]+)"\s+local:true$/;
+    const match = content.match(regex);
+    return match ? match[1].toString() : null;
+  }
+
+  extractvideoyoutubeid(content: string): string | null {
+    const regex = /^\$video\s+id:"([^"]*)"\s+local:false$/;
+    const match = content.match(regex);
+    return match ? match[1].toString() : null;
+  }
+
+  toggleNewVideoPlayer() {
+    this.previewNewVideoPlayer = !this.previewNewVideoPlayer;
   }
 
   loadChatbotStuff() {
@@ -325,7 +343,7 @@ export class Admsupport implements OnInit, OnDestroy {
   }
 
   async checkMessageProfanity() {
-    const profanityList = (await import('profanityfilters.json')).badwords || [];
+    const profanityList = (await import('@mydir/profanityfilters.json')).badwords || [];
     if(profanityList && profanityList.some(word => this.userInput.toLowerCase().includes(word.toLowerCase()))) {
       // this.userInput = '';
       this.userInput = this.userInput.replace(new RegExp(profanityList.join('|'), 'gi'), '****');

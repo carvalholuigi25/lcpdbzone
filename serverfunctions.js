@@ -136,6 +136,9 @@ async function getNews(a, srch, lang = "en", category = "technology", country = 
 }
 
 function getVideo(id, islocal = false) {
+  //usage for local: $video path:"assets/videos/demo.mp4" local:true
+  //usage for external: $video id:"youtube video id here" local:false  
+
   const videoSrc = String(id || "").trim();
   const isRemoteVideo = !islocal && /^(https?:\/\/.*\.(mp4|webm|ogg))(\?.*)?$/i.test(videoSrc);
   const isYouTubeId = !islocal && /^[0-9A-Za-z_-]{11}$/.test(videoSrc);
@@ -152,6 +155,7 @@ function getVideo(id, islocal = false) {
     `;
 
     return `<div class='myvideoblk ${islocal ? 'videolocalblk' : 'videojsblk'}' data-vjs-player><div class="ratio ratio-16x9">${viplayer}</div></div>`;
+    // return `<div class='myvideoblk ${islocal ? 'videolocalblk' : 'videojsblk'}' data-vjs-player><div class="ratio ratio-16x9">${viplayer}</div></div>`;
   }
 
   if (isYouTubeId) {

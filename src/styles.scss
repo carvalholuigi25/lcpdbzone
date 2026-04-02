@@ -415,6 +415,12 @@ body {
     }
 }
 
+.btnpreviewnewvideoplayer {
+  background-color: #1985c3;
+  color: white;
+  border-radius: calc(16px + 8px);
+}
+
 @media all and (min-width: 1200px) {
     .admin { 
         padding: 6rem calc(12rem + 1rem);

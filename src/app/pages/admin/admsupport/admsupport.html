@@ -56,11 +56,35 @@
                           }
                         }
 
-                      <div class="message_content mt-0" [innerHTML]="msg.content | safeHtml"></div>
-                      <small class="mt-3">
-                        <i class="bi bi-clock"></i>
-                        <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>
-                      </small>
+                      @if(!previewNewVideoPlayer) {
+                        <div class="message_content mt-0" [innerHTML]="msg.content | safeHtml"></div>
+                      }
+
+                      <div class="d-block mt-3 mprevnewvidplayer">
+                        @if(msg.role == 'user' && msg.content.includes(prefix+'video' || prefixalt+'video')) {
+                          <button class="btn btn-primary btnpreviewnewvideoplayer" (click)="toggleNewVideoPlayer()">Preview new video player</button>
+                        }
+
+                        <div class="d-block mt-3">
+                          @if(previewNewVideoPlayer) {
+                            @if(msg.role == 'user' && msg.content.includes((prefix+'video' || prefixalt+'video')+' path:') && msg.content.includes('local:true')) {
+                              <app-videojsplayer [src]="'' + extractvideosrc(msg.content)" [width]="640" [height]="480" [poster]=""></app-videojsplayer>
+                            }
+
+                            @if(msg.role == 'user' && msg.content.includes((prefix+'video' || prefixalt+'video')+' id:') && msg.content.includes('local:false')) {
+                              <app-videojsplayer [src]="'' + extractvideoyoutubeid(msg.content)" [width]="640" [height]="480" [poster]=""></app-videojsplayer>
+                            }
+                          }
+                        </div>
+                      </div>
+
+
+                      <div class="d-block mt-3">
+                        <small>
+                          <i class="bi bi-clock"></i>
+                          <span class="ms-2" title="Time of post generated">{{msg.timestamp | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                        </small>
+                      </div>
                     </div>
                   }
                 }
