@@ -178,7 +178,7 @@ function getMyListAllTimeZones(method = "native") {
 }
 
 async function getHelpCmds() {
-  const data = await import('@mydir/list_help_cmds.json', { assert: { type: 'json' } });
+  const data = await import('@mydir/list_help_cmds.json', { with: { type: 'json' } });
   const {cmds} = data.default;
   return cmds || [];
 }

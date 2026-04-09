@@ -18,7 +18,7 @@
     "module": "preserve",
     "paths": {
       "*": ["./src/*"],
-      "@/*": ["src/*"],
+      "@/*": ["./src/*"],
       "@mydir/*": ["./*"],
       "@json/*": ["src/assets/json/*"],
       "@directives/*": ["src/app/directives/*"],
@@ -32,6 +32,7 @@
       "@services/*": ["src/app/services/*"],
       "@assets/*": ["public/assets/*"],
       "@fonts/*": ["src/fonts/*"],
+      "@nmodules/*": ["./node_modules/*"],
       "@myfunctions": ["src/app/functions/functions.ts"],
       "@myserverfunctions": ["./functions.js"],
       "@sendgridm": ["./node_modules/@sendgrid/mail/index.js"]
