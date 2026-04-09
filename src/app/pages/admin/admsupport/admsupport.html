@@ -68,12 +68,12 @@
                         <div class="d-block mt-3">
                           @if(previewNewVideoPlayer) {
                             @if(msg.role == 'user' && msg.content.includes((prefix+'video' || prefixalt+'video')+' path:') && msg.content.includes('local:true')) {
-                              <app-videojsplayer [src]="'' + extractvideosrc(msg.content)" [type]="'video/mp4'" [width]="640" [height]="480" [poster]="" [autoplay]="false"></app-videojsplayer>
+                              <app-videojsplayer [src]="'//' + extractvideosrc(msg.content)" [type]="'video/mp4'" [width]="640" [height]="480" [poster]="" [autoplay]="false"></app-videojsplayer>
                               <p class="lblunseevplayer mt-3">Still cannot see or interact new video player? <a [href]="'//'+extractvideosrc(msg.content)" target="_blank">Click here</a>.</p>
                             }
 
                             @if(msg.role == 'user' && msg.content.includes((prefix+'video' || prefixalt+'video')+' id:') && msg.content.includes('local:false')) {
-                              <app-videojsplayer [src]="'https://www.youtube.com/watch?v=' + extractvideoyoutubeid(msg.content)" type="video/youtube" [width]="640" [height]="480" [poster]="" [autoplay]="false"></app-videojsplayer>
+                              <app-videojsplayer [src]="'https://www.youtube.com/watch?v=' + extractvideoyoutubeid(msg.content)" [type]="'video/youtube'" [width]="640" [height]="480" [poster]="" [autoplay]="false"></app-videojsplayer>
                               <p class="lblunseevplayer mt-3">Still cannot see or interact new video player? <a [href]="'https://www.youtube.com/watch?v='+extractvideoyoutubeid(msg.content)" target="_blank">Click here</a>.</p>
                             }
                           }

@@ -1,5 +1,6 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import videojs from 'video.js';
+import 'videojs-youtube';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-videojsplayer',
@@ -19,62 +20,71 @@ export class Videojsplayer implements OnInit, OnDestroy {
   @Input() poster?: string = "assets/videos/posters/default.png";
   @Input() fluid: boolean = false;
   @Input() autoplay: boolean = false;
+  @Input() controls: boolean = true;
   @Input() type?: string;
 
-  objopts: any;
-  typevideo: any;
+  objopts: any = this.getVideoDefOptions();
 
   ngOnInit() {
     this.initVideoPlayer();
   }
 
-  initVideoPlayer() {
-    // Initialize the Video.js player
-    this.objopts = this.setVideoOptions();
-    console.log(this.objopts)
+  ngOnDestroy() {
+    // Clean up the Video.js player to avoid memory leaks
+    if (this.player) {
+      this.player.dispose();
+    }
+  }
 
-    this.player = videojs(this.target.nativeElement, this.objopts, () => {
+  getVideoDefOptions() {
+    return {
+      techOrder: this.isYoutube() ? ['youtube', 'html5'] : ['html5'],
+      sources: [{ src: this.src, type: this.getVideoType() }],
+      width: this.width,
+      height: this.height,
+      poster: this.poster,
+      fluid: this.fluid,
+      autoplay: this.autoplay ?? false,
+      controls: this.controls ?? true,
+      youtube: this.isYoutube() ? { iv_load_policy: 1 } : {}
+    };
+  }
+
+  private initVideoPlayer() {
+    const options = {
+      techOrder: this.isYoutube() ? ['youtube', 'html5'] : ['html5'],
+      sources: [{ src: this.src, type: this.getVideoType() }],
+      width: this.width,
+      height: this.height,
+      poster: this.poster,
+      fluid: this.fluid,
+      autoplay: this.autoplay ?? false,
+      controls: this.controls ?? true,
+      youtube: this.isYoutube() ? { iv_load_policy: 1 } : {}
+    };
+
+    this.objopts = JSON.stringify(options);
+
+    this.player = videojs(this.target.nativeElement, JSON.parse(this.objopts), () => {
       console.log("The player is now ready");
     });
 
     // if(this.player) {
     //   this.player.src({
-    //     type: this.type ?? this.getVideoTypeSrc(this.src),
-    //     src: this.src
+    //     type: "video/youtube",
+    //     src: "https://www.youtube.com/watch?v=Hb17uaaldwM"
     //   });
     // }
   }
 
-  setVideoOptions() {
-    this.typevideo = this.type ?? this.getVideoTypeSrc(this.src);
-
-    const srclist = [{ 
-      type: this.type ?? this.getVideoTypeSrc(this.src), 
-      src: this.src 
-    }];
-
-    return {
-      width: this.width,
-      height: this.height,
-      poster: this.poster,
-      fluid: this.fluid,
-      autoplay: this.autoplay,
-      sources: srclist,
-      techOrder: this.typevideo.includes("youtube") ? ["youtube", "html5"] : ["html5"],
-      "youtube": this.typevideo.includes("youtube") ? { "iv_load_policy": 1 } : {}
-    };
+  private isYoutube(): boolean {
+    return this.src?.includes('youtube.com') ?? false;
   }
 
-  getVideoTypeSrc(src: string) {
-    // all mime types: https://mimetype.io/all-types
-    let regex = /http([a-z]?):\/\/youtube\.com/mig;
-    return new RegExp(regex).test(src) ? "video/youtube" : src.endsWith(".webm") ? "video/webm" : "video/mp4";
-  }
-
-  ngOnDestroy() {
-    // Clean up the Video.js player to avoid  memory leaks
-    if (this.player) {
-      this.player.dispose();
-    }
+  private getVideoType(): string {
+    if (!this.src) return 'video/mp4';
+    if (this.isYoutube()) return 'video/youtube';
+    if (this.src.endsWith('.webm')) return 'video/webm';
+    return 'video/mp4';
   }
 }

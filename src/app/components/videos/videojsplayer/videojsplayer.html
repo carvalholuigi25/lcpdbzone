@@ -3,7 +3,9 @@
   class="video-js vjs-default-skin"
   controls
   preload="auto"
+  [autoplay]="autoplay"
+  [poster]="poster"
   [attr.width]="width"
   [attr.height]="height"
-  [poster]="poster"
+  [attr.data-setup]="objopts"
 ></video>
