@@ -56,30 +56,23 @@
                           }
                         }
 
-                      @if(!previewNewVideoPlayer) {
-                        <div class="message_content mt-0" [innerHTML]="msg.content | safeHtml"></div>
-                      }
+                      <div class="message_content mt-0" [innerHTML]="msg.content | safeHtml"></div>
 
-                      <div class="d-block mt-3 mprevnewvidplayer">
-                        @if(msg.role == 'user' && msg.content.includes(prefix+'video' || prefixalt+'video')) {
-                          <button class="btn btn-primary btnpreviewnewvideoplayer" (click)="toggleNewVideoPlayer()">Preview new video player</button>
-                        }
-
-                        <div class="d-block mt-3">
-                          @if(previewNewVideoPlayer) {
-                            @if(msg.role == 'user' && msg.content.includes((prefix+'video' || prefixalt+'video')+' path:') && msg.content.includes('local:true')) {
-                              <app-videojsplayer [src]="'//' + extractvideosrc(msg.content)" [type]="'video/mp4'" [width]="640" [height]="480" [poster]="" [autoplay]="false"></app-videojsplayer>
-                              <p class="lblunseevplayer mt-3">Still cannot see or interact new video player? <a [href]="'//'+extractvideosrc(msg.content)" target="_blank">Click here</a>.</p>
-                            }
-
-                            @if(msg.role == 'user' && msg.content.includes((prefix+'video' || prefixalt+'video')+' id:') && msg.content.includes('local:false')) {
-                              <app-videojsplayer [src]="'https://www.youtube.com/watch?v=' + extractvideoyoutubeid(msg.content)" [type]="'video/youtube'" [width]="640" [height]="480" [poster]="" [autoplay]="false"></app-videojsplayer>
-                              <p class="lblunseevplayer mt-3">Still cannot see or interact new video player? <a [href]="'https://www.youtube.com/watch?v='+extractvideoyoutubeid(msg.content)" target="_blank">Click here</a>.</p>
-                            }
-                          }
+                      @if(msg.video) {
+                        <div class="d-block mt-3 videoplayer-response">
+                          <app-videojsplayer
+                            [src]="msg.video.src"
+                            [type]="msg.video.type === 'youtube' ? 'video/youtube' : 'video/mp4'"
+                            [width]="640"
+                            [height]="480"
+                            [poster]="''"
+                            [autoplay]="false"
+                          ></app-videojsplayer>
+                          <p class="lblunseevplayer mt-3">
+                            Still cannot see or interact with the new video player? <a [href]="msg.video.src" target="_blank">Click here</a>.
+                          </p>
                         </div>
-                      </div>
-
+                      }
 
                       <div class="d-block mt-3">
                         <small>

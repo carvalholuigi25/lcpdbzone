@@ -137,7 +137,7 @@ async function getNews(a, srch, lang = "en", category = "technology", country = 
 
 function getVideo(id, islocal = false) {
   //usage for local: $video path:"assets/videos/demo.mp4" local:true
-  //usage for external: $video id:"youtube video id here" local:false  
+  //usage for external: $video id:"youtube video id here" local:false (e.g: $video id:"Hb17uaaldwM" local:false) 
 
   const videoSrc = String(id || "").trim();
   const isRemoteVideo = !islocal && /^(https?:\/\/.*\.(mp4|webm|ogg))(\?.*)?$/i.test(videoSrc);

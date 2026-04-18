@@ -11,6 +11,10 @@ interface Message {
   role: string | 'user' | 'assistant';
   content: string;
   timestamp?: Date | string;
+  video?: {
+    src: string;
+    type: 'youtube' | 'local' | 'remote';
+  };
 }
 
 @Component({
@@ -38,11 +42,33 @@ export class Admsupport implements OnInit, OnDestroy {
   prefixalt = "!";
   chatthemename: string = "mychattheme default";
   dateTimeWarnExpire: number = new Date().getTime() + this.timeValMs;
-  previewNewVideoPlayer: boolean = false;
-
   ageverificationform = new FormGroup({
     dateBirthday: new FormControl('', [Validators.required]),
   });
+
+  private parseVideoCommand(content: string): { src: string; type: 'youtube' | 'local' | 'remote' } | null {
+    const normalized = content?.trim();
+    if (!normalized) {
+      return null;
+    }
+
+    const localMatch = normalized.match(/^(?:\$|\!)video\s+path:"([^"]+)"\s+local:true$/i);
+    if (localMatch) {
+      return { src: localMatch[1], type: 'local' };
+    }
+
+    const youtubeMatch = normalized.match(/^(?:\$|\!)video\s+id:"([^"]+)"\s+local:false$/i);
+    if (youtubeMatch) {
+      return { src: `https://www.youtube.com/watch?v=${youtubeMatch[1]}`, type: 'youtube' };
+    }
+
+    const remoteMatch = normalized.match(/^(?:\$|\!)video\s+path:"([^"]+)"\s+local:false$/i);
+    if (remoteMatch) {
+      return { src: remoteMatch[1], type: 'remote' };
+    }
+
+    return null;
+  }
 
   private abortController: AbortController | null = null;
   private mytimer: any;
@@ -108,10 +134,6 @@ export class Admsupport implements OnInit, OnDestroy {
     const regex = /^\$video\s+id:"([^"]*)"\s+local:false$/;
     const match = content.match(regex);
     return match ? match[1].toString() : null;
-  }
-
-  toggleNewVideoPlayer() {
-    this.previewNewVideoPlayer = !this.previewNewVideoPlayer;
   }
 
   loadChatbotStuff() {
@@ -504,6 +526,18 @@ export class Admsupport implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  // private handleVideoCommand(assistantMessage: Message, userMessage: Message) {
+  //   this.ngZone.run(() => {
+  //     const videoCommand = this.parseVideoCommand(userMessage.content);
+      
+  //     if(videoCommand) {
+  //       assistantMessage.content = `Here is your requested video player.`;
+  //       assistantMessage.video = videoCommand;
+  //       this.cdr.markForCheck();
+  //     }
+  //   });
+  // }
+
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 
@@ -526,9 +560,21 @@ export class Admsupport implements OnInit, OnDestroy {
       timestamp: new Date().toISOString()
     };
 
+    const videoCommand = this.parseVideoCommand(userMessage.content);
     this.messages.push(userMessage, assistantMessage);
     this.userInput = '';
     this.loading = true;
+
+    if (videoCommand) {
+      assistantMessage.content = `Here is your requested video player.`;
+      assistantMessage.video = videoCommand;
+      this.loading = false;
+      return;
+    }
+
+    // this.messages.push(userMessage, assistantMessage);
+    // this.userInput = '';
+    // this.loading = true;
 
     const conversation = [...this.messages];
 
@@ -559,6 +605,12 @@ export class Admsupport implements OnInit, OnDestroy {
       this.handleByeCommand(assistantMessage);
       return;
     }
+
+    // if ([this.prefix+"video", this.prefixalt+"video"].includes(userMessage.content.split(' ')[0])) {
+    //   this.handleVideoCommand(userMessage, assistantMessage);
+    //   this.loading = false;
+    //   return;
+    // }
 
     try {
       await this.chatService.sendMessage(
