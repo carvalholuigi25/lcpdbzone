@@ -1,0 +1,7 @@
+<audio #targetaudio class="myaudio" [controls]="controls" [autoplay]="autoplay" preload="metadata">
+  <source [src]="src" [type]="type_file" />
+  <p class="warn">
+    Your browser does not support the audio element.
+    <a [href]="src" target="_blank">Click here to download the audio file</a>
+  </p>
+</audio>

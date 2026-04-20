@@ -46,6 +46,7 @@ notes
 notes/
 public/assets/images/tvseries
 public/assets/videos
+public/assets/audios
 covinfo
 storage/local/*
 storage/local/chatwarnings/*

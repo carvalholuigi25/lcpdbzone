@@ -74,6 +74,23 @@
                         </div>
                       }
 
+                      @if(msg.audio) {
+                        <div class="d-block mt-3 audioplayer-response">
+                          @if(msg.audio.type === 'spotify') {
+                            <iframe [src]="msg.audio.src | safe" width="300" height="380" frameborder="0" allowtransparency="true" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                          } @else {
+                            <app-audioplayer
+                              [src]="msg.audio.src"
+                              [autoplay]="false"
+                            ></app-audioplayer>
+                          }
+                          
+                          <p class="lblunseeaplayer mt-3">
+                            Still cannot see or interact with the new audio player? <a [href]="msg.audio.src" target="_blank">Click here</a>.
+                          </p>
+                        </div>
+                      }
+
                       <div class="d-block mt-3">
                         <small>
                           <i class="bi bi-clock"></i>

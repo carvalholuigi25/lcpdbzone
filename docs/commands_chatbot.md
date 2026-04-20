@@ -51,8 +51,8 @@
 | translate | It will translate your message. Usage: $translate text:\"your text here\" to:english (or lang:en) | :white_check_mark: |
 | news | It displays the current (or newest) news of world. | :white_check_mark: |
 | spotify | It uses the official spotify public web api to search the audio info or play your audio or podcasts (Usage: $spotify search:'top hits') | :construction: |
-| video | It plays your video by youtube (or your local video file) through iframe (Usage: $video id:VIDEO_ID [path?]:YOUR_VIDEO_FILE_HERE.mp4 local:(true or false)) | :construction: |
-| audio | It plays your audio by spotify (or your local audio file) through iframe (Usage: $audio id:TRACK_ID [path?]:YOUR_AUDIO_FILE_HERE.mp4 local:(true or false)) | :construction: |
+| video | It plays your video by youtube (or your local video file) through iframe (Usage: $video id:"VIDEO_ID" local:false or $video path:"assets/videos/YOUR_VIDEO_FILE_HERE.mp4" local:true) | :white_check_mark: |
+| audio | It plays your audio by spotify (or your local audio file) through iframe (Usage: $audio id:"TRACK_ID" local:false or $audio path:"assets/audios/YOUR_AUDIO_FILE_HERE.mp3" local:true) | :white_check_mark: |
 
 >
 > &nbsp;

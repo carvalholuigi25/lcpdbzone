@@ -1,5 +1,6 @@
 import { Videojsplayer } from '@/app/components/videos/videojsplayer/videojsplayer';
-import { SafeHtmlPipe } from '@/app/pipes';
+import { Audioplayer } from 'app/components/audios/audioplayer/audioplayer';
+import { SafeHtmlPipe, SafePipe } from '@/app/pipes';
 import { ChatService } from '@/app/services/data/chat.service';
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, DOCUMENT } from '@angular/core';
@@ -15,11 +16,15 @@ interface Message {
     src: string;
     type: 'youtube' | 'local' | 'remote';
   };
+  audio?: {
+    src: string;
+    type: 'local' | 'spotify' | 'remote';
+  };
 }
 
 @Component({
   selector: 'app-admsupport',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, SafeHtmlPipe, Videojsplayer],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SafeHtmlPipe, SafePipe, Videojsplayer, Audioplayer],
   standalone: true,
   templateUrl: './admsupport.html',
   styleUrl: './admsupport.scss',
@@ -63,6 +68,31 @@ export class Admsupport implements OnInit, OnDestroy {
     }
 
     const remoteMatch = normalized.match(/^(?:\$|\!)video\s+path:"([^"]+)"\s+local:false$/i);
+    if (remoteMatch) {
+      return { src: remoteMatch[1], type: 'remote' };
+    }
+
+    return null;
+  }
+
+  private parseAudioCommand(content: string): { src: string; type: 'local' | 'spotify' | 'remote' } | null {
+    const normalized = content?.trim();
+    if (!normalized) {
+      return null;
+    }
+
+    const localMatch = normalized.match(/^(?:\$|\!)audio\s+path:"([^"]+)"\s+local:true$/i);
+    if (localMatch) {
+      console.log(localMatch);
+      return { src: localMatch[1], type: 'local' };
+    }
+
+    const spotifyMatch = normalized.match(/^(?:\$|\!)audio\s+id:"([^"]+)"\s+local:false$/i);
+    if (spotifyMatch) {
+      return { src: `https://open.spotify.com/embed/track/${spotifyMatch[1]}`, type: 'spotify' };
+    }
+
+    const remoteMatch = normalized.match(/^(?:\$|\!)audio\s+path:"([^"]+)"\s+local:false$/i);
     if (remoteMatch) {
       return { src: remoteMatch[1], type: 'remote' };
     }
@@ -526,30 +556,40 @@ export class Admsupport implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  // private handleVideoCommand(assistantMessage: Message, userMessage: Message) {
-  //   this.ngZone.run(() => {
-  //     const videoCommand = this.parseVideoCommand(userMessage.content);
-      
-  //     if(videoCommand) {
-  //       assistantMessage.content = `Here is your requested video player.`;
-  //       assistantMessage.video = videoCommand;
-  //       this.cdr.markForCheck();
-  //     }
-  //   });
-  // }
+  private handleVideoCommand(videoCommand: any, assistantMessage: Message) {
+    this.ngZone.run(() => {
+      if (videoCommand) {
+        assistantMessage.content = `Here is your requested video player.`;
+        assistantMessage.video = videoCommand;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private handleAudioCommand(audioCommand: any, assistantMessage: Message) {
+    this.ngZone.run(() => {
+      if (audioCommand) {
+        assistantMessage.content = `Here is your requested audio player.`;
+        assistantMessage.audio = audioCommand;
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   async sendMessageStream() {
     if (!this.userInput.trim() || this.loading) return;
 
+    // Check profanity and reset warnings before processing
     await this.checkMessageProfanity();
     this.resetWarnings();
 
     const userId = this.id++;
-    
+    const userContent = this.userInput.trim();
+
     const userMessage: Message = {
       id: userId,
       role: 'user',
-      content: this.userInput,
+      content: userContent,
       timestamp: new Date().toISOString()
     };
 
@@ -560,63 +600,72 @@ export class Admsupport implements OnInit, OnDestroy {
       timestamp: new Date().toISOString()
     };
 
-    const videoCommand = this.parseVideoCommand(userMessage.content);
+    // Extract first word (command) robustly
+    const firstWord = userContent.split(/\s+/)[0]?.toLowerCase() || '';
+
+    // Parse for video command
+    const videoCommand = this.parseVideoCommand(userContent);
+
+    // Parse for audio command
+    const audioCommand = this.parseAudioCommand(userContent);
+
+    // Add messages to conversation
     this.messages.push(userMessage, assistantMessage);
     this.userInput = '';
     this.loading = true;
 
-    if (videoCommand) {
-      assistantMessage.content = `Here is your requested video player.`;
-      assistantMessage.video = videoCommand;
-      this.loading = false;
-      return;
-    }
-
-    // this.messages.push(userMessage, assistantMessage);
-    // this.userInput = '';
-    // this.loading = true;
-
-    const conversation = [...this.messages];
-
-    // abort any previous
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-    this.abortController = new AbortController();
-
-    // Handle special commands locally
-    if ([this.prefix+"time", this.prefixalt+"time"].includes(userMessage.content.split(' ')[0])) {
-      this.handleTimeCommand(userMessage, assistantMessage);
-      this.loading = false;
-      return;
-    } else if ([this.prefix+"countdown", this.prefixalt+"countdown"].includes(userMessage.content.split(' ')[0])) {
-      this.handleCountdownCommand(userMessage, assistantMessage);
-      this.loading = false;
-      return;
-    } else if ([this.prefix+"countup", this.prefixalt+"countup"].includes(userMessage.content.split(' ')[0])) {
-      this.handleCountupCommand(userMessage, assistantMessage);
-      this.loading = false;
-      return;
-    } else if ([this.prefix+"theme", this.prefixalt+"theme"].includes(userMessage.content.split(' ')[0])) {
-      this.handleThemeCommand(userMessage, assistantMessage);
-      this.loading = false;
-      return;
-    } else if ([this.prefix+"bye", this.prefixalt+"bye"].includes(userMessage.content.split(' ')[0])) {
-      this.handleByeCommand(assistantMessage);
-      return;
-    }
-
-    // if ([this.prefix+"video", this.prefixalt+"video"].includes(userMessage.content.split(' ')[0])) {
-    //   this.handleVideoCommand(userMessage, assistantMessage);
-    //   this.loading = false;
-    //   return;
-    // }
-
     try {
+      // Handle video command
+      if ([this.prefix + 'video', this.prefixalt + 'video'].includes(firstWord)) {
+        this.handleVideoCommand(videoCommand, assistantMessage);
+        return;
+      }
+
+      // Handle audio command
+      if ([this.prefix + 'audio', this.prefixalt + 'audio'].includes(firstWord)) {
+        this.handleAudioCommand(audioCommand, assistantMessage);
+        return;
+      }
+
+      // Handle special commands locally
+      if ([this.prefix + 'time', this.prefixalt + 'time'].includes(firstWord)) {
+        this.handleTimeCommand(userMessage, assistantMessage);
+        return;
+      }
+
+      if ([this.prefix + 'countdown', this.prefixalt + 'countdown'].includes(firstWord)) {
+        this.handleCountdownCommand(userMessage, assistantMessage);
+        return;
+      }
+
+      if ([this.prefix + 'countup', this.prefixalt + 'countup'].includes(firstWord)) {
+        this.handleCountupCommand(userMessage, assistantMessage);
+        return;
+      }
+
+      if ([this.prefix + 'theme', this.prefixalt + 'theme'].includes(firstWord)) {
+        this.handleThemeCommand(userMessage, assistantMessage);
+        return;
+      }
+
+      if ([this.prefix + 'bye', this.prefixalt + 'bye'].includes(firstWord)) {
+        this.handleByeCommand(assistantMessage);
+        return;
+      }
+
+      // Handle AI response with streaming
+      const conversation = [...this.messages];
+
+      // Abort any previous request
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+      this.abortController = new AbortController();
+
       await this.chatService.sendMessage(
         conversation,
         (chunk) => {
-          // ensure UI updates run inside Angular zone
+          // Ensure UI updates run inside Angular zone
           this.ngZone.run(() => {
             assistantMessage.content += chunk;
             this.cdr.markForCheck();
@@ -624,9 +673,9 @@ export class Admsupport implements OnInit, OnDestroy {
         },
         this.abortController.signal
       );
-    } catch (err: any) {
-      if (err?.name !== 'AbortError') {
-        console.error(err);
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') {
+        console.error('Error in sendMessageStream:', error);
 
         this.ngZone.run(() => {
           assistantMessage.content += '\n\n[Error receiving response]';
@@ -636,10 +685,6 @@ export class Admsupport implements OnInit, OnDestroy {
     } finally {
       this.loading = false;
       this.abortController = null;
-
-      if(this.userInput.trim() === this.prefix+'bye' || this.userInput.trim() === this.prefixalt+'bye') {
-        this.endInteraction();
-      }
     }
   }
 }
