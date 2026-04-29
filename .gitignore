@@ -54,3 +54,4 @@ storage/local/chatwarnings/warningCount
 package-lock.json
 .env
 .env.*
+.early.coverage

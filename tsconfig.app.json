@@ -10,10 +10,7 @@
       "@angular/localize"
     ]
   },
-  "include": [
-    "src/**/*.ts", 
-    "src/main.d.ts"
-  ],
+  "include": ["src/**/*.ts", "src/main.d.ts", "src/test-setup.ts"],
   "exclude": [
     "src/**/*.spec.ts"
   ]
