@@ -5,11 +5,12 @@ import { ChangeDetectorRef } from '@angular/core';
 import { of, throwError, Subject } from 'rxjs';
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 
-import { AuthService } from '@services/auth.service';
-import { ToastService } from '@/app/services/toast.service';
-import { Toast } from '@/app/components';
-import { AuthResponse } from '@models/auth';
+import { AuthService } from '../../../services/auth.service';
+import { ToastService } from '../../../services/toast.service';
+import { Toast } from '../../../components';
+import { AuthResponse } from '../../../models/auth';
 import { Login } from './login';
+import '../../../../test-setup';
 
 beforeAll(async () => {
     try {
@@ -38,7 +39,7 @@ describe('Login', () => {
 
   const mockAuthResponse: AuthResponse = {
     displayName: 'Admin',
-    username: 'admin',
+    username: 'admin'
   };
 
   beforeEach(async () => {

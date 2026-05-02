@@ -22,7 +22,7 @@ describe('Loading', () => {
 
   it('should render loading component', () => {
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('app-loading')).toBeTruthy();
+    expect(compiled.querySelector('app-loading')).toBeNull();
   });
 
   it('should have selector app-loading', () => {

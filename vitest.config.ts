@@ -4,8 +4,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     // setupFiles: ['src/test-setup.ts'],
-    // globals: true,
+    // globals: false,
     // environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
     alias: {
       '@/': new URL('./src/', import.meta.url).pathname,
       '@app': path.resolve(__dirname, 'src/app'),
@@ -30,6 +31,9 @@ export default defineConfig({
       reportsDirectory: path.join(__dirname, './coverage/lcpdbzone'),
       reportOnFailure: true,
     },
+    restoreMocks: true,
+    clearMocks: true,
+    mockReset: true,
   },
   plugins: []
 })

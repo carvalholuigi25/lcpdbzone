@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GamesDetails } from './games-details';
+import { ActivatedRoute } from '@angular/router';
 
 describe('GamesDetails', () => {
   let component: GamesDetails;
@@ -8,7 +9,23 @@ describe('GamesDetails', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GamesDetails]
+      imports: [GamesDetails],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 

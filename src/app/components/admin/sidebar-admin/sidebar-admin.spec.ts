@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SidebarAdmin } from './sidebar-admin';
+import { ActivatedRoute } from '@angular/router';
 
 describe('SidebarAdmin', () => {
   let component: SidebarAdmin;
@@ -8,7 +9,23 @@ describe('SidebarAdmin', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SidebarAdmin]
+      imports: [SidebarAdmin],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 

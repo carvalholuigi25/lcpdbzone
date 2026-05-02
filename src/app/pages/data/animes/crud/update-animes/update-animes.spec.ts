@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UpdateAnimes } from './update-animes';
+import { ActivatedRoute } from '@angular/router';
 
 describe('UpdateAnimes', () => {
   let component: UpdateAnimes;
@@ -8,7 +9,23 @@ describe('UpdateAnimes', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UpdateAnimes]
+      imports: [UpdateAnimes],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 

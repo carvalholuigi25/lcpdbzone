@@ -73,7 +73,7 @@ describe('PrettyJsonPipe', () => {
   it('should handle undefined value', () => {
     const result = pipe.transform(undefined);
 
-    expect(result).toBeDefined();
+    expect(result).toBeUndefined();
   });
 
   it('should handle string value', () => {

@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { TVSeriesDataService } from './tvseriesdata.service';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { ActivatedRoute } from '@angular/router';
 
 describe('TVSeriesDataService', () => {
   let service: TVSeriesDataService;
@@ -9,7 +10,22 @@ describe('TVSeriesDataService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [TVSeriesDataService]
+      providers: [TVSeriesDataService, {
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     });
     service = TestBed.inject(TVSeriesDataService);
   });

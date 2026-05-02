@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateBooks } from './create-books';
+import { ActivatedRoute } from '@angular/router';
 
 describe('CreateBooks', () => {
   let component: CreateBooks;
@@ -8,7 +9,23 @@ describe('CreateBooks', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateBooks]
+      imports: [CreateBooks],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 

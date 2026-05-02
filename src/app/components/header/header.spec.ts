@@ -1,90 +1,154 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { DOCUMENT } from '@angular/common';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { Header } from './header';
 import { AuthService } from '@services/auth.service';
-import { DOCUMENT } from '@angular/common';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// --- Helpers -----------------------------------------------------------
+
+const mockLoginData = {
+  id: '123',
+  displayName: 'John Doe',
+  role: 'admin',
+  username: 'johndoe',
+};
+
+function buildAuthServiceMock() {
+  return { logout: vi.fn() };
+}
+
+function mockLocalStorage(overrides: Record<string, string | null> = {}) {
+  vi.spyOn(globalThis.localStorage, 'getItem').mockImplementation(
+    (key: string) => (key in overrides ? overrides[key] : null)
+  );
+  vi.spyOn(globalThis.localStorage, 'setItem').mockImplementation(vi.fn());
+  vi.spyOn(globalThis.localStorage, 'removeItem').mockImplementation(vi.fn());
+}
+
+// --- Tests -------------------------------------------------------------
 
 describe('Header', () => {
-  let component: Header;
-  let fixture: ComponentFixture<Header>;
-  let authService: any;
+  let authServiceMock: ReturnType<typeof buildAuthServiceMock>;
 
-  beforeEach(async () => {
-    const authServiceSpy = {
-      logout: vi.fn()
-    };
+  // Helper: configure TestBed using the real DOCUMENT (required by Angular's DOM renderer)
+  async function createComponent() {
+    authServiceMock = buildAuthServiceMock();
 
     await TestBed.configureTestingModule({
       imports: [Header],
       providers: [
-        { provide: AuthService, useValue: authServiceSpy }
-      ]
+        provideRouter([]),
+        // Do NOT override DOCUMENT — Angular needs the real one to render
+        { provide: AuthService, useValue: authServiceMock },
+      ],
     }).compileComponents();
 
-    authService = TestBed.inject(AuthService) as any;
-    fixture = TestBed.createComponent(Header);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-  });
+    const fixture = TestBed.createComponent(Header);
+    fixture.detectChanges();
+    return fixture.componentInstance;
+  }
 
   afterEach(() => {
-    localStorage.clear();
+    vi.restoreAllMocks();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  // -------------------------------------------------------------------
+  // Constructor – localStorage scenarios
+  // -------------------------------------------------------------------
 
-  it('should load user details from localStorage on init', () => {
-    const loginData = {
-      id: 1,
-      displayName: 'John Doe',
-      role: 'user',
-      username: 'johndoe'
-    };
+  describe('constructor', () => {
+    it('should create the component', async () => {
+      mockLocalStorage(); // no "login" key
+      const component = await createComponent();
+      expect(component).toBeTruthy();
+    });
 
-    localStorage.setItem('login', JSON.stringify(loginData));
+    it('should populate userDetails when "login" exists in localStorage', async () => {
+      mockLocalStorage({ login: JSON.stringify(mockLoginData) });
 
-    const newComponent: Header = new Header(
-      TestBed.inject(DOCUMENT),
-      authService
-    );
+      const component = await createComponent();
 
-    expect(newComponent.userDetails).toEqual({
-      id: 1,
-      displayName: 'John Doe',
-      role: 'user',
-      username: 'johndoe'
+      expect(component.userDetails).toEqual(mockLoginData);
+    });
+
+    it('should leave userDetails undefined when "login" is absent', async () => {
+      mockLocalStorage(); // getItem always returns null
+      const component = await createComponent();
+
+      expect(component.userDetails).toBeUndefined();
+    });
+
+    it('should leave userDetails undefined when defaultView is null', async () => {
+      // Patch the real document so defaultView appears absent
+      vi.spyOn(document, 'defaultView', 'get').mockReturnValue(null);
+
+      const component = await createComponent();
+
+      expect(component.userDetails).toBeUndefined();
+    });
+
+    it('should map only the expected fields from the stored login object', async () => {
+      const extraData = { ...mockLoginData, extraField: 'ignored' };
+      mockLocalStorage({ login: JSON.stringify(extraData) });
+
+      const component = await createComponent();
+
+      expect(component.userDetails).toEqual(mockLoginData);
+      expect((component.userDetails as any)?.extraField).toBeUndefined();
     });
   });
 
-  it('should handle missing login data', () => {
-    localStorage.clear();
+  // -------------------------------------------------------------------
+  // doLogout
+  // -------------------------------------------------------------------
 
-    const newComponent: Header = new Header(
-      TestBed.inject(DOCUMENT),
-      authService
-    );
+  describe('doLogout()', () => {
+    it('should remove "login" from localStorage', async () => {
+      mockLocalStorage({ login: JSON.stringify(mockLoginData) });
+      const component = await createComponent();
 
-    expect(newComponent.userDetails).toBeUndefined();
-  });
+      vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
 
-  it('should call logout on doLogout', () => {
-    component.doLogout();
+      component.doLogout();
 
-    expect(authService.logout).toHaveBeenCalled();
-  });
+      expect(globalThis.localStorage.removeItem).toHaveBeenCalledWith('login');
+    });
 
-  it('should remove login from localStorage on doLogout', () => {
-    const loginData = { id: 1, role: 'user' };
-    localStorage.setItem('login', JSON.stringify(loginData));
+    it('should call authService.logout()', async () => {
+      mockLocalStorage();
+      const component = await createComponent();
 
-    component.doLogout();
+      vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
 
-    expect(localStorage.getItem('login')).toBeNull();
-  });
+      component.doLogout();
 
-  it('should handle ngOnInit', () => {
-    expect(() => component.ngOnInit()).not.toThrow();
+      expect(authServiceMock.logout).toHaveBeenCalledOnce();
+    });
+
+    it('should call location.reload() after logout', async () => {
+      mockLocalStorage();
+      const component = await createComponent();
+
+      const reloadSpy = vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
+
+      component.doLogout();
+
+      expect(reloadSpy).toHaveBeenCalledOnce();
+    });
+
+    it('should still call authService.logout() when localStorage is unavailable', async () => {
+      // Simulate localStorage being unavailable via defaultView
+      vi.spyOn(document, 'defaultView', 'get').mockReturnValue(null);
+
+      const component = await createComponent();
+
+      vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
+
+      component.doLogout();
+
+      expect(authServiceMock.logout).toHaveBeenCalledOnce();
+    });
   });
 });

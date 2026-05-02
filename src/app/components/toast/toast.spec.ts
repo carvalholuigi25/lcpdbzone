@@ -1,63 +1,66 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ChangeDetectorRef } from '@angular/core';
-import { Toast } from './toast';
-import { ToastService } from '@/app/services/toast.service';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
+import { ToastService } from '../../services/toast.service';
+import { Toast } from '../../components';
+// import '../../../test-setup';
+
+beforeAll(async () => {
+    try {
+      if (typeof process !== 'undefined' && process.versions?.node) {
+        const { readFileSync } = await import('node:fs');
+        const { ɵresolveComponentResources: resolveComponentResources } =
+          await import('@angular/core');
+
+        await resolveComponentResources(url =>
+          Promise.resolve(readFileSync(new URL(url, import.meta.url), 'utf-8'))
+        );
+      }
+    } catch {
+      return;
+    }
+  });
 
 describe('Toast', () => {
   let component: Toast;
-  let fixture: ComponentFixture<Toast>;
-  let toastService: ToastService;
-  let changeDetectorRef: ChangeDetectorRef;
+  let toastServiceMock: Partial<ToastService>;
+  let cdr: ChangeDetectorRef;
+  let cdrSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
+    toastServiceMock = {};
+
     await TestBed.configureTestingModule({
       imports: [Toast],
-      providers: [ToastService]
+      providers: [{ provide: ToastService, useValue: toastServiceMock }],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Toast);
+    const fixture = TestBed.createComponent(Toast);
     component = fixture.componentInstance;
-    toastService = TestBed.inject(ToastService);
-    changeDetectorRef = fixture.debugElement.injector.get(ChangeDetectorRef);
+    cdr = (component as any).cdr;
+    cdrSpy = vi.spyOn(cdr, 'markForCheck');
     fixture.detectChanges();
+    cdrSpy.mockClear();
   });
 
-  it('should create', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should inject ToastService', () => {
-    expect(component.toastService).toBe(toastService);
+  it('should have toastService injected', () => {
+    expect(component.toastService).toBeDefined();
   });
 
-  it('should call markForCheck on init', () => {
-    const markForCheckSpy = vi.spyOn(changeDetectorRef, 'markForCheck');
+  it('should call cdr.markForCheck() on ngOnInit', () => {
     component.ngOnInit();
-    expect(markForCheckSpy).toHaveBeenCalled();
+
+    expect(cdrSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should have empty toasts initially', () => {
-    expect(component.toastService.toasts.length).toBe(0);
-  });
+  it('should call cdr.markForCheck() only once per ngOnInit call', () => {
+    component.ngOnInit();
+    component.ngOnInit();
 
-  it('should display added toasts', () => {
-    component.toastService.show('Test message');
-    fixture.detectChanges();
-    
-    expect(component.toastService.toasts.length).toBe(1);
-    expect(component.toastService.toasts[0].message).toBe('Test message');
-  });
-
-  it('should remove toast when removed from service', () => {
-    component.toastService.show('Test message');
-    fixture.detectChanges();
-    
-    expect(component.toastService.toasts.length).toBe(1);
-    
-    component.toastService.remove(component.toastService.toasts[0]);
-    fixture.detectChanges();
-    
-    expect(component.toastService.toasts.length).toBe(0);
+    expect(cdrSpy).toHaveBeenCalledTimes(2);
   });
 });

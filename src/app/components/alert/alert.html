@@ -1,4 +1,4 @@
-<div [class]="'alert ' + ('alert-'+data.alertType) + ' text-center mx-auto w-auto blkdatanotfound'">
-    <i [class]="'bi ' + data.icoType + ' icowarn'"></i>
+<div [class]="'alert ' + ('alert-'+(data ? data.alertType : 'warning')) + ' text-center mx-auto w-auto blkdatanotfound'">
+    <i [class]="'bi ' + (data ? data.icoType : 'bi-exclamation-octagon-fill') + ' icowarn'"></i>
     <p>{{data.message}}</p>
 </div>

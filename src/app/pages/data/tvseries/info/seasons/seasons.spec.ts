@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TVSeriesSeasons } from './seasons';
+import { ActivatedRoute } from '@angular/router';
 
 describe('TVSeriesSeasons', () => {
   let component: TVSeriesSeasons;
@@ -8,7 +9,23 @@ describe('TVSeriesSeasons', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TVSeriesSeasons]
+      imports: [TVSeriesSeasons],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 

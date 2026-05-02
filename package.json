@@ -21,8 +21,8 @@
     "delpacklock": "del /f /q package-lock.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "testcoverage": "ng test --coverage",
+    "test": "ng test --watch=true",
+    "testcoverage": "ng test --coverage --watch=true",
     "serve:ssr:lcpdbzone": "node dist/lcpdbzone/server/server.mjs"
   },
   "prettier": {

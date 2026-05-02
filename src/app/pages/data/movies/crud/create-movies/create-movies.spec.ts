@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateMovies } from './create-movies';
+import { ActivatedRoute } from '@angular/router';
 
 describe('CreateMovies', () => {
   let component: CreateMovies;
@@ -8,7 +9,23 @@ describe('CreateMovies', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CreateMovies]
+      imports: [CreateMovies],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 

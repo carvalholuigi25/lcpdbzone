@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeleteMovies } from './delete-movies';
+import { ActivatedRoute } from '@angular/router';
 
 describe('DeleteMovies', () => {
   let component: DeleteMovies;
@@ -8,7 +9,23 @@ describe('DeleteMovies', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DeleteMovies]
+      imports: [DeleteMovies],
+      providers: [{
+        provide: ActivatedRoute,
+        useValue: {
+          snapshot: {
+            data: {
+              userDetails: {
+                id: 1,
+                username: 'testuser',
+                email: '',
+                role: 'admin',
+                token: 'testtoken'
+              }
+            }
+          }
+        }
+      }]
     })
     .compileComponents();
 
