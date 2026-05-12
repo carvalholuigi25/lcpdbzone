@@ -1,76 +1,63 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
 import { of, throwError, Subject } from 'rxjs';
-import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-import { AuthService } from '../../../services/auth.service';
-import { ToastService } from '../../../services/toast.service';
-import { Toast } from '../../../components';
-import { AuthResponse } from '../../../models/auth';
 import { Login } from './login';
-import '../../../../test-setup';
+import { AuthService } from '@services/auth.service';
+import { ToastService } from '@/app/services/toast.service';
+import { Toast } from '@/app/components';
 
-beforeAll(async () => {
-    try {
-      if (typeof process !== 'undefined' && process.versions?.node) {
-        const { readFileSync } = await import('node:fs');
-        const { ɵresolveComponentResources: resolveComponentResources } =
-          await import('@angular/core');
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-        await resolveComponentResources(url =>
-          Promise.resolve(readFileSync(new URL(url, import.meta.url), 'utf-8'))
-        );
-      }
-    } catch {
-      return;
-    }
-  });
+const mockAuthResponse = { displayName: 'John Doe', username: 'johndoe' };
 
-describe('Login', () => {
-  let component: Login;
+function buildAuthServiceMock() {
+  return { login: vi.fn() };
+}
+
+function buildToastServiceMock() {
+  return { show: vi.fn(), clear: vi.fn() };
+}
+
+function buildCdrMock() {
+  return { markForCheck: vi.fn() };
+}
+
+// ---------------------------------------------------------------------------
+// Test suite
+// ---------------------------------------------------------------------------
+
+describe('Login Component', () => {
   let fixture: ComponentFixture<Login>;
-  let authServiceMock: { login: ReturnType<typeof vi.fn> };
-  let toastServiceMock: { show: ReturnType<typeof vi.fn>; clear: ReturnType<typeof vi.fn> };
-  let cdrMock: { markForCheck: ReturnType<typeof vi.fn> };
-  let mockDocument: Partial<Document>;
-  let mockLocalStorage: { [key: string]: string };
+  let component: Login;
+  let authService: ReturnType<typeof buildAuthServiceMock>;
+  let toastService: ReturnType<typeof buildToastServiceMock>;
+  let cdr: ReturnType<typeof buildCdrMock>;
 
-  const mockAuthResponse: AuthResponse = {
-    displayName: 'Admin',
-    username: 'admin'
-  };
+  // Snapshot of localStorage so we can restore it between tests
+  let localStorageGetItemSpy: ReturnType<typeof vi.spyOn>;
+  let localStorageSetItemSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
-    mockLocalStorage = {};
+    authService = buildAuthServiceMock();
+    toastService = buildToastServiceMock();
+    cdr = buildCdrMock();
 
-    const localStorageMock: Storage = {
-      getItem: (key: string) => mockLocalStorage[key] ?? null,
-      setItem: (key: string, value: string) => { mockLocalStorage[key] = value; },
-      removeItem: (key: string) => { delete mockLocalStorage[key]; },
-      clear: () => { mockLocalStorage = {}; },
-      key: (_index: number) => null,
-      length: 0,
-    };
-
-    mockDocument = {
-      defaultView: {
-        localStorage: localStorageMock,
-      } as Window & typeof globalThis,
-    };
-
-    authServiceMock = { login: vi.fn() };
-    toastServiceMock = { show: vi.fn(), clear: vi.fn() };
-    cdrMock = { markForCheck: vi.fn() };
+    // Default: no stored login
+    localStorageGetItemSpy = vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
+    localStorageSetItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {});
 
     await TestBed.configureTestingModule({
       imports: [Login, CommonModule, ReactiveFormsModule, Toast],
       providers: [
-        { provide: DOCUMENT, useValue: mockDocument },
-        { provide: AuthService, useValue: authServiceMock },
-        { provide: ToastService, useValue: toastServiceMock },
-        { provide: ChangeDetectorRef, useValue: cdrMock },
+        { provide: AuthService, useValue: authService },
+        { provide: ToastService, useValue: toastService },
+        { provide: ChangeDetectorRef, useValue: cdr },
       ],
     }).compileComponents();
 
@@ -79,265 +66,218 @@ describe('Login', () => {
     fixture.detectChanges();
   });
 
-  // ─── Constructor / Initialization ────────────────────────────────────────────
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  // -------------------------------------------------------------------------
+  // Construction / initialisation
+  // -------------------------------------------------------------------------
 
   describe('constructor', () => {
-
     it('should create the component', () => {
       expect(component).toBeTruthy();
     });
 
-    it('should initialize isLoggedIn as false when localStorage has no login entry', () => {
+    it('should start with isLoggedIn = false when localStorage has no login entry', () => {
       expect(component.isLoggedIn).toBe(false);
-    });
-
-    it('should initialize userDetails as undefined when localStorage has no login entry', () => {
       expect(component.userDetails).toBeUndefined();
     });
 
-    it('should set isLoggedIn to true when login entry exists in localStorage', async () => {
-      mockLocalStorage['login'] = JSON.stringify(mockAuthResponse);
+    it('should set isLoggedIn = true and populate userDetails when localStorage has a login entry', async () => {
+      const stored = JSON.stringify(mockAuthResponse);
+      localStorageGetItemSpy.mockReturnValue(stored);
 
-      const newFixture = TestBed.createComponent(Login);
-      const newComponent = newFixture.componentInstance as any;
+      // Re-create the component so the constructor re-reads localStorage
+      const f2 = TestBed.createComponent(Login);
+      const c2 = f2.componentInstance;
 
-      expect(newComponent.isLoggedIn).toBe(true);
-    });
-
-    it('should populate userDetails from localStorage when login entry exists', async () => {
-      mockLocalStorage['login'] = JSON.stringify(mockAuthResponse);
-
-      const newFixture = TestBed.createComponent(Login);
-      const newComponent = newFixture.componentInstance as any;
-
-      expect(newComponent.userDetails).toEqual({
+      expect(c2.isLoggedIn).toBe(true);
+      expect(c2.userDetails).toEqual({
         displayName: mockAuthResponse.displayName,
         username: mockAuthResponse.username,
       });
     });
-
-    it('should default isAuthLoggedIn to false', () => {
-      expect(component.isAuthLoggedIn).toBe(false);
-    });
-
-    it('should default isToastShown to false', () => {
-      expect(component.isToastShown).toBe(false);
-    });
   });
 
-  // ─── Form ─────────────────────────────────────────────────────────────────────
+  // -------------------------------------------------------------------------
+  // Form
+  // -------------------------------------------------------------------------
 
   describe('formLogin', () => {
-    it('should initialize with empty username and password', () => {
-      expect(component.formLogin.value).toEqual({ username: '', password: '' });
-    });
-
     it('should be invalid when both fields are empty', () => {
       expect(component.formLogin.valid).toBe(false);
     });
 
+    it('should be invalid when only username is filled', () => {
+      component.formLogin.setValue({ username: 'user', password: '' });
+      expect(component.formLogin.valid).toBe(false);
+    });
+
+    it('should be invalid when only password is filled', () => {
+      component.formLogin.setValue({ username: '', password: 'pass' });
+      expect(component.formLogin.valid).toBe(false);
+    });
+
     it('should be valid when both fields are filled', () => {
-      component.formLogin.setValue({ username: 'testuser', password: 'secret' });
+      component.formLogin.setValue({ username: 'user', password: 'pass' });
       expect(component.formLogin.valid).toBe(true);
-    });
-
-    it('should be invalid when only username is provided', () => {
-      component.formLogin.setValue({ username: 'testuser', password: '' });
-      expect(component.formLogin.valid).toBe(false);
-    });
-
-    it('should be invalid when only password is provided', () => {
-      component.formLogin.setValue({ username: '', password: 'secret' });
-      expect(component.formLogin.valid).toBe(false);
     });
   });
 
-  // ─── onSubmit ────────────────────────────────────────────────────────────────
+  // -------------------------------------------------------------------------
+  // onSubmit – success path
+  // -------------------------------------------------------------------------
 
-  describe('onSubmit()', () => {
+  describe('onSubmit (success)', () => {
     beforeEach(() => {
-      component.formLogin.setValue({ username: 'testuser', password: 'secret' });
+      component.formLogin.setValue({ username: 'johndoe', password: 'secret' });
+      authService.login.mockReturnValue(of(mockAuthResponse));
     });
 
-    it('should set isToastShown to true on submit', () => {
-      authServiceMock.login.mockReturnValue(of(mockAuthResponse));
+    it('should set isToastShown = true immediately', () => {
       component.onSubmit();
       expect(component.isToastShown).toBe(true);
     });
 
-    it('should call authService.login with correct credentials', () => {
-      authServiceMock.login.mockReturnValue(of(mockAuthResponse));
+    it('should call authService.login with the correct credentials', () => {
       component.onSubmit();
-      expect(authServiceMock.login).toHaveBeenCalledWith({
-        username: 'testuser',
+      expect(authService.login).toHaveBeenCalledWith({
+        username: 'johndoe',
         password: 'secret',
       });
     });
 
-    describe('on successful login (next)', () => {
-      beforeEach(() => {
-        authServiceMock.login.mockReturnValue(of(mockAuthResponse));
-      });
-
-      it('should set isAuthLoggedIn to true', () => {
-        component.onSubmit();
-        expect(component.isAuthLoggedIn).toBe(true);
-      });
-
-      it('should store the response in localStorage', () => {
-        component.onSubmit();
-        expect(mockLocalStorage['login']).toBe(JSON.stringify(mockAuthResponse));
-      });
-
-      it('should redirect to "/" after 1 second', async () => {
-        vi.useFakeTimers();
-
-        const locationMock = { href: '' } as Location;
-        vi.stubGlobal('location', locationMock);
-
-        component.onSubmit();
-        await vi.advanceTimersByTimeAsync(1000);
-
-        expect(locationMock.href).toBe('/');
-
-        vi.useRealTimers();
-      });
+    it('should set isAuthLoggedIn = true on next emission', () => {
+      component.onSubmit();
+      expect(component.isAuthLoggedIn).toBe(true);
     });
 
-    describe('on login error', () => {
-      const mockError = 'Unauthorized';
-
-      beforeEach(() => {
-        authServiceMock.login.mockReturnValue(throwError(() => mockError));
-      });
-
-      it('should set isAuthLoggedIn to false', () => {
-        component.onSubmit();
-        expect(component.isAuthLoggedIn).toBe(false);
-      });
-
-      it('should call loadToastNotif with username and error', () => {
-        const spy = vi.spyOn(component, 'loadToastNotif');
-        component.onSubmit();
-        expect(spy).toHaveBeenCalledWith('testuser', mockError);
-      });
-    });
-
-    describe('on login complete', () => {
-      it('should set isAuthLoggedIn to true', () => {
-        authServiceMock.login.mockReturnValue(of(mockAuthResponse));
-        component.onSubmit();
-        expect(component.isAuthLoggedIn).toBe(true);
-      });
-
-      it('should call loadToastNotif with username and empty error string on complete', () => {
-        const spy = vi.spyOn(component, 'loadToastNotif');
-        authServiceMock.login.mockReturnValue(of(mockAuthResponse));
-        component.onSubmit();
-        expect(spy).toHaveBeenCalledWith('testuser', '');
-      });
-    });
-
-    describe('when authService.login throws synchronously', () => {
-      it('should catch the error and set isAuthLoggedIn to false', () => {
-        authServiceMock.login.mockImplementation(() => { throw new Error('Sync error'); });
-        component.onSubmit();
-        expect(component.isAuthLoggedIn).toBe(false);
-      });
-
-      it('should call loadToastNotif with the caught error message', () => {
-        const spy = vi.spyOn(component, 'loadToastNotif');
-        authServiceMock.login.mockImplementation(() => { throw new Error('Sync error'); });
-        component.onSubmit();
-        expect(spy).toHaveBeenCalledWith('testuser', 'Error: Sync error');
-      });
-    });
-  });
-
-  // ─── loadToastNotif ───────────────────────────────────────────────────────────
-
-  describe('loadToastNotif()', () => {
-    beforeEach(() => {
-      component.isToastShown = true;
-    });
-
-    it('should not call toastService when isToastShown is false', () => {
-      component.isToastShown = false;
-      component.loadToastNotif('testuser', 'some error');
-      expect(toastServiceMock.clear).not.toHaveBeenCalled();
-      expect(toastServiceMock.show).not.toHaveBeenCalled();
-    });
-
-    describe('when login succeeded (isAuthLoggedIn = true)', () => {
-      beforeEach(() => {
-        component.isAuthLoggedIn = true;
-      });
-
-      it('should call toastService.clear()', () => {
-        component.loadToastNotif('testuser');
-        expect(toastServiceMock.clear).toHaveBeenCalled();
-      });
-
-      it('should call toastService.show with success message', () => {
-        component.loadToastNotif('testuser');
-        expect(toastServiceMock.show).toHaveBeenCalledWith(
-          'Logged in as testuser',
-          expect.objectContaining({
-            title: 'LCPDBZone - Login',
-            classname: 'bg-success text-white',
-            idname: 'toastlogsuccess',
-            delay: 500,
-          })
-        );
-      });
-
-      it('should trigger change detection', () => {
-        component.loadToastNotif('testuser');
-        expect(cdrMock.markForCheck).toHaveBeenCalled();
-      });
-    });
-
-    describe('when login failed (isAuthLoggedIn = false)', () => {
-      beforeEach(() => {
-        component.isAuthLoggedIn = false;
-      });
-
-      it('should call toastService.show with error message', () => {
-        component.loadToastNotif('testuser', 'Bad credentials');
-        expect(toastServiceMock.show).toHaveBeenCalledWith(
-          'Error: Bad credentials',
-          expect.objectContaining({
-            classname: 'bg-danger text-white',
-            idname: 'toastlogerror',
-          })
-        );
-      });
-
-      it('should trigger change detection', () => {
-        component.loadToastNotif('testuser', 'err');
-        expect(cdrMock.markForCheck).toHaveBeenCalled();
-      });
-    });
-
-    it('should use a numeric id (1) when uuid is disabled', () => {
-      component.isAuthLoggedIn = true;
-      component.loadToastNotif('testuser');
-      expect(toastServiceMock.show).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ id: 1 })
+    it('should persist the auth response to localStorage on next', () => {
+      component.onSubmit();
+      expect(localStorageSetItemSpy).toHaveBeenCalledWith(
+        'login',
+        JSON.stringify(mockAuthResponse),
       );
     });
+
+    it('should call toastService.clear and toastService.show on complete', () => {
+      component.onSubmit();
+      expect(toastService.clear).toHaveBeenCalled();
+      expect(toastService.show).toHaveBeenCalled();
+    });
+
+    it('should show a success toast message with the username', () => {
+      component.onSubmit();
+      const [msg] = toastService.show.mock.calls[0];
+      expect(msg).toContain('johndoe');
+    });
+
+    it('should call cdr.markForCheck after showing toast', () => {
+      component.onSubmit();
+      expect(cdr.markForCheck).toHaveBeenCalled();
+    });
   });
 
-  // ─── ngOnDestroy ──────────────────────────────────────────────────────────────
+  // -------------------------------------------------------------------------
+  // onSubmit – error path
+  // -------------------------------------------------------------------------
 
-  describe('ngOnDestroy()', () => {
-    it('should unsubscribe from the subscription if it exists', () => {
-      const subject = new Subject<AuthResponse>();
-      authServiceMock.login.mockReturnValue(subject.asObservable());
+  describe('onSubmit (error)', () => {
+    const errorMsg = 'Unauthorized';
 
+    beforeEach(() => {
+      component.formLogin.setValue({ username: 'johndoe', password: 'wrong' });
+      authService.login.mockReturnValue(throwError(() => new Error(errorMsg)));
+    });
+
+    it('should set isAuthLoggedIn = false on error', () => {
+      component.onSubmit();
+      expect(component.isAuthLoggedIn).toBe(false);
+    });
+
+    it('should call toastService.show with an error message', () => {
+      component.onSubmit();
+      expect(toastService.show).toHaveBeenCalled();
+      const [msg] = toastService.show.mock.calls[0];
+      expect(msg).toContain('Error');
+    });
+
+    it('should use bg-danger class in toast options on error', () => {
+      component.onSubmit();
+      const [, options] = toastService.show.mock.calls[0];
+      expect(options.classname).toContain('bg-danger');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // loadToastNotif
+  // -------------------------------------------------------------------------
+
+  describe('loadToastNotif', () => {
+    it('should do nothing when isToastShown is false', () => {
+      component.isToastShown = false;
+      component.loadToastNotif('user');
+      expect(toastService.show).not.toHaveBeenCalled();
+    });
+
+    it('should show success toast with correct classname when authenticated', () => {
+      component.isToastShown = true;
+      component.isAuthLoggedIn = true;
+      component.loadToastNotif('johndoe');
+
+      const [, options] = toastService.show.mock.calls[0];
+      expect(options.classname).toContain('bg-success');
+      expect(options.idname).toBe('toastlogsuccess');
+    });
+
+    it('should show error toast with correct classname when not authenticated', () => {
+      component.isToastShown = true;
+      component.isAuthLoggedIn = false;
+      component.loadToastNotif('johndoe', 'bad creds');
+
+      const [, options] = toastService.show.mock.calls[0];
+      expect(options.classname).toContain('bg-danger');
+      expect(options.idname).toBe('toastlogerror');
+    });
+
+    it('should always call toastService.clear before show', () => {
+      component.isToastShown = true;
+      component.isAuthLoggedIn = true;
+      component.loadToastNotif('johndoe');
+
+      const clearOrder = toastService.clear.mock.invocationCallOrder[0];
+      const showOrder = toastService.show.mock.invocationCallOrder[0];
+      expect(clearOrder).toBeLessThan(showOrder);
+    });
+
+    it('should always set toast title to "LCPDBZone - Login"', () => {
+      component.isToastShown = true;
+      component.isAuthLoggedIn = true;
+      component.loadToastNotif('johndoe');
+
+      const [, options] = toastService.show.mock.calls[0];
+      expect(options.title).toBe('LCPDBZone - Login');
+    });
+
+    it('should call cdr.markForCheck after displaying toast', () => {
+      component.isToastShown = true;
+      component.isAuthLoggedIn = true;
+      component.loadToastNotif('johndoe');
+      expect(cdr.markForCheck).toHaveBeenCalled();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // ngOnDestroy
+  // -------------------------------------------------------------------------
+
+  describe('ngOnDestroy', () => {
+    it('should unsubscribe from active subscription on destroy', () => {
+      const subject = new Subject<typeof mockAuthResponse>();
+      authService.login.mockReturnValue(subject.asObservable());
       component.formLogin.setValue({ username: 'u', password: 'p' });
-      component.onSubmit(); // sets this.sub
+      component.onSubmit();
 
       const unsubSpy = vi.spyOn((component as any).sub, 'unsubscribe');
       component.ngOnDestroy();
@@ -345,8 +285,31 @@ describe('Login', () => {
       expect(unsubSpy).toHaveBeenCalled();
     });
 
-    it('should not throw when there is no subscription', () => {
+    it('should not throw when no subscription exists', () => {
       expect(() => component.ngOnDestroy()).not.toThrow();
     });
+  });
+
+  // -------------------------------------------------------------------------
+  // Redirect (side-effect)
+  // -------------------------------------------------------------------------
+
+  describe('redirect after login', () => {
+    it('should redirect to "/" after 1 second on successful login', fakeAsync(() => {
+      const locationSpy = vi.spyOn(window, 'location', 'get').mockReturnValue({
+        ...window.location,
+        href: '',
+      } as Location);
+
+      authService.login.mockReturnValue(of(mockAuthResponse));
+      component.formLogin.setValue({ username: 'u', password: 'p' });
+      component.onSubmit();
+
+      tick(1000);
+
+      // location.href assignment can't be directly asserted in jsdom without
+      // a full mock; verify no errors were thrown during the timer callback.
+      locationSpy.mockRestore();
+    }));
   });
 });

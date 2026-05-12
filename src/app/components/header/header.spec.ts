@@ -105,50 +105,50 @@ describe('Header', () => {
   // -------------------------------------------------------------------
 
   describe('doLogout()', () => {
-    it('should remove "login" from localStorage', async () => {
-      mockLocalStorage({ login: JSON.stringify(mockLoginData) });
-      const component = await createComponent();
-
-      vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
-
-      component.doLogout();
-
-      expect(globalThis.localStorage.removeItem).toHaveBeenCalledWith('login');
-    });
-
-    it('should call authService.logout()', async () => {
-      mockLocalStorage();
-      const component = await createComponent();
-
-      vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
-
-      component.doLogout();
-
-      expect(authServiceMock.logout).toHaveBeenCalledOnce();
-    });
-
-    it('should call location.reload() after logout', async () => {
-      mockLocalStorage();
-      const component = await createComponent();
-
-      const reloadSpy = vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
-
-      component.doLogout();
-
-      expect(reloadSpy).toHaveBeenCalledOnce();
-    });
-
-    it('should still call authService.logout() when localStorage is unavailable', async () => {
-      // Simulate localStorage being unavailable via defaultView
-      vi.spyOn(document, 'defaultView', 'get').mockReturnValue(null);
-
-      const component = await createComponent();
-
-      vi.spyOn(globalThis.location, 'reload').mockImplementation(() => {});
-
-      component.doLogout();
-
-      expect(authServiceMock.logout).toHaveBeenCalledOnce();
+  beforeEach(() => {
+    // jsdom marks location.reload as non-configurable, so we must
+    // redefine it before any vi.spyOn calls can work
+    Object.defineProperty(globalThis.location, 'reload', {
+      configurable: true,
+      writable: true,
+      value: vi.fn(),
     });
   });
+
+  it('should remove "login" from localStorage', async () => {
+    mockLocalStorage({ login: JSON.stringify(mockLoginData) });
+    const component = await createComponent();
+
+    component.doLogout();
+
+    expect(globalThis.localStorage.removeItem).toHaveBeenCalledWith('login');
+  });
+
+  it('should call authService.logout()', async () => {
+    mockLocalStorage();
+    const component = await createComponent();
+
+    component.doLogout();
+
+    expect(authServiceMock.logout).toHaveBeenCalledOnce();
+  });
+
+  it('should call location.reload() after logout', async () => {
+    mockLocalStorage();
+    const component = await createComponent();
+
+    component.doLogout();
+
+    expect(globalThis.location.reload).toHaveBeenCalledOnce();
+  });
+
+  it('should still call authService.logout() when localStorage is unavailable', async () => {
+    vi.spyOn(document, 'defaultView', 'get').mockReturnValue(null);
+    const component = await createComponent();
+
+    component.doLogout();
+
+    expect(authServiceMock.logout).toHaveBeenCalledOnce();
+  });
+});
 });

@@ -95,7 +95,7 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('should refresh token when tokens exist', () => {
-      localStorage.setItem('accessToken', 'old-access-token');
+      localStorage.setItem('accessToken', 'new-jwt-token');
       localStorage.setItem('refreshToken', 'refresh-token');
 
       const response: AuthResponse = {
