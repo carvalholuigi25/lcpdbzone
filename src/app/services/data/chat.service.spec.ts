@@ -1,7 +1,7 @@
-/// <reference types="node" />
+// /// <reference types="node" />
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ChatService } from './chat.service';
+import { ChatService } from '@/app/services/data/chat.service';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -1,40 +1,109 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CreateTvseries } from './create-tvseries';
 import { ActivatedRoute } from '@angular/router';
+import { TVSeriesDataService } from '@/app/services';
+import { AuthService } from '@/app/services/auth.service';
+import { TvSeriesModel } from '@/app/models';
+
+const mockUserDetails = {
+  id: 1,
+  username: 'testuser',
+  email: 'test@example.com',
+  role: 'admin',
+  token: 'testtoken'
+};
+
+const mockCreatedTvserie = {
+  tvserieId: 1,
+  title: 'New Tvserie',
+  description: 'New Description',
+  studio: 'New Studio',
+  image: 'new.jpg',
+  artwork: 'new-artwork.jpg',
+  isFeatured: false,
+  releaseDate: '2024-06-01',
+  genre: ['Drama'],
+  format: ['Tvserie'],
+  scoreRating: 7
+} as TvSeriesModel;
 
 describe('CreateTvseries', () => {
   let component: CreateTvseries;
   let fixture: ComponentFixture<CreateTvseries>;
+  let mockTvseriesDataService: any;
 
   beforeEach(async () => {
+    mockTvseriesDataService = {
+      createTvseries: vi.fn().mockReturnValue(of(mockCreatedTvserie))
+    };
+
     await TestBed.configureTestingModule({
       imports: [CreateTvseries],
-      providers: [{
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: {
-            data: {
-              userDetails: {
-                id: 1,
-                username: 'testuser',
-                email: '',
-                role: 'admin',
-                token: 'testtoken'
-              }
-            }
-          }
-        }
-      }]
-    })
-    .compileComponents();
+      providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: { data: { userDetails: mockUserDetails } } } },
+        { provide: TVSeriesDataService, useValue: mockTvseriesDataService },
+        { provide: AuthService, useValue: {} }
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CreateTvseries);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should initialize form with required validators', () => {
+    const form = component.formCreateTVSeries;
+    expect(form.get('title')?.hasError('required')).toBeTruthy();
+    expect(form.get('description')?.hasError('required')).toBeTruthy();
+    expect(form.get('studio')?.hasError('required')).toBeTruthy();
+    expect(form.get('image')?.hasError('required')).toBeTruthy();
+  });
+
+  it('should have default values for optional fields', () => {
+    const form = component.formCreateTVSeries;
+    expect(form.get('isFeatured')?.value).toBe('');
+    expect(form.get('scoreRating')?.value).toBe(0);
+  });
+
+  it('should have artwork field with no validators', () => {
+    const form = component.formCreateTVSeries;
+    expect(form.get('artwork')?.hasError('required')).toBeTruthy();
+  });
+
+  it('should set form as valid when all required fields are filled', () => {
+    const form = component.formCreateTVSeries;
+    form.patchValue({
+      title: 'Test Tvserie',
+      description: 'Test Description',
+      studio: 'Test Studio',
+      image: 'test.jpg',
+      artwork: 'artwork.jpg'
+    });
+    expect(form.valid).toBeTruthy();
+  });
+
+  it('should set form as invalid when required fields are empty', () => {
+    const form = component.formCreateTVSeries;
+    form.patchValue({
+      title: '',
+      description: '',
+      studio: '',
+      image: '',
+      artwork: ''
+    });
+    expect(form.invalid).toBeTruthy();
+  });
+
+  it('should initialize with empty form values', () => {
+    const form = component.formCreateTVSeries;
+    expect(form.get('title')?.value).toBe('');
+    expect(form.get('description')?.value).toBe('');
+    expect(form.get('genre')?.value).toEqual(['']);
+    expect(form.get('format')?.value).toEqual(['']);
   });
 });

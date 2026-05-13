@@ -5,6 +5,7 @@ import { UpdateAnimes } from './update-animes';
 import { ActivatedRoute } from '@angular/router';
 import { AnimesDataService } from '@/app/services';
 import { AuthService } from '@/app/services/auth.service';
+import { AnimesModel } from '@/app/models';
 
 const mockUserDetails = {
   id: 1,
@@ -26,7 +27,7 @@ const mockAnimeData = {
   genre: ['Action', 'Adventure'],
   format: ['TV'],
   scoreRating: 8
-};
+} as AnimesModel;
 
 describe('UpdateAnimes', () => {
   let component: UpdateAnimes;

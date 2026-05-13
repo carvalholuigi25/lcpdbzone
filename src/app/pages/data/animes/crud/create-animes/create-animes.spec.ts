@@ -5,6 +5,7 @@ import { CreateAnimes } from './create-animes';
 import { ActivatedRoute } from '@angular/router';
 import { AnimesDataService } from '@/app/services';
 import { AuthService } from '@/app/services/auth.service';
+import { AnimesModel } from '@/app/models';
 
 const mockUserDetails = {
   id: 1,
@@ -26,7 +27,7 @@ const mockCreatedAnime = {
   genre: ['Drama'],
   format: ['Movie'],
   scoreRating: 7
-};
+} as AnimesModel;
 
 describe('CreateAnimes', () => {
   let component: CreateAnimes;

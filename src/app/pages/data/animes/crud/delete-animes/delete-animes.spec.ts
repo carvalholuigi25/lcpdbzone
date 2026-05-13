@@ -5,6 +5,7 @@ import { DeleteAnimes } from './delete-animes';
 import { ActivatedRoute } from '@angular/router';
 import { AnimesDataService } from '@/app/services';
 import { myFunctionsService } from '@/app/services';
+import { AnimesModel } from '@/app/models';
 
 const mockUserDetails = {
   id: 1,
@@ -26,7 +27,7 @@ const mockAnimeData = {
   genre: ['Action'],
   format: ['TV'],
   scoreRating: 8
-};
+} as AnimesModel;
 
 describe('DeleteAnimes', () => {
   let component: DeleteAnimes;

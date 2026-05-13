@@ -8,7 +8,7 @@ export default defineConfig({
     // environment: 'jsdom',
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     alias: {
-      '@/': new URL('./src/', import.meta.url).pathname,
+      '@/': path.resolve(__dirname, 'src/'),
       '@app': path.resolve(__dirname, 'src/app'),
       '@components': path.resolve(__dirname, 'src/app/components'),
       '@services': path.resolve(__dirname, 'src/app/services'),

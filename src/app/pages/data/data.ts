@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthModule } from "../../modules";
+import { AuthModule } from "@/app/modules";
 import { dataAryPages } from '@/app/models/dataarypages';
 import { myFunctionsService } from '@/app/services';
 
