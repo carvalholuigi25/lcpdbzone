@@ -11,11 +11,15 @@ import { tap } from 'rxjs/operators';
 export class SettingsService {
   private apiURL: string = 'http://localhost:5001/api/settings';
   private defaultSettings: Settings = {
+    id: 0,
     theme: 'dark',
+    themeSettingName: 'theme0',
     realTimeDataEnabled: true,
+    isDarkMode: true,
     autoRefreshInterval: 30,
     notificationsEnabled: true,
-    enableLogging: false
+    enableLogging: false,
+    userId: 1
   };
 
   private settingsSubject = new BehaviorSubject<Settings>(this.defaultSettings);
@@ -61,8 +65,19 @@ export class SettingsService {
     return this.settingsSubject.value;
   }
 
+  createSettings(settings: Settings): Observable<Settings> {
+    return this.http.post<Settings>(this.apiURL, settings)
+      .pipe(
+        tap((created) => {
+          this.settingsSubject.next(created);
+          this.saveSettingsToLocalStorage(created);
+          this.applyTheme(created.theme);
+        }
+      ));
+  }
+
   updateSettings(settings: Settings): Observable<Settings> {
-    return this.http.put<Settings>(`${this.apiURL}`, settings)
+    return this.http.put<Settings>(`${this.apiURL}/${settings.id}`, settings)
       .pipe(
         tap((updated) => {
           this.settingsSubject.next(updated);

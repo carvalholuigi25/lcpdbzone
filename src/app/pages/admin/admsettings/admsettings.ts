@@ -19,6 +19,7 @@ export class Admsettings implements OnInit {
   themeOptions: ThemeOption[] = [];
   loading: boolean = false;
   saved: boolean = false;
+  id: number = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -26,11 +27,15 @@ export class Admsettings implements OnInit {
     private toastService: ToastService
   ) {
     this.settingsForm = this.fb.group({
+      id: [0],
       theme: ['dark', Validators.required],
+      themeSettingName: ['theme' + this.id],
       realTimeDataEnabled: [true],
+      isDarkMode: [false],
       autoRefreshInterval: [30, [Validators.required, Validators.min(5), Validators.max(300)]],
       notificationsEnabled: [true],
-      enableLogging: [false]
+      enableLogging: [false],
+      userId: [1]
     });
   }
 
@@ -61,7 +66,17 @@ export class Admsettings implements OnInit {
     this.loading = true;
     const formValue = this.settingsForm.value as Settings;
 
-    this.settingsService.updateSettings(formValue).subscribe({
+    const newformValue: Settings = {
+      ...formValue, 
+      realTimeDataEnabled: formValue.realTimeDataEnabled.toString(), 
+      isDarkMode: formValue.isDarkMode!.toString(), 
+      notificationsEnabled: formValue.notificationsEnabled.toString(), 
+      enableLogging: formValue.enableLogging.toString()
+    }
+
+    console.log('Submitting settings:', newformValue);
+
+    this.settingsService.createSettings(newformValue).subscribe({
       next: () => {
         this.loading = false;
         this.saved = true;

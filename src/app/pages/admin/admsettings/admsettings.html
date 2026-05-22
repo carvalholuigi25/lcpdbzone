@@ -30,6 +30,11 @@
                         <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
                             <!-- Theme Setting -->
                             <div class="mb-4">
+                                <input type="hidden" formControlName="id" class="form-control" value="0" />
+                                <input type="hidden" formControlName="userId" class="form-control" value="1" />
+                                <input type="hidden" formControlName="themeSettingName" class="form-control" [value]="'theme' + settingsForm.get('id')?.value" />
+                                <input type="hidden" formControlName="isDarkMode" class="form-control" [value]="settingsForm.get('theme')?.value === 'dark' ? true : false" />
+
                                 <label for="themeSelect" class="form-label">
                                     <i class="bi bi-palette me-2"></i>Theme
                                 </label>
