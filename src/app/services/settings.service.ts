@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Settings, ThemeOption } from '@/app/models/settings';
-import { tap } from 'rxjs/operators';
+import { finalize, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,7 @@ import { tap } from 'rxjs/operators';
 export class SettingsService {
   private apiURL: string = 'http://localhost:5001/api/settings';
   private defaultSettings: Settings = {
-    id: 0,
+    settingsId: 0,
     theme: 'dark',
     themeSettingName: 'theme0',
     realTimeDataEnabled: true,
@@ -72,12 +72,12 @@ export class SettingsService {
           this.settingsSubject.next(created);
           this.saveSettingsToLocalStorage(created);
           this.applyTheme(created.theme);
-        }
-      ));
+        })
+      );
   }
 
   updateSettings(settings: Settings): Observable<Settings> {
-    return this.http.put<Settings>(`${this.apiURL}/${settings.id}`, settings)
+    return this.http.put<Settings>(`${this.apiURL}/${settings.settingsId}`, settings)
       .pipe(
         tap((updated) => {
           this.settingsSubject.next(updated);

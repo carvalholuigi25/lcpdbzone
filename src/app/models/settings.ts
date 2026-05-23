@@ -1,12 +1,12 @@
 export interface Settings {
-  id?: string | number;
+  settingsId?: string | number;
   theme: 'light' | 'dark' | 'auto';
   themeSettingName: string;
-  realTimeDataEnabled: string | boolean;
-  isDarkMode?: string | boolean; // Optional, can be derived from theme
+  realTimeDataEnabled: boolean | string;
+  isDarkMode?: boolean | string; // Optional, can be derived from theme
   autoRefreshInterval: number; // in seconds
-  notificationsEnabled: string | boolean;
-  enableLogging: string | boolean;
+  notificationsEnabled: boolean | string;
+  enableLogging: boolean | string;
   createdAt?: Date;
   updatedAt?: Date;
   userId?: number;
