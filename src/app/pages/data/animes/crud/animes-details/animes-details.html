@@ -60,7 +60,7 @@
                     !!loadedVideo &&
                     (animesdata$ | async)?.AnimesMediasInfo &&
                     (animesdata$ | async)?.AnimesMediasInfo!.length > 0 &&
-                    (animesdata$ | async)?.AnimesMediasInfo![0]?.typeMedia?.indexOf('youtube') !== -1
+                    (animesdata$ | async)?.AnimesMediasInfo![0]?.typeMedia!.toString()!.indexOf('youtube') !== -1
                   ) {
                     <div class="ratio ratio-16x9">
                       <iframe

@@ -60,7 +60,7 @@
                     !!loadedVideo &&
                     (gamesdata$ | async)?.GamesMediasInfo &&
                     (gamesdata$ | async)?.GamesMediasInfo!.length > 0 &&
-                    (gamesdata$ | async)?.GamesMediasInfo![0]?.typeMedia?.indexOf('youtube') !== -1
+                    (gamesdata$ | async)?.GamesMediasInfo![0]?.typeMedia!.toString()!.indexOf('youtube') !== -1
                   ) {
                     <div class="ratio ratio-16x9">
                       <iframe

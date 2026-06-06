@@ -122,7 +122,7 @@
                   @if (
                     tvsdata?.tvseriesMediasInfo &&
                     tvsdata?.tvseriesMediasInfo!.length > 0 &&
-                    tvsdata?.tvseriesMediasInfo![0]?.typeMedia?.indexOf('youtube') !== -1
+                    tvsdata?.tvseriesMediasInfo![0]?.typeMedia!.toString()!.indexOf('youtube') !== -1
                   ) {
                     <button
                       class="btn btn-primary btnloadvideo mt-3 mb-3"

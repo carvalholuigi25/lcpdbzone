@@ -60,7 +60,7 @@
                     !!loadedVideo &&
                     (booksdata$ | async)?.BooksMediasInfo &&
                     (booksdata$ | async)?.BooksMediasInfo!.length > 0 &&
-                    (booksdata$ | async)?.BooksMediasInfo![0]?.typeMedia?.indexOf('youtube') !== -1
+                    (booksdata$ | async)?.BooksMediasInfo![0]?.typeMedia!.toString()!.indexOf('youtube') !== -1
                   ) {
                     <div class="ratio ratio-16x9">
                       <iframe
